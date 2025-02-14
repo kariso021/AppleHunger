@@ -183,7 +183,8 @@ public class AppleDragHandler : MonoBehaviour
     {
         if (currentSum == 10)
         {
-            int cachedScorebyRemovedApple = 0;
+            int cachedScorebyRemovedApple = 0;                          
+            int cachedSelectionAppleCount = selectedApples.Count;
 
             foreach (GameObject apple in selectedApples)
             {
@@ -195,8 +196,17 @@ public class AppleDragHandler : MonoBehaviour
                     originalColors.Remove(apple);
                 }
             }
+            // 제거된 사과 개수* 각자의 AppleValue만큼 + 제거된 사과 개수 * 콤보 만큼
+            GameManager.Instance.AddScore(cachedScorebyRemovedApple
+                + (cachedSelectionAppleCount* 
+                ComboManager.Instance.comboBasicScore * 
+                ComboManager.Instance.comboCount));
 
-            GameManager.Instance.AddScore(cachedScorebyRemovedApple);
+            // 사과가 성공적으로 만들어졌음을 콤보시스템에 알려 콤보를 이어나감
+            ComboManager.Instance.StartCombo();
+            ComboManager.Instance.isAppleMaking = true;
+            if(ComboManager.Instance.comboCount < 5)
+                ComboManager.Instance.comboCount++;
         }
         else
         {
