@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem.LowLevel;
 
 public class AppleDragHandler : MonoBehaviour
 {
@@ -14,6 +16,10 @@ public class AppleDragHandler : MonoBehaviour
     public GameObject dragBox; // 드래그 영역을 표시할 SpriteRenderer 오브젝트
     private SpriteRenderer dragBoxRenderer;
 
+    private void Awake()
+    {
+        EnhancedTouchSupport.Enable();
+    }
     private void Start()
     {
         mainCamera = Camera.main;
@@ -33,33 +39,71 @@ public class AppleDragHandler : MonoBehaviour
             Debug.LogError("🚨 DragBox가 씬에 존재하지 않습니다! Hierarchy에서 확인하세요.");
         }
     }
-
+    private void OnEnable()
+    {
+        TouchSimulation.Enable(); // 터치 입력을 마우스에서도 테스트 가능
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown += OnFingerDown;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove += OnFingerMove;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp += OnFingerUp;
+    }
+    private void OnDisable()
+    {
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= OnFingerDown;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove -= OnFingerMove;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp -= OnFingerUp;
+    }
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // 드래그 시작
-        {
-            dragStartPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-            isDragging = true;
-            dragBoxRenderer.enabled = true; // 드래그 박스 표시
-            selectedApples.Clear(); // 이전 선택된 사과 초기화
-            currentSum = 0;
-        }
+        //if (Input.GetMouseButtonDown(0)) // 드래그 시작
+        //{
+        //    dragStartPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        //    isDragging = true;
+        //    dragBoxRenderer.enabled = true; // 드래그 박스 표시
+        //    selectedApples.Clear(); // 이전 선택된 사과 초기화
+        //    currentSum = 0;
+        //}
 
-        if (Input.GetMouseButton(0)) // 드래그 중
+        //if (Input.GetMouseButton(0)) // 드래그 중
+        //{
+        //    dragEndPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        //    UpdateDragBox();
+        //    DetectAppleUnderCursor();
+        //}
+
+        //if (Input.GetMouseButtonUp(0)) // 드래그 끝
+        //{
+        //    CheckAndRemoveApples();
+        //    dragBoxRenderer.enabled = false; // 드래그 박스 숨기기
+        //    isDragging = false;
+        //}
+    }
+
+    // 스크린 터치 관련
+    private void OnFingerDown(Finger finger)
+    {
+        dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
+        isDragging = true;
+        dragBoxRenderer.enabled = true; // 드래그 박스 표시
+        selectedApples.Clear(); // 이전 선택된 사과 초기화
+        currentSum = 0;
+    }
+
+    private void OnFingerMove(Finger finger)
+    {
+        if (isDragging)
         {
-            dragEndPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            dragEndPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
             UpdateDragBox();
             DetectAppleUnderCursor();
         }
-
-        if (Input.GetMouseButtonUp(0)) // 드래그 끝
-        {
-            CheckAndRemoveApples();
-            dragBoxRenderer.enabled = false; // 드래그 박스 숨기기
-            isDragging = false;
-        }
     }
 
+    private void OnFingerUp(Finger finger)
+    {
+        CheckAndRemoveApples();
+        dragBoxRenderer.enabled = false; // 드래그 박스 숨기기
+        isDragging = false;
+    }
     private void UpdateDragBox()
     {
         Vector2 center = (dragStartPos + dragEndPos) / 2;

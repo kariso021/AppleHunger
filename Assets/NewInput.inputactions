@@ -1,0 +1,34 @@
+{
+    "name": "NewInput",
+    "maps": [
+        {
+            "name": "TouchScreen",
+            "id": "ecf78fe2-ca10-428f-81c6-e337fe068b5f",
+            "actions": [
+                {
+                    "name": "Touch",
+                    "type": "PassThrough",
+                    "id": "50619550-e1e3-49ec-9dec-b58aa0d2c986",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ff38936c-6e84-44ad-b733-013c0d49643e",
+                    "path": "<Touchscreen>/primaryTouch/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Touch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
