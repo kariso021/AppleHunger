@@ -1,95 +1,103 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem.EnhancedTouch;
-using UnityEngine.InputSystem.LowLevel;
 
 public class AppleDragHandler : MonoBehaviour
 {
     private Camera mainCamera;
-    private List<GameObject> selectedApples = new List<GameObject>(); // 드래그한 사과 저장
-    private Dictionary<GameObject, Color> originalColors = new Dictionary<GameObject, Color>(); // 사과 원래 색상 저장
-    private int currentSum = 0; // 드래그된 사과 숫자의 합
-    private Vector2 dragStartPos; // 드래그 시작 위치
-    private Vector2 dragEndPos; // 드래그 끝 위치
+    private List<GameObject> selectedApples = new List<GameObject>();
+    private Dictionary<GameObject, Color> originalColors = new Dictionary<GameObject, Color>();
+    private int currentSum = 0;
+    private Vector2 dragStartPos;
+    private Vector2 dragEndPos;
     private bool isDragging = false;
+    private bool isDragRestricted = false; // 🚫 드래그 차단 여부
+    private bool isCooldownActive = false; // 🔥 1초 쿨타임 방지
 
-    public GameObject dragBox; // 드래그 영역을 표시할 SpriteRenderer 오브젝트
+    public GameObject dragBox;
     private SpriteRenderer dragBoxRenderer;
+    public Image flashImage;
+    private CanvasGroup flashCanvasGroup;
 
     private void Awake()
     {
         EnhancedTouchSupport.Enable();
     }
+
     private void Start()
     {
         mainCamera = Camera.main;
 
         if (dragBox == null)
         {
-            dragBox = GameObject.Find("DragBox"); // 자동 연결
+            dragBox = GameObject.Find("DragBox");
         }
 
         if (dragBox != null)
         {
             dragBoxRenderer = dragBox.GetComponent<SpriteRenderer>();
-            dragBoxRenderer.enabled = false; // 처음에는 안 보이게 설정
+            dragBoxRenderer.enabled = false;
         }
         else
         {
             Debug.LogError("🚨 DragBox가 씬에 존재하지 않습니다! Hierarchy에서 확인하세요.");
         }
+
+        if (flashImage != null)
+        {
+            flashCanvasGroup = flashImage.GetComponent<CanvasGroup>();
+
+            if (flashCanvasGroup == null)
+            {
+                flashCanvasGroup = flashImage.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            flashCanvasGroup.alpha = 0f; // 처음엔 투명
+            flashCanvasGroup.blocksRaycasts = false; // 처음엔 터치 가능
+        }
     }
+
     private void OnEnable()
     {
-        TouchSimulation.Enable(); // 터치 입력을 마우스에서도 테스트 가능
+        TouchSimulation.Enable();
         UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown += OnFingerDown;
         UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove += OnFingerMove;
         UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp += OnFingerUp;
     }
+
     private void OnDisable()
     {
         UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= OnFingerDown;
         UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove -= OnFingerMove;
         UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp -= OnFingerUp;
     }
-    private void Update()
-    {
-        //if (Input.GetMouseButtonDown(0)) // 드래그 시작
-        //{
-        //    dragStartPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        //    isDragging = true;
-        //    dragBoxRenderer.enabled = true; // 드래그 박스 표시
-        //    selectedApples.Clear(); // 이전 선택된 사과 초기화
-        //    currentSum = 0;
-        //}
 
-        //if (Input.GetMouseButton(0)) // 드래그 중
-        //{
-        //    dragEndPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        //    UpdateDragBox();
-        //    DetectAppleUnderCursor();
-        //}
-
-        //if (Input.GetMouseButtonUp(0)) // 드래그 끝
-        //{
-        //    CheckAndRemoveApples();
-        //    dragBoxRenderer.enabled = false; // 드래그 박스 숨기기
-        //    isDragging = false;
-        //}
-    }
-
-    // 스크린 터치 관련
     private void OnFingerDown(Finger finger)
     {
+        if (isDragRestricted || isCooldownActive) return; // 🚫 쿨타임 중이면 드래그 불가
+
         dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
-        isDragging = true;
-        dragBoxRenderer.enabled = true; // 드래그 박스 표시
-        selectedApples.Clear(); // 이전 선택된 사과 초기화
-        currentSum = 0;
+        isDragging = false; // 드래그 여부 초기화
     }
 
     private void OnFingerMove(Finger finger)
     {
+        if (isDragRestricted || isCooldownActive) return; // 🚫 쿨타임 중이면 드래그 불가
+
+        if (!isDragging)
+        {
+            float dragThreshold = 0.1f;
+            if (Vector2.Distance(dragStartPos, mainCamera.ScreenToWorldPoint(finger.screenPosition)) > dragThreshold)
+            {
+                isDragging = true;
+                dragBoxRenderer.enabled = true;
+                selectedApples.Clear();
+                currentSum = 0;
+            }
+        }
+
         if (isDragging)
         {
             dragEndPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
@@ -100,10 +108,13 @@ public class AppleDragHandler : MonoBehaviour
 
     private void OnFingerUp(Finger finger)
     {
+        if (!isDragging) return; // 🚫 드래그 안했으면 그냥 리턴
+
         CheckAndRemoveApples();
-        dragBoxRenderer.enabled = false; // 드래그 박스 숨기기
+        dragBoxRenderer.enabled = false;
         isDragging = false;
     }
+
     private void UpdateDragBox()
     {
         Vector2 center = (dragStartPos + dragEndPos) / 2;
@@ -115,45 +126,39 @@ public class AppleDragHandler : MonoBehaviour
 
     private void DetectAppleUnderCursor()
     {
-        // 드래그 박스의 영역을 계산 (사과의 "중앙값" 기준)
         Bounds dragBounds = new Bounds((dragStartPos + dragEndPos) / 2,
                                        new Vector3(Mathf.Abs(dragEndPos.x - dragStartPos.x), Mathf.Abs(dragEndPos.y - dragStartPos.y), 1));
 
-        // 🌟 현재 선택된 사과 중에서 드래그 영역을 벗어난 사과 찾기
         List<GameObject> applesToDeselect = new List<GameObject>();
 
         foreach (GameObject apple in selectedApples)
         {
             if (apple == null) continue;
 
-            Vector2 appleCenter = apple.transform.position; // 사과 중앙 위치
+            Vector2 appleCenter = apple.transform.position;
 
-            // 🛑 드래그 박스 밖에 있으면 원래 색상으로 복구
             if (!dragBounds.Contains(appleCenter))
             {
                 applesToDeselect.Add(apple);
             }
         }
 
-        // 원래 색상으로 복구
         foreach (GameObject apple in applesToDeselect)
         {
             if (apple != null && originalColors.ContainsKey(apple))
             {
-                apple.GetComponent<SpriteRenderer>().color = originalColors[apple]; // 원래 색 복구
-                selectedApples.Remove(apple); // 선택 목록에서 제거
-                currentSum -= apple.GetComponent<Apple>().value; // 숫자 합계에서 제외
+                apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
+                selectedApples.Remove(apple);
+                currentSum -= apple.GetComponent<Apple>().value;
             }
         }
 
-        // 🌟 새로운 사과 탐색 (드래그 박스 안에 있는 사과만 추가)
         foreach (GameObject apple in GameObject.FindGameObjectsWithTag("Apple"))
         {
             if (apple == null) continue;
 
             Vector2 appleCenter = apple.transform.position;
 
-            // 🔥 사과의 중앙값이 드래그 박스 안에 포함될 때만 선택
             if (dragBounds.Contains(appleCenter))
             {
                 Apple appleComponent = apple.GetComponent<Apple>();
@@ -161,7 +166,6 @@ public class AppleDragHandler : MonoBehaviour
                 {
                     SpriteRenderer appleRenderer = apple.GetComponent<SpriteRenderer>();
 
-                    // 🌟 사과의 원래 색상 저장 (처음 선택될 때만)
                     if (!originalColors.ContainsKey(apple))
                     {
                         originalColors[apple] = appleRenderer.color;
@@ -169,16 +173,15 @@ public class AppleDragHandler : MonoBehaviour
 
                     selectedApples.Add(apple);
                     currentSum += appleComponent.value;
-                    appleRenderer.color = Color.yellow; // 드래그된 사과 색상 변경
+                    appleRenderer.color = Color.yellow;
                 }
             }
         }
     }
 
-
     private void CheckAndRemoveApples()
     {
-        if (currentSum == 10) // 합이 10이면 제거
+        if (currentSum == 10)
         {
             int cachedScorebyRemovedApple = 0;
 
@@ -189,25 +192,59 @@ public class AppleDragHandler : MonoBehaviour
                     int appleValue = apple.GetComponent<Apple>().scorevalue;
                     cachedScorebyRemovedApple += appleValue;
                     Destroy(apple);
-                    originalColors.Remove(apple); // 제거된 사과는 원래 색상 목록에서도 삭제
+                    originalColors.Remove(apple);
                 }
             }
 
-            // 제거된 사과 개수* 각자의 AppleValue만큼
             GameManager.Instance.AddScore(cachedScorebyRemovedApple);
         }
+        else
+        {
+            StartCoroutine(RestrictDragAndFadeOut());
+        }
 
-        // 🌟 선택된 사과의 색상을 원래 색으로 복구
         foreach (GameObject apple in selectedApples)
         {
             if (apple != null && originalColors.ContainsKey(apple))
             {
-                apple.GetComponent<SpriteRenderer>().color = originalColors[apple]; // 원래 색상 복구
+                apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
             }
         }
 
         selectedApples.Clear();
         currentSum = 0;
+    }
+
+    private IEnumerator RestrictDragAndFadeOut()
+    {
+        if (isCooldownActive) yield break; // 쿨타임 중이면 리턴
+
+        float fadeDuration = 1.0f; // 점멸 효과와 쿨타임을 동일하게 설정
+        isCooldownActive = true; // 쿨타임 시작
+        isDragRestricted = true; // 드래그 차단
+        dragBoxRenderer.enabled = false; // 드래그 박스도 생성되지 않게!
+
+        if (flashCanvasGroup != null)
+        {
+            flashCanvasGroup.alpha = 0.5f;
+            flashCanvasGroup.blocksRaycasts = true;
+
+            float elapsedTime = 0.0f;
+
+            while (elapsedTime < fadeDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                flashCanvasGroup.alpha = Mathf.Lerp(0.5f, 0f, elapsedTime / fadeDuration);
+                yield return null;
+            }
+
+            flashCanvasGroup.alpha = 0f;
+            flashCanvasGroup.blocksRaycasts = false;
+        }
+
+        // 페이드 아웃이 끝나면 바로 드래그 다시 가능
+        isDragRestricted = false;
+        isCooldownActive = false;
     }
 
 }
