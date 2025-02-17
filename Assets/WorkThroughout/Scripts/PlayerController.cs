@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using FishNet.Object;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem.EnhancedTouch;
 
-public class AppleDragHandler : MonoBehaviour
+public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝트로 변경
 {
     private Camera mainCamera;
     private List<GameObject> selectedApples = new List<GameObject>();
@@ -59,6 +60,16 @@ public class AppleDragHandler : MonoBehaviour
         }
     }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        if (!IsOwner)
+        {
+            enabled = false; // 🛑 다른 플레이어의 입력을 방지
+        }
+    }
+
     private void OnEnable()
     {
         TouchSimulation.Enable();
@@ -76,15 +87,15 @@ public class AppleDragHandler : MonoBehaviour
 
     private void OnFingerDown(Finger finger)
     {
-        if (isDragRestricted || isCooldownActive) return; // 쿨타임 중이면 드래그 불가
+        if (!IsOwner || isDragRestricted || isCooldownActive) return; // 🛑 본인만 입력 가능
 
         dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
-        isDragging = false; // 드래그 여부 초기화
+        isDragging = false;
     }
 
     private void OnFingerMove(Finger finger)
     {
-        if (isDragRestricted || isCooldownActive) return; // 쿨타임 중이면 드래그 불가
+        if (!IsOwner || isDragRestricted || isCooldownActive) return; // 🛑 본인만 입력 가능
 
         if (!isDragging)
         {
@@ -108,9 +119,11 @@ public class AppleDragHandler : MonoBehaviour
 
     private void OnFingerUp(Finger finger)
     {
-        if (!isDragging) return; // 드래그 안했으면 그냥 리턴
+        if (!isDragging) return;
 
-        CheckAndRemoveApples();
+        // 🟢 서버에게 사과 제거 요청을 보냄
+        RequestAppleRemovalServerRpc(selectedApples.ToArray(), currentSum);
+
         dragBoxRenderer.enabled = false;
         isDragging = false;
     }
@@ -179,82 +192,19 @@ public class AppleDragHandler : MonoBehaviour
         }
     }
 
-    private void CheckAndRemoveApples()
+
+    [ServerRpc] // 🟢 서버에서만 실행
+    private void RequestAppleRemovalServerRpc(GameObject[] apples, int sum)
     {
-        if (currentSum == 10)
+        if (sum == 10)
         {
-            int cachedScorebyRemovedApple = 0;                          
-            int cachedSelectionAppleCount = selectedApples.Count;
-
-            foreach (GameObject apple in selectedApples)
+            GameServer server = FindObjectOfType<GameServer>();
+            if (server != null)
             {
-                if (apple != null)
-                {
-                    int appleValue = apple.GetComponent<Apple>().scorevalue;
-                    cachedScorebyRemovedApple += appleValue;
-                    Destroy(apple);
-                    originalColors.Remove(apple);
-                }
-            }
-            // 제거된 사과 개수* 각자의 AppleValue만큼 + 제거된 사과 개수 * 콤보 만큼
-            GameManager.Instance.AddScore(cachedScorebyRemovedApple
-                + (cachedSelectionAppleCount* 
-                ComboManager.Instance.comboBasicScore * 
-                ComboManager.Instance.comboCount));
-
-            // 사과가 성공적으로 만들어졌음을 콤보시스템에 알려 콤보를 이어나감
-            ComboManager.Instance.StartCombo();
-            ComboManager.Instance.isAppleMaking = true;
-            if(ComboManager.Instance.comboCount < 5)
-                ComboManager.Instance.comboCount++;
-        }
-        else
-        {
-            StartCoroutine(RestrictDragAndFadeOut());
-        }
-
-        foreach (GameObject apple in selectedApples)
-        {
-            if (apple != null && originalColors.ContainsKey(apple))
-            {
-                apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
+                server.GetAppleManager().RemoveApplesServerRpc(apples); // ✅ AppleManager의 RemoveApples 호출
+                server.GetScoreManager().AddScore(100, apples.Length);
             }
         }
-
-        selectedApples.Clear();
-        currentSum = 0;
     }
-
-    private IEnumerator RestrictDragAndFadeOut()
-    {
-        if (isCooldownActive) yield break; // 쿨타임 중이면 리턴
-
-        float fadeDuration = 1.0f; // 점멸 효과와 쿨타임을 동일하게 설정
-        isCooldownActive = true; // 쿨타임 시작
-        isDragRestricted = true; // 드래그 차단
-        dragBoxRenderer.enabled = false; // 드래그 박스도 생성되지 않게!
-
-        if (flashCanvasGroup != null)
-        {
-            flashCanvasGroup.alpha = 0.5f;
-            flashCanvasGroup.blocksRaycasts = true;
-
-            float elapsedTime = 0.0f;
-
-            while (elapsedTime < fadeDuration)
-            {
-                elapsedTime += Time.deltaTime;
-                flashCanvasGroup.alpha = Mathf.Lerp(0.5f, 0f, elapsedTime / fadeDuration);
-                yield return null;
-            }
-
-            flashCanvasGroup.alpha = 0f;
-            flashCanvasGroup.blocksRaycasts = false;
-        }
-
-        // 페이드 아웃이 끝나면 바로 드래그 다시 가능
-        isDragRestricted = false;
-        isCooldownActive = false;
-    }
-
 }
+

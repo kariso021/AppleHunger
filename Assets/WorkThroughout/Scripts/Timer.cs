@@ -3,21 +3,23 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
-    public static Timer Instance;
     public Slider timerSlider; // 타이머 슬라이더 UI
 
-    private void Awake()
-    {
-        Instance = this;
-    }
+    private GameServer gameServer; // 🟢 GameServer에서 시간 가져오기
 
     private void Start()
     {
-        timerSlider.maxValue = GameManager.Instance.gameTime; // 최대값 설정
-        timerSlider.value = GameManager.Instance.gameTime; // 시작 값 설정
+        gameServer = FindObjectOfType<GameServer>(); // 🟢 GameServer 찾기
+
+        if (gameServer == null)
+        {
+            Debug.LogError("🚨 GameServer를 찾을 수 없습니다! Hierarchy에 추가했는지 확인하세요.");
+            return;
+        }
+
+        timerSlider.maxValue = gameServer.gameTime; // 🟢 GameServer의 게임 시간 설정
+        timerSlider.value = gameServer.gameTime;
     }
-
-
 
     public void UpdateTimerUI(float currentTime)
     {
@@ -27,7 +29,7 @@ public class Timer : MonoBehaviour
         }
         else
         {
-            Debug.LogError(" TimerSlider가 연결되지 않았습니다! Inspector에서 확인하세요.");
+            Debug.LogError("🚨 TimerSlider가 연결되지 않았습니다! Inspector에서 확인하세요.");
         }
     }
 }
