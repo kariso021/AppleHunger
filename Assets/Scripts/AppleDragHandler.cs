@@ -76,7 +76,7 @@ public class AppleDragHandler : MonoBehaviour
 
     private void OnFingerDown(Finger finger)
     {
-        if (isDragRestricted || isCooldownActive) return; // 🚫 쿨타임 중이면 드래그 불가
+        if (isDragRestricted || isCooldownActive) return; // 쿨타임 중이면 드래그 불가
 
         dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
         isDragging = false; // 드래그 여부 초기화
@@ -84,7 +84,7 @@ public class AppleDragHandler : MonoBehaviour
 
     private void OnFingerMove(Finger finger)
     {
-        if (isDragRestricted || isCooldownActive) return; // 🚫 쿨타임 중이면 드래그 불가
+        if (isDragRestricted || isCooldownActive) return; // 쿨타임 중이면 드래그 불가
 
         if (!isDragging)
         {
@@ -108,7 +108,7 @@ public class AppleDragHandler : MonoBehaviour
 
     private void OnFingerUp(Finger finger)
     {
-        if (!isDragging) return; // 🚫 드래그 안했으면 그냥 리턴
+        if (!isDragging) return; // 드래그 안했으면 그냥 리턴
 
         CheckAndRemoveApples();
         dragBoxRenderer.enabled = false;
