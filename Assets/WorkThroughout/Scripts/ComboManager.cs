@@ -35,13 +35,11 @@ public class ComboManager : MonoBehaviour
 
     public IEnumerator OnCombo()
     {
-        Debug.Log("콤보 시작");
         float timer = 0f; // 타이머   
 
         while(timer <= timeToMaintainCombo)
         {
             timer += Time.deltaTime;
-            Debug.Log($"Timer = {(int)timer}");
             if(isAppleMaking)
             {
                 timer = 0f; // 콤보 유지 시간을 초기화하여 연장
@@ -49,8 +47,6 @@ public class ComboManager : MonoBehaviour
             }
             yield return null;
         }
-
-        Debug.Log("콤보 끝");
         comboCount = 0; // 콤보 초기화
         comboCoroutine = null;
         yield return null;
