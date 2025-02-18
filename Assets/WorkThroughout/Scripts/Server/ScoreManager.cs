@@ -1,26 +1,64 @@
 ﻿using FishNet.Object;
+using TMPro;
 using UnityEngine;
+using System.Collections;
 
-public class ScoreManager : NetworkBehaviour // ✅ 파일명과 클래스명이 동일해야 함!
+public class ScoreManager : NetworkBehaviour
 {
-    private int totalScore = 0;
+    private int score = 0;
     private int comboCount = 0;
     private int maxCombo = 5;
+    private float comboTimeLimit = 5f;
+    private Coroutine comboCoroutine;
 
-    public void AddScore(int amount, int removedAppleCount)
+    [SerializeField] private TextMeshPro scoreText; // 점수 UI 표시
+
+    public int Score => score;
+
+    public override void OnStartClient()
     {
-        if (!IsServer) return; // 🛑 서버에서만 실행
-
-        totalScore += amount;
-        comboCount = Mathf.Min(comboCount + 1, maxCombo);
-
-        UpdateScoreObserversRpc(totalScore, comboCount);
+        base.OnStartClient();
+        UpdateScoreUI(); // 클라이언트가 시작할 때 점수 UI 업데이트
     }
 
-    [ObserversRpc]
-    private void UpdateScoreObserversRpc(int newScore, int newComboCount)
+    [ServerRpc]
+    public void AddScoreServerRpc(int amount)
     {
-        UIManager.Instance.UpdateScore(newScore);
-       // UIManager.Instance.UpdateComboUI(newComboCount);
+        score += amount * (comboCount + 1); // ✅ 콤보를 반영하여 점수 증가
+        comboCount = Mathf.Min(comboCount + 1, maxCombo);
+        UpdateScoreClientRpc(score, comboCount);
+
+        // 콤보 타이머 리셋
+        if (comboCoroutine != null)
+            StopCoroutine(comboCoroutine);
+        comboCoroutine = StartCoroutine(ResetComboTimer());
+    }
+
+    [TargetRpc]
+    private void UpdateScoreClientRpc(int newScore, int newCombo)
+    {
+        score = newScore;
+        comboCount = newCombo;
+        UpdateScoreUI();
+    }
+
+    private void UpdateScoreUI()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = $"Score: {score} (Combo: {comboCount})";
+        }
+    }
+
+    private IEnumerator ResetComboTimer()
+    {
+        float timer = 0f;
+        while (timer <= comboTimeLimit)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        comboCount = 0; // 콤보 초기화
+        UpdateScoreClientRpc(score, comboCount);
     }
 }

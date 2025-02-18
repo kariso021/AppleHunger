@@ -10,47 +10,39 @@ public class Apple : NetworkBehaviour
     public int Value => value; // Getter를 사용하여 외부에서 읽기 가능
     public int ScoreValue => scorevalue; // 점수 값도 읽기 가능
 
-    public TextMeshPro numberText;
+    [SerializeField] private TextMeshPro numberText;
 
     public override void OnStartServer()
     {
         base.OnStartServer();
         value = Random.Range(1, 10); // 서버에서 랜덤 값 설정
-        scorevalue = value * 10; // 점수 값 계산 후 동기화
-        UpdateAppleObserversRpc(value, scorevalue); // 모든 클라이언트에 값 전송
+        scorevalue = 10;
+        UpdateAppleObserversRpc(value, scorevalue); // ✅ 모든 기존 클라이언트에 값 전송
     }
 
-    [ObserversRpc] // 클라이언트들에게 값을 전달
+    [ObserversRpc(BufferLast = true)] // *******새로운 클라이언트도 최신 값 받도록 설정******** BufferLast = true 로 해주면 됨
     private void UpdateAppleObserversRpc(int newValue, int newScoreValue)
     {
         value = newValue;
         scorevalue = newScoreValue;
-
-        // 🔍 numberText가 null인지 체크
-        if (numberText != null)
-        {
-            numberText.text = value.ToString(); // UI 업데이트
-        }
-        else
-        {
-            Debug.LogError("🚨 numberText가 할당되지 않았습니다! Inspector에서 확인하세요.");
-        }
+        UpdateText(); // ✅ UI 업데이트
     }
 
-    public override void OnStartClient()
+    public void SetValue(int newValue) // 클라이언트가 Apple의 Value 값을 업데이트할 수 있도록 설정
     {
-        base.OnStartClient();
+        value = newValue;
+        UpdateText();
+    }
 
-        Debug.Log($"🍏 Client: Apple spawned with value {value}");
-
+    private void UpdateText()
+    {
         if (numberText != null)
         {
             numberText.text = value.ToString();
         }
         else
         {
-            Debug.LogError("🚨 Client: numberText is null! Check Inspector.");
+            Debug.LogError("🚨 numberText가 할당되지 않았습니다! Inspector에서 확인하세요.");
         }
     }
-
 }

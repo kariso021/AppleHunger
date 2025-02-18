@@ -2,7 +2,9 @@
 using FishNet.Object;
 using UnityEngine;
 using System.Collections.Generic;
+using FishNet.Connection;
 using FishNet;
+using FishNet.Observing;
 
 public class AppleManager : NetworkBehaviour
 {
@@ -11,14 +13,13 @@ public class AppleManager : NetworkBehaviour
     public int gridHeight = 10;
     public float spacing = 1.1f;
 
-    private List<GameObject> spawnedApples = new List<GameObject>();
+    private List<Apple> spawnedApples = new List<Apple>(); // Apple 컴포넌트를 직접 저장
 
     public override void OnStartServer()
     {
         base.OnStartServer();
-        SpawnApplesInGrid(); // ✅ 직접 호출하여 서버에서만 실행
+        SpawnApplesInGrid(); // 서버에서 Apple 스폰
     }
-
 
     private void SpawnApplesInGrid()
     {
@@ -31,46 +32,59 @@ public class AppleManager : NetworkBehaviour
             for (int x = 0; x < gridWidth; x++)
             {
                 Vector3 spawnPosition = new Vector3((x * spacing) - xOffset, -(y * spacing) + yOffset, 0);
-                GameObject newApple = Instantiate(applePrefab, spawnPosition, Quaternion.identity, transform);
+                GameObject newApple = Instantiate(applePrefab, spawnPosition, Quaternion.identity);
 
-                if (newApple.TryGetComponent(out NetworkObject netObj))
+                if (newApple.TryGetComponent(out Apple apple))
                 {
-                    InstanceFinder.ServerManager.Spawn(newApple); // ✅ 공식 문서 적용
-                    Debug.Log($"✅ Server: Apple spawned at {spawnPosition}");
+                    InstanceFinder.ServerManager.Spawn(newApple); // ✅ 서버에서 스폰
+                    spawnedApples.Add(apple); // ✅ Apple 컴포넌트 저장
                 }
-                else
-                {
-                    Debug.LogError("🚨 applePrefab에 NetworkObject가 없습니다!");
-                }
-
-                spawnedApples.Add(newApple);
             }
         }
     }
 
-
-    [ObserversRpc] // 모든 클라이언트에게 Apple이 정상적으로 생성되었는지 확인
-    private void NotifyClientsAppleSpawned()
+    // 🔹 클라이언트가 접속할 때 기존 Apple의 Value 값 요청
+    public override void OnStartClient()
     {
-        Debug.Log("🍏 Client: Apple has been received and spawned.");
-    }
-
-    [ServerRpc]
-    public void RemoveApplesServerRpc()
-    {
-        if (!IsServer) return; // 🛑 서버에서만 실행
-
-        foreach (GameObject apple in spawnedApples)
+        base.OnStartClient();
+        if (IsClient)
         {
-            if (apple != null)
+            RequestAppleDataServerRpc(); // ✅ 서버에 기존 Apple 데이터 요청
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestAppleDataServerRpc(NetworkConnection conn = null)
+    {
+        if (IsServer)
+        {
+            SendAppleDataToClientRpc(conn, GetAppleValues()); // ✅ 기존 Apple들의 Value 값 전송
+        }
+    }
+
+    [TargetRpc] // 특정 클라이언트에게만 Value 값 전송
+    private void SendAppleDataToClientRpc(NetworkConnection conn, int[] appleValues)
+    {
+        Debug.Log($"🍏 Client: Syncing {appleValues.Length} Apple Values from Server.");
+
+        // 클라이언트 측에서 Apple의 Value 값 업데이트
+        for (int i = 0; i < spawnedApples.Count; i++)
+        {
+            if (i < appleValues.Length)
             {
-                if (apple.TryGetComponent(out NetworkObject netObj))
-                {
-                    InstanceFinder.ServerManager.Despawn(apple); // ✅ 공식 문서 적용 (기존의 netObj.Despawn() 제거)
-                }
-                Destroy(apple);
+                spawnedApples[i].SetValue(appleValues[i]); // 클라이언트에서 Apple 값 업데이트
             }
         }
-        spawnedApples.Clear();
+    }
+
+    // Apple들의 Value 값 배열을 가져오는 함수
+    private int[] GetAppleValues()
+    {
+        int[] values = new int[spawnedApples.Count];
+        for (int i = 0; i < spawnedApples.Count; i++)
+        {
+            values[i] = spawnedApples[i].Value;
+        }
+        return values;
     }
 }

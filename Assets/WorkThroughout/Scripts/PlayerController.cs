@@ -117,7 +117,6 @@ public class PlayerController : NetworkBehaviour
     {
         if (!isDragging) return;
 
-        // ✅ sum == 10이면 서버에 사과 제거 요청
         if (currentSum == 10)
         {
             RequestAppleRemovalServerRpc(selectedApples.ToArray(), currentSum);
