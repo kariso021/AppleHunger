@@ -1,3 +1,6 @@
+//구버전 콤보 매니저 여기있는 로직을 ScoreManager에 넣을것임
+
+
 using System.Collections;
 using UnityEngine;
 
