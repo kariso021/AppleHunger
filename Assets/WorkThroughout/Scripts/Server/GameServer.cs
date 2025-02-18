@@ -46,10 +46,15 @@ public class GameServer : NetworkBehaviour
     [ObserversRpc] // 🔹 모든 클라이언트에게 타이머 UI 업데이트
     private void UpdateTimerObserversRpc(float time)
     {
+       
         Timer timer = FindObjectOfType<Timer>();
         if (timer != null)
         {
             timer.UpdateTimerUI(time);
+        }
+        else
+        {
+            Debug.LogError("Timer is Null!");
         }
     }
 

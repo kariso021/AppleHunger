@@ -1,11 +1,13 @@
-﻿using FishNet.Object;
+﻿using FishNet.Managing;
+using FishNet.Object;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem.EnhancedTouch;
+using FishNet;
 
-public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝트로 변경
+public class PlayerController : NetworkBehaviour
 {
     private Camera mainCamera;
     private List<GameObject> selectedApples = new List<GameObject>();
@@ -14,8 +16,8 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
     private Vector2 dragStartPos;
     private Vector2 dragEndPos;
     private bool isDragging = false;
-    private bool isDragRestricted = false; // 🚫 드래그 차단 여부
-    private bool isCooldownActive = false; // 🔥 1초 쿨타임 방지
+    private bool isDragRestricted = false;
+    private bool isCooldownActive = false;
 
     public GameObject dragBox;
     private SpriteRenderer dragBoxRenderer;
@@ -43,20 +45,14 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
         }
         else
         {
-            Debug.LogError("🚨 DragBox가 씬에 존재하지 않습니다! Hierarchy에서 확인하세요.");
+            Debug.LogError("🚨 DragBox가 씬에 존재하지 않습니다!");
         }
 
         if (flashImage != null)
         {
-            flashCanvasGroup = flashImage.GetComponent<CanvasGroup>();
-
-            if (flashCanvasGroup == null)
-            {
-                flashCanvasGroup = flashImage.gameObject.AddComponent<CanvasGroup>();
-            }
-
-            flashCanvasGroup.alpha = 0f; // 처음엔 투명
-            flashCanvasGroup.blocksRaycasts = false; // 처음엔 터치 가능
+            flashCanvasGroup = flashImage.GetComponent<CanvasGroup>() ?? flashImage.gameObject.AddComponent<CanvasGroup>();
+            flashCanvasGroup.alpha = 0f;
+            flashCanvasGroup.blocksRaycasts = false;
         }
     }
 
@@ -66,7 +62,7 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
 
         if (!IsOwner)
         {
-            enabled = false; // 🛑 다른 플레이어의 입력을 방지
+            enabled = false;
         }
     }
 
@@ -87,7 +83,7 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
 
     private void OnFingerDown(Finger finger)
     {
-        if (!IsOwner || isDragRestricted || isCooldownActive) return; // 🛑 본인만 입력 가능
+        if (!IsOwner || isDragRestricted || isCooldownActive) return;
 
         dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
         isDragging = false;
@@ -95,7 +91,7 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
 
     private void OnFingerMove(Finger finger)
     {
-        if (!IsOwner || isDragRestricted || isCooldownActive) return; // 🛑 본인만 입력 가능
+        if (!IsOwner || isDragRestricted || isCooldownActive) return;
 
         if (!isDragging)
         {
@@ -121,7 +117,7 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
     {
         if (!isDragging) return;
 
-        // 🟢 서버에게 사과 제거 요청을 보냄
+        // ✅ 서버에게 Apple 제거 요청을 보냄
         RequestAppleRemovalServerRpc(selectedApples.ToArray(), currentSum);
 
         dragBoxRenderer.enabled = false;
@@ -162,7 +158,7 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
             {
                 apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
                 selectedApples.Remove(apple);
-                currentSum -= apple.GetComponent<Apple>().value;
+                currentSum -= apple.GetComponent<Apple>().Value;
             }
         }
 
@@ -185,26 +181,28 @@ public class PlayerController : NetworkBehaviour // 🟢 네트워크 오브젝�
                     }
 
                     selectedApples.Add(apple);
-                    currentSum += appleComponent.value;
+                    currentSum += appleComponent.Value;
                     appleRenderer.color = Color.yellow;
                 }
             }
         }
     }
 
-
-    [ServerRpc] // 🟢 서버에서만 실행
+    [ServerRpc]
     private void RequestAppleRemovalServerRpc(GameObject[] apples, int sum)
     {
         if (sum == 10)
         {
-            GameServer server = FindObjectOfType<GameServer>();
-            if (server != null)
+            Debug.Log($"🍏 Server: Removing {apples.Length} apples.");
+
+            foreach (GameObject apple in apples)
             {
-                server.GetAppleManager().RemoveApplesServerRpc(apples); // ✅ AppleManager의 RemoveApples 호출
-                server.GetScoreManager().AddScore(100, apples.Length);
+                if (apple != null && apple.TryGetComponent(out NetworkObject netObj))
+                {
+                    InstanceFinder.ServerManager.Despawn(apple); // ✅ FishNet 공식 방식 적용
+                    Destroy(apple);
+                }
             }
         }
     }
 }
-

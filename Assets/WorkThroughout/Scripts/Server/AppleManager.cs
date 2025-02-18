@@ -1,11 +1,13 @@
-﻿using FishNet.Object;
+﻿using FishNet.Managing;
+using FishNet.Object;
 using UnityEngine;
 using System.Collections.Generic;
+using FishNet;
 
 public class AppleManager : NetworkBehaviour
 {
     public GameObject applePrefab;
-    public int gridWidth = 17;
+    public int gridWidth = 10;
     public int gridHeight = 10;
     public float spacing = 1.1f;
 
@@ -14,12 +16,13 @@ public class AppleManager : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
-        SpawnApplesInGridServerRpc();
+        SpawnApplesInGrid(); // ✅ 직접 호출하여 서버에서만 실행
     }
 
-    [ServerRpc]
-    public void SpawnApplesInGridServerRpc()
+
+    private void SpawnApplesInGrid()
     {
+        Debug.Log("🚀 Server: Spawning Apples...");
         float xOffset = (gridWidth - 1) * spacing / 2;
         float yOffset = (gridHeight - 1) * spacing / 2;
 
@@ -30,11 +33,10 @@ public class AppleManager : NetworkBehaviour
                 Vector3 spawnPosition = new Vector3((x * spacing) - xOffset, -(y * spacing) + yOffset, 0);
                 GameObject newApple = Instantiate(applePrefab, spawnPosition, Quaternion.identity, transform);
 
-                NetworkObject netObj = newApple.GetComponent<NetworkObject>();
-                if (netObj != null)
+                if (newApple.TryGetComponent(out NetworkObject netObj))
                 {
-                    netObj.Spawn(applePrefab);
-
+                    InstanceFinder.ServerManager.Spawn(newApple); // ✅ 공식 문서 적용
+                    Debug.Log($"✅ Server: Apple spawned at {spawnPosition}");
                 }
                 else
                 {
@@ -46,21 +48,29 @@ public class AppleManager : NetworkBehaviour
         }
     }
 
+
+    [ObserversRpc] // 모든 클라이언트에게 Apple이 정상적으로 생성되었는지 확인
+    private void NotifyClientsAppleSpawned()
+    {
+        Debug.Log("🍏 Client: Apple has been received and spawned.");
+    }
+
     [ServerRpc]
-    public void RemoveApplesServerRpc(GameObject[] apples)
+    public void RemoveApplesServerRpc()
     {
         if (!IsServer) return; // 🛑 서버에서만 실행
 
-        foreach (GameObject apple in apples)
+        foreach (GameObject apple in spawnedApples)
         {
             if (apple != null)
             {
-                spawnedApples.Remove(apple);
-                apple.GetComponent<NetworkObject>().Despawn(); // 🟢 네트워크에서 제거
+                if (apple.TryGetComponent(out NetworkObject netObj))
+                {
+                    InstanceFinder.ServerManager.Despawn(apple); // ✅ 공식 문서 적용 (기존의 netObj.Despawn() 제거)
+                }
                 Destroy(apple);
             }
         }
+        spawnedApples.Clear();
     }
-
 }
-

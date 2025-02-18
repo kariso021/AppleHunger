@@ -4,8 +4,8 @@ using System.Collections.Generic;
 public class AppleSpawner : MonoBehaviour
 {
     public GameObject applePrefab; // 사과 프리팹
-    public int gridWidth = 17; // 가로 17칸
-    public int gridHeight = 10; // 세로 10칸
+    public int gridWidth = 8; // 가로 17칸
+    public int gridHeight = 8; // 세로 10칸
     public float spacing = 1.1f; // 사과 간격
 
     private List<GameObject> spawnedApples = new List<GameObject>(); // 생성된 사과 저장
