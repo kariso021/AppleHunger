@@ -6,11 +6,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem.EnhancedTouch;
 using FishNet;
+using FishNet.Connection;
 
 public class PlayerController : NetworkBehaviour
 {
     private Camera mainCamera;
     private List<GameObject> selectedApples = new List<GameObject>();
+    private ScoreManager scoreManager;
     private Dictionary<GameObject, Color> originalColors = new Dictionary<GameObject, Color>();
     private int currentSum = 0;
     private Vector2 dragStartPos;
@@ -32,6 +34,7 @@ public class PlayerController : NetworkBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
+        scoreManager = GetComponent<ScoreManager>(); // ✅ ScoreManager 연결
 
         if (dragBox == null)
         {
@@ -210,25 +213,43 @@ public class PlayerController : NetworkBehaviour
 
 
 
-    [ServerRpc]
-    private void RequestAppleRemovalServerRpc(GameObject[] apples, int sum)
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestAppleRemovalServerRpc(GameObject[] apples, int sum, NetworkConnection sender = null)
     {
-        if (sum == 10)
+        if (sum == 10 && sender != null)
         {
-            Debug.Log($"🍏 Server: Removing {apples.Length} apples.");
+            Debug.Log($"Server: Removing {apples.Length} apples.");
+
+            int appleCount = apples.Length;
+            int AppleScoreValue = 0;
 
             foreach (GameObject apple in apples)
             {
-                if (apple != null && apple.TryGetComponent(out NetworkObject netObj))
+                if (apple != null && apple.TryGetComponent(out Apple appleComponent) &&
+                    apple.TryGetComponent(out NetworkObject netObj))
                 {
-                    InstanceFinder.ServerManager.Despawn(apple); // ✅ FishNet 공식 방식 적용
+                    AppleScoreValue += appleComponent.ScoreValue;  // 🍎 Apple들의 ScoreValue 값 합산
+                    InstanceFinder.ServerManager.Despawn(apple);
                     Destroy(apple);
                 }
+            }
+
+            // 개별 플레이어의 ScoreManager 찾기
+            ScoreManager scoreManager = sender.FirstObject.GetComponent<ScoreManager>();
+            if (scoreManager != null)
+            {
+                scoreManager.AddScoreServerRpc(appleCount, AppleScoreValue, sender); // 점수 공식 적용
+            }
+            else
+            {
+                Debug.LogError($"🚨 ScoreManager를 찾을 수 없습니다! ClientId: {sender.ClientId}");
             }
         }
     }
 
 
-  
+
+
+
 
 }

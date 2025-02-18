@@ -6,7 +6,6 @@ public class GameServer : NetworkBehaviour
     public float gameTime = 60f; // 전체 게임 시간
     private bool isGameOver = false;
 
-    private ScoreManager scoreManager; // 점수 관리
     private AppleManager appleManager; // 사과 관리
 
     public override void OnStartServer() // ✅ FishNet의 서버 시작 이벤트 활용
@@ -20,12 +19,11 @@ public class GameServer : NetworkBehaviour
             return;
         }
 
-        scoreManager = GetComponent<ScoreManager>();
         appleManager = GetComponent<AppleManager>();
 
-        if (scoreManager == null || appleManager == null)
+        if (appleManager == null)
         {
-            Debug.LogError("🚨 GameServer에서 ScoreManager 또는 AppleManager를 찾을 수 없습니다.");
+            Debug.LogError("🚨 GameServer에서 AppleManager를 찾을 수 없습니다.");
         }
     }
 
@@ -70,10 +68,7 @@ public class GameServer : NetworkBehaviour
         UIManager.Instance.ShowGameOverScreen();
     }
 
-    public ScoreManager GetScoreManager()
-    {
-        return scoreManager;
-    }
+ 
 
     public AppleManager GetAppleManager()
     {

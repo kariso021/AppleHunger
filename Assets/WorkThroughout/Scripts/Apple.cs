@@ -5,7 +5,7 @@ using UnityEngine;
 public class Apple : NetworkBehaviour
 {
     private int value; // 내부에서만 변경 가능
-    private int scorevalue;
+    private int scorevalue = 10;
 
     public int Value => value; // Getter를 사용하여 외부에서 읽기 가능
     public int ScoreValue => scorevalue; // 점수 값도 읽기 가능
