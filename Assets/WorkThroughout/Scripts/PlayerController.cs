@@ -117,8 +117,16 @@ public class PlayerController : NetworkBehaviour
     {
         if (!isDragging) return;
 
-        // ✅ 서버에게 Apple 제거 요청을 보냄
-        RequestAppleRemovalServerRpc(selectedApples.ToArray(), currentSum);
+        // ✅ sum == 10이면 서버에 사과 제거 요청
+        if (currentSum == 10)
+        {
+            RequestAppleRemovalServerRpc(selectedApples.ToArray(), currentSum);
+        }
+        else
+        {
+            // ✅ sum != 10이면 원래 색상으로 복구
+            ResetAppleColors();
+        }
 
         dragBoxRenderer.enabled = false;
         isDragging = false;
@@ -188,6 +196,21 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    private void ResetAppleColors()
+    {
+        foreach (GameObject apple in selectedApples)
+        {
+            if (apple != null && originalColors.ContainsKey(apple))
+            {
+                apple.GetComponent<SpriteRenderer>().color = originalColors[apple]; // ✅ 원래 색상 복구
+            }
+        }
+        selectedApples.Clear();
+        currentSum = 0; // ✅ 합계 초기화
+    }
+
+
+
     [ServerRpc]
     private void RequestAppleRemovalServerRpc(GameObject[] apples, int sum)
     {
@@ -205,4 +228,8 @@ public class PlayerController : NetworkBehaviour
             }
         }
     }
+
+
+  
+
 }
