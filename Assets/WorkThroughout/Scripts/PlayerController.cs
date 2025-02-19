@@ -228,7 +228,7 @@ public class PlayerController : NetworkBehaviour
                 if (apple != null && apple.TryGetComponent(out Apple appleComponent) &&
                     apple.TryGetComponent(out NetworkObject netObj))
                 {
-                    AppleScoreValue += appleComponent.ScoreValue;  // 🍎 Apple들의 ScoreValue 값 합산
+                    AppleScoreValue = appleComponent.ScoreValue;  // Apple들의 ScoreValue
                     InstanceFinder.ServerManager.Despawn(apple);
                     Destroy(apple);
                 }

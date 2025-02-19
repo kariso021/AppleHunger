@@ -10,12 +10,23 @@ public class ScoreManager : NetworkBehaviour
     private static Dictionary<NetworkConnection, int> playerScores = new Dictionary<NetworkConnection, int>();
     private static Dictionary<NetworkConnection, int> playerCombos = new Dictionary<NetworkConnection, int>();
 
-    private int maxCombo = 5;
-    private float comboTimeLimit = 5f;
+    private int maxCombo;
+    private float comboTimeLimit;
     private Dictionary<NetworkConnection, Coroutine> comboCoroutines = new Dictionary<NetworkConnection, Coroutine>();
 
     [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private int ComboValue = 1;
+    [SerializeField] private int ComboValue;
+
+
+
+    private void Awake()
+    {
+        ComboValue = 1;
+        maxCombo = 5;
+        comboTimeLimit = 5f;
+    }
+
+
 
     public override void OnStartClient()
     {
@@ -38,7 +49,6 @@ public class ScoreManager : NetworkBehaviour
         {
             Debug.LogError($"{gameObject.name}의 Score UI를 찾을 수 없습니다!");
         }
-
         UpdateScoreUI();
     }
 
@@ -60,19 +70,20 @@ public class ScoreManager : NetworkBehaviour
         if (!playerCombos.ContainsKey(sender))
             playerCombos[sender] = 0;
 
-        // ✅ 점수 공식 적용
         int currentCombo = playerCombos[sender];
         int TotalComboValue = ComboValue * currentCombo;
-        int finalScore = (appleCount * AppleValue) + (TotalComboValue * appleCount);
+        int finalScore = (appleCount) * (TotalComboValue + AppleValue);
+
+        Debug.Log($"[Server] sender: {sender.ClientId}, appleCount: {appleCount},ComboValue : {ComboValue}");
 
         playerScores[sender] += finalScore;
         playerCombos[sender] = Mathf.Min(playerCombos[sender] + 1, maxCombo);
 
         UpdateScoreTargetRpc(sender, playerScores[sender], playerCombos[sender]);
 
-        // ✅ 콤보 타이머 시작
         StartComboTimer(sender);
     }
+
 
     /// <summary>
     /// ✅ 개별 클라이언트의 UI 업데이트
