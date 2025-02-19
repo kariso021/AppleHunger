@@ -21,6 +21,9 @@ public class PlayerController : NetworkBehaviour
     private bool isDragRestricted = false;
     private bool isCooldownActive = false;
 
+    private float updateInterval = 0.05f; // 20 FPS
+    private float timeSinceLastUpdate = 0f;
+
     [Header("Local Drag Box")]
     public GameObject localDragBox; // 로컬 전용 드래그 박스
     private SpriteRenderer localDragBoxRenderer;
@@ -34,6 +37,16 @@ public class PlayerController : NetworkBehaviour
     private void Awake()
     {
         EnhancedTouchSupport.Enable();
+
+        flashCanvasGroup = flashImage.GetComponent<CanvasGroup>();
+        if (flashCanvasGroup == null)
+        {
+            flashCanvasGroup = flashImage.gameObject.AddComponent<CanvasGroup>();
+        }
+
+        // 3️⃣ 초기화
+        flashCanvasGroup.alpha = 0f;
+        flashCanvasGroup.blocksRaycasts = false;
     }
 
     private void Start()
@@ -51,12 +64,9 @@ public class PlayerController : NetworkBehaviour
             Debug.LogError("🚨 Local DragBox가 씬에 존재하지 않습니다!");
         }
 
-        if (flashImage != null)
-        {
-            flashCanvasGroup = flashImage.GetComponent<CanvasGroup>() ?? flashImage.gameObject.AddComponent<CanvasGroup>();
-            flashCanvasGroup.alpha = 0f;
-            flashCanvasGroup.blocksRaycasts = false;
-        }
+
+
+       
 
         //  자기 자신의 NetworkDragBoxManager 참조
         networkDragBoxManager = GetComponentInChildren<NetworkDragBoxManager>();
@@ -100,6 +110,12 @@ public class PlayerController : NetworkBehaviour
     {
         if (!IsOwner || isDragRestricted || isCooldownActive) return;
 
+        //FPS 프레임조절
+        timeSinceLastUpdate += Time.deltaTime;
+        if (timeSinceLastUpdate < updateInterval) return; // FPS 제한
+        timeSinceLastUpdate = 0f;
+
+
         if (!isDragging)
         {
             float dragThreshold = 0.1f;
@@ -138,6 +154,7 @@ public class PlayerController : NetworkBehaviour
         {
             // ✅ sum != 10이면 원래 색상으로 복구
             ResetAppleColors();
+            StartCoroutine(TriggerFlashEffect());
         }
 
         localDragBoxRenderer.enabled = false;
@@ -267,4 +284,45 @@ public class PlayerController : NetworkBehaviour
     }
 
     #endregion
+
+
+    //TrigerFlashImage
+
+    private IEnumerator TriggerFlashEffect()
+    {
+        isDragRestricted = true; // 드래그 제한
+
+        float flashDuration = 0.5f; // 총 지속 시간
+        float halfDuration = flashDuration / 2f; // 절반 동안 밝아지고 절반 동안 어두워짐
+        float elapsedTime = 0f;
+
+        if (flashCanvasGroup != null)
+        {
+            // 밝아지는 구간
+            while (elapsedTime < halfDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float alpha = Mathf.Lerp(0f, 0.5f, elapsedTime / halfDuration); // 부드럽게 증가
+                flashCanvasGroup.alpha = alpha;
+                yield return null;
+            }
+
+            elapsedTime = 0f;
+
+            // 어두워지는 구간
+            while (elapsedTime < halfDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float alpha = Mathf.Lerp(0.5f, 0f, elapsedTime / halfDuration); // 부드럽게 감소
+                flashCanvasGroup.alpha = alpha;
+                yield return null;
+            }
+
+            flashCanvasGroup.alpha = 0f; // 최종적으로 완전히 투명
+        }
+
+        yield return new WaitForSeconds(1.0f); // 1초간 드래그 제한 유지
+        isDragRestricted = false; // 드래그 제한 해제
+    }
+
 }

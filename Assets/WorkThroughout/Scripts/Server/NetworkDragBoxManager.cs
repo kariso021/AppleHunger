@@ -13,7 +13,6 @@ public class NetworkDragBoxManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void SendDragStartServerRpc(Vector2 startPos, NetworkConnection conn)
     {
-       
        SendDragStartObserversRpc(startPos, conn.ClientId);
     }
 
