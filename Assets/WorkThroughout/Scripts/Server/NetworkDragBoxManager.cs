@@ -6,97 +6,73 @@ using FishNet;
 
 public class NetworkDragBoxManager : NetworkBehaviour
 {
-    public GameObject networkDragBoxPrefab;
-    private Dictionary<int, NetworkObject> networkDragBoxes = new Dictionary<int, NetworkObject>(); // 클라이언트별 DragBox 관리
+    // ✅ 미리 생성된 DragBox를 참조
+    public GameObject networkDragBox;
 
-    // 서버에서 DragBox 생성
+    // ✅ 1️⃣ 서버에서 DragBox 시작 요청
     [ServerRpc(RequireOwnership = false)]
     public void SendDragStartServerRpc(Vector2 startPos, NetworkConnection conn)
     {
-        if (networkDragBoxes.ContainsKey(conn.ClientId)) return; // 이미 생성된 경우 방지
-
-        GameObject newBox = Instantiate(networkDragBoxPrefab, startPos, Quaternion.identity, this.transform);
-        NetworkObject newBoxNetObj = newBox.GetComponent<NetworkObject>();
-        Spawn(newBoxNetObj, conn); // ✅ 해당 클라이언트가 소유하도록 설정
-
-        networkDragBoxes[conn.ClientId] = newBoxNetObj;
-        Debug.Log($"[Server] Spawned DragBox for ClientId: {conn.ClientId}");
-
-        // 모든 클라이언트에게 DragBox 생성 요청
+        Debug.Log($"[Server] Activating DragBox for ClientId: {conn.ClientId}");
         SendDragStartObserversRpc(startPos, conn.ClientId);
     }
 
-    // 클라이언트에게 DragBox 생성 요청 (자신 제외)
+    // ✅ 2️⃣ 클라이언트에서 DragBox 활성화
     [ObserversRpc(BufferLast = true)]
     private void SendDragStartObserversRpc(Vector2 startPos, int clientId)
     {
         int localClientId = InstanceFinder.ClientManager.Connection.ClientId;
-        if (localClientId == clientId) return; // 자기 자신이면 무시
-
-        if (!networkDragBoxes.ContainsKey(clientId))
+        if (localClientId != clientId) // 자신이면 무시
         {
-            GameObject newBox = Instantiate(networkDragBoxPrefab, startPos, Quaternion.identity, this.transform);
-            NetworkObject newBoxNetObj = newBox.GetComponent<NetworkObject>();
-
-            networkDragBoxes[clientId] = newBoxNetObj;
-            Debug.Log($"[Client] Created DragBox for ClientId: {clientId}");
+            networkDragBox.SetActive(true);
+            networkDragBox.transform.position = startPos;
+            networkDragBox.transform.localScale = Vector3.zero; // 초기 크기
+            Debug.Log($"[Client] Activated DragBox for ClientId: {clientId}");
         }
     }
 
-    // 서버에서 DragBox 업데이트
+    // ✅ 3️⃣ 서버에서 DragBox 업데이트 요청
     [ServerRpc(RequireOwnership = false)]
     public void SendDragUpdateServerRpc(Vector2 startPos, Vector2 endPos, NetworkConnection conn)
     {
-        if (!networkDragBoxes.ContainsKey(conn.ClientId)) return;
-
         Vector2 center = (startPos + endPos) / 2;
         Vector2 size = new Vector2(Mathf.Abs(endPos.x - startPos.x), Mathf.Abs(endPos.y - startPos.y));
 
-        networkDragBoxes[conn.ClientId].transform.position = center;
-        networkDragBoxes[conn.ClientId].transform.localScale = new Vector3(size.x, size.y, 1);
+        Debug.Log($"[Server] Updating DragBox for ClientId: {conn.ClientId}");
 
-        //모든 클라이언트에게 DragBox 업데이트 요청
         SendDragUpdateObserversRpc(center, size, conn.ClientId);
     }
 
-    // 클라이언트에게 DragBox 업데이트 요청 (자신 제외)
+    // ✅ 4️⃣ 클라이언트에서 DragBox 위치/크기 업데이트
     [ObserversRpc(BufferLast = true)]
     private void SendDragUpdateObserversRpc(Vector2 center, Vector2 size, int clientId)
     {
         int localClientId = InstanceFinder.ClientManager.Connection.ClientId;
-        if (localClientId == clientId) return; // 자기 자신이면 무시
-
-        if (networkDragBoxes.TryGetValue(clientId, out NetworkObject box))
+        if (localClientId != clientId) // 자신이면 무시
         {
-            box.transform.position = center;
-            box.transform.localScale = new Vector3(size.x, size.y, 1);
+            networkDragBox.transform.position = center;
+            networkDragBox.transform.localScale = new Vector3(size.x, size.y, 1);
+            Debug.Log($"[Client] Updated DragBox for ClientId: {clientId}");
         }
     }
 
-    // 서버에서 DragBox 제거
+    // ✅ 5️⃣ 서버에서 DragBox 비활성화 요청
     [ServerRpc(RequireOwnership = false)]
     public void SendDragEndServerRpc(NetworkConnection conn)
     {
-        if (!networkDragBoxes.ContainsKey(conn.ClientId)) return;
-
-        Despawn(networkDragBoxes[conn.ClientId]);
-        networkDragBoxes.Remove(conn.ClientId);
-
-        // ✅ 모든 클라이언트에게 DragBox 제거 요청
+        Debug.Log($"[Server] Deactivating DragBox for ClientId: {conn.ClientId}");
         SendDragEndObserversRpc(conn.ClientId);
     }
 
-    // 클라이언트에게 DragBox 제거 요청 (자신 제외)
+    // ✅ 6️⃣ 클라이언트에서 DragBox 비활성화
     [ObserversRpc(BufferLast = true)]
     private void SendDragEndObserversRpc(int clientId)
     {
         int localClientId = InstanceFinder.ClientManager.Connection.ClientId;
-        if (localClientId == clientId) return; // 자기 자신이면 무시
-
-        if (networkDragBoxes.ContainsKey(clientId))
+        if (localClientId != clientId) // 자신이면 무시
         {
-            Destroy(networkDragBoxes[clientId].gameObject);
-            networkDragBoxes.Remove(clientId);
+            networkDragBox.SetActive(false);
+            Debug.Log($"[Client] Deactivated DragBox for ClientId: {clientId}");
         }
     }
 }
