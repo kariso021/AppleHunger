@@ -52,6 +52,8 @@ public class ScoreManager : NetworkBehaviour
         UpdateScoreUI();
     }
 
+
+
     /// <summary>
     /// ✅ 서버에서 점수를 계산하고 해당 클라이언트에게 업데이트
     /// </summary>
