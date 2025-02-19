@@ -39,7 +39,7 @@ public class PlayerController : NetworkBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
-        scoreManager = GetComponent<ScoreManager>(); // ✅ ScoreManager 연결
+        scoreManager = GetComponent<ScoreManager>(); // ScoreManager 연결
 
         if (localDragBox != null)
         {
@@ -58,7 +58,7 @@ public class PlayerController : NetworkBehaviour
             flashCanvasGroup.blocksRaycasts = false;
         }
 
-        // ✅ 자기 자신의 NetworkDragBoxManager 참조
+        //  자기 자신의 NetworkDragBoxManager 참조
         networkDragBoxManager = GetComponentInChildren<NetworkDragBoxManager>();
     }
 
@@ -110,7 +110,7 @@ public class PlayerController : NetworkBehaviour
                 selectedApples.Clear();
                 currentSum = 0;
 
-                // ✅ 서버에 드래그 시작 요청 (네트워크 드래그 박스)
+                //  서버에 드래그 시작 요청 (네트워크 드래그 박스)
                 networkDragBoxManager.SendDragStartServerRpc(dragStartPos, base.Owner);
             }
         }
@@ -121,7 +121,7 @@ public class PlayerController : NetworkBehaviour
             UpdateLocalDragBox();
             DetectAppleUnderCursor();
 
-            // ✅ 서버에 드래그 업데이트 요청
+            // 서버에 드래그 업데이트 요청
             networkDragBoxManager.SendDragUpdateServerRpc(dragStartPos, dragEndPos, base.Owner);
         }
     }
@@ -221,11 +221,11 @@ public class PlayerController : NetworkBehaviour
         {
             if (apple != null && originalColors.ContainsKey(apple))
             {
-                apple.GetComponent<SpriteRenderer>().color = originalColors[apple]; // ✅ 원래 색상 복구
+                apple.GetComponent<SpriteRenderer>().color = originalColors[apple]; // 원래 색상 복구
             }
         }
         selectedApples.Clear();
-        currentSum = 0; // ✅ 합계 초기화
+        currentSum = 0; // 합계 초기화
     }
 
     #endregion
