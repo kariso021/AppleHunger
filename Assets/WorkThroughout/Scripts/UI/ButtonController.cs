@@ -41,7 +41,7 @@ public class ButtonController : MonoBehaviour
         profileButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
 
-        // 서버-클라 테스트
+        // 서버-클라 테스트 , 1은 임시 아이디
         profileButton.onClick.AddListener(() =>
         FindAnyObjectByType<ClientDatabaseManager>().GetPlayerData(1));
         // single,multi 플레이 관련 함수 바인딩
@@ -57,6 +57,10 @@ public class ButtonController : MonoBehaviour
         // Setting Panel Buttons
         // bgm,vfx 는 후에 SoundManager에서 함수를 가져와 바인딩
         // login 도 구글 로그인 기능을 가져와 바인딩
+        // 테스트 기능
+        loginButton.onClick.AddListener(() =>
+        FindAnyObjectByType<ClientDatabaseManager>().ChangePlayerDataTest(100));
+        //
         creditButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
 

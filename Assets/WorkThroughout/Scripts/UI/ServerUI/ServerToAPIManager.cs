@@ -4,9 +4,17 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Security.Cryptography.X509Certificates;
+using FishNet.Demo.AdditiveScenes;
 public class ServerToAPIManager : NetworkBehaviour
 {
     private string apiBaseUrl = "https://localhost";
+
+    ClientDatabaseManager clientDatabaseManager;
+
+    private void Start()
+    {
+        clientDatabaseManager = FindAnyObjectByType<ClientDatabaseManager>();
+    }
 
     [ServerRpc(RequireOwnership = false)]
     public void RequestAddPlayerServerRpc(string playerName, string profileIcon, string boardImage, int totalGames, int wins, int losses, int rating, int currency, int icons, int boards)
@@ -38,30 +46,33 @@ public class ServerToAPIManager : NetworkBehaviour
     }
 
 
-    // �÷��̾� ���� ���� ��û
     [ServerRpc(RequireOwnership = false)]
-    public void RequestUpdatePlayerServerRpc(int playerId, string newName, string newProfileIcon, string newBoardImage)
+    public void RequestUpdatePlayerDataServerRpc(PlayerData updatedData, NetworkConnection conn = null)
     {
-        StartCoroutine(UpdatePlayer(playerId, newName, newProfileIcon, newBoardImage));
+        StartCoroutine(UpdatePlayerData(updatedData, conn));
     }
 
-    private IEnumerator UpdatePlayer(int playerId, string newName, string newProfileIcon, string newBoardImage)
+    private IEnumerator UpdatePlayerData(PlayerData updatedData, NetworkConnection conn)
     {
         string url = $"{apiBaseUrl}/updatePlayer";
-        PlayerData updateData = new PlayerData(playerId, newName, newProfileIcon, newBoardImage, 0, 0, 0, 1200, 0, 0, 0);
-        string jsonData = JsonUtility.ToJson(updateData);
 
-        using (UnityWebRequest request = UnityWebRequest.PostWwwForm(url, jsonData))
+        string jsonData = JsonUtility.ToJson(updatedData);
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
+
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log(" 플레이어 업데이트 성공");
+                Debug.Log("플레이어 데이터 업데이트 성공");
             else
-                Debug.LogError(" 플레이어 업데이트 실패: " + request.error);
+                Debug.LogError("업데이트 실패: " + request.error);
         }
     }
+
 
     // �÷��̾� ���� ��û
     [ServerRpc(RequireOwnership = false)]
@@ -115,7 +126,7 @@ public class ServerToAPIManager : NetworkBehaviour
     {
         
         Debug.Log(" 플레이어 정보 수신: " + jsonData);
-        ClientDatabaseManager clientDatabaseManager = FindAnyObjectByType<ClientDatabaseManager>();
+        
         if (clientDatabaseManager != null)
         {
             clientDatabaseManager.ApplyPlayerData(jsonData);

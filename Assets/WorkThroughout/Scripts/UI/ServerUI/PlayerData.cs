@@ -15,6 +15,9 @@ public class PlayerData
     public int icons;          // 아이콘 보유 수
     public int boards;         // 보드 보유 수
 
+    //기본 생성자 추가 (JsonUtility와 Fish-Net이 필요로 함)
+
+    public PlayerData() { }
     public PlayerData(int id, string name, string icon, string board, int games, int wins , int losses, int rating, int currency, int icons, int boards)
     {
         this.playerId = id;

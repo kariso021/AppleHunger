@@ -15,6 +15,7 @@ MonoBehaviour:
   _prefabs:
   - {fileID: 2386790144099630624, guid: 888ca3dbd536bc94e83fb6a884d7d661, type: 3}
   - {fileID: -5441920844907001893, guid: 18267a447bfd77a45b2dacb8f8372d60, type: 3}
+  - {fileID: 5339311194521782495, guid: b845d813dd3fd6f47b0c8dda6b67f3a5, type: 3}
   - {fileID: 2710306627862504432, guid: 3cd6e940a4e3eed47ad43103d39b9196, type: 3}
   - {fileID: 8475222101369129519, guid: 8cf33e8e99a9b0c4c8f29ff725650de6, type: 3}
   - {fileID: 4512293259955182956, guid: 44611030e61220d42ab7c37ba3c0ea92, type: 3}
@@ -27,4 +28,3 @@ MonoBehaviour:
   - {fileID: 201277550, guid: 5b712878ecece354ba4ffb026c0a221c, type: 3}
   - {fileID: 201277550, guid: 26a567abbe21227428f5c3d309d1d73c, type: 3}
   - {fileID: 8192566354860284824, guid: 6331b3542e64a564c81bc39cedf70c8d, type: 3}
-  - {fileID: 5339311194521782495, guid: b845d813dd3fd6f47b0c8dda6b67f3a5, type: 3}
