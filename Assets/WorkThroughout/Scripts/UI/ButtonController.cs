@@ -32,12 +32,18 @@ public class ButtonController : MonoBehaviour
     [Header("Close Buttons")]
     public Button closeButton1;
     public Button closeButton2;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+
         // Home Panel Buttons Binding
         profileButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
+
+        // 서버-클라 테스트
+        profileButton.onClick.AddListener(() =>
+        FindAnyObjectByType<ClientDatabaseManager>().GetPlayerData(1));
         // single,multi 플레이 관련 함수 바인딩
 
         // Ranking Panel Buttons
@@ -88,5 +94,6 @@ public class ButtonController : MonoBehaviour
     {
             
     }
+
 
 }
