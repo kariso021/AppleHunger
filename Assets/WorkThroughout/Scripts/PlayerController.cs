@@ -75,9 +75,18 @@ public class PlayerController : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (!IsOwner)
+
+        // 모든 클라이언트에서 드래그 박스 렌더러 끄기
+        if (localDragBoxRenderer != null)
         {
-            enabled = false;
+            localDragBoxRenderer.enabled = false;
+            localDragBox.transform.localScale = Vector3.zero;  // 크기 초기화
+        }
+
+        // 자신의 클라이언트만 드래그 박스 렌더링 활성화
+        if (IsOwner)
+        {
+            localDragBoxRenderer.enabled = true;
         }
     }
 

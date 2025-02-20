@@ -54,9 +54,8 @@ public class ScoreManager : NetworkBehaviour
 
 
 
-    /// <summary>
-    /// ✅ 서버에서 점수를 계산하고 해당 클라이언트에게 업데이트
-    /// </summary>
+   
+    /// --------------------서버에서 점수를 계산하고 해당 클라이언트에게 업데이트----------------------------
     [ServerRpc(RequireOwnership = false)]
     public void AddScoreServerRpc(int appleCount, int AppleValue, NetworkConnection sender)
     {
