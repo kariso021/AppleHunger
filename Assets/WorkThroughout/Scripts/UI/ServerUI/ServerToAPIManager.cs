@@ -17,16 +17,16 @@ public class ServerToAPIManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void RequestAddPlayerServerRpc(string playerName, string profileIcon, string boardImage, int totalGames, int wins, int losses, int rating, int currency, int icons, int boards)
+    public void RequestAddPlayerServerRpc(string name, NetworkConnection conn = null)
     {
-        StartCoroutine(AddPlayer(playerName, profileIcon, boardImage, totalGames, wins, losses, rating, currency, icons, boards));
+        StartCoroutine(AddPlayer(name,conn));
     }
 
-    private IEnumerator AddPlayer(string playerName, string profileIcon, string boardImage, int totalGames, int wins, int losses, int rating, int currency, int icons, int boards)
+    private IEnumerator AddPlayer(string name, NetworkConnection conn)
     {
-        string url = $"{apiBaseUrl}/addPlayer";
+        string url = $"{apiBaseUrl}/players";
 
-        PlayerData newPlayer = new PlayerData(0, playerName, profileIcon, boardImage, totalGames, wins, losses, rating, currency, icons, boards);
+        PlayerData newPlayer = new PlayerData("deviceId-"+Random.Range(0,1000), "googleId-" + Random.Range(0, 1000), name, "profileIcon", "boardImage", Random.Range(900,1500), Random.Range(3000,15000));
         string jsonData = JsonUtility.ToJson(newPlayer);
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
@@ -39,13 +39,39 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log(" 플레이어 추가 성공");
+            {
+                string responseText = request.downloadHandler.text;
+                PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(responseText);
+
+                Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
+            }
             else
                 Debug.LogError("플레이어 추가 실패: " + request.error);
         }
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestDeletePlayerServerRpc(int playerId)
+    {
+        StartCoroutine(DeletePlayer(playerId));
+    }
 
+    private IEnumerator DeletePlayer(int playerId)
+    {
+        string url = $"{apiBaseUrl}/players/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Delete(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log(" 플레이어 삭제 성공");
+            else
+                Debug.LogError(" 플레이어 삭제 실패: " + request.error);
+        }
+    }
+
+    // 플레이어 정보 수정
     [ServerRpc(RequireOwnership = false)]
     public void RequestUpdatePlayerDataServerRpc(PlayerData updatedData, NetworkConnection conn = null)
     {
@@ -54,10 +80,10 @@ public class ServerToAPIManager : NetworkBehaviour
 
     private IEnumerator UpdatePlayerData(PlayerData updatedData, NetworkConnection conn)
     {
-        string url = $"{apiBaseUrl}/updatePlayer";
+        string url = $"{apiBaseUrl}/players/{updatedData.playerId}";
 
         string jsonData = JsonUtility.ToJson(updatedData);
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        using (UnityWebRequest request = new UnityWebRequest(url, "PUT")) // PUT 사용
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
@@ -74,29 +100,8 @@ public class ServerToAPIManager : NetworkBehaviour
     }
 
 
-    // �÷��̾� ���� ��û
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestDeletePlayerServerRpc(int playerId)
-    {
-        StartCoroutine(DeletePlayer(playerId));
-    }
-
-    private IEnumerator DeletePlayer(int playerId)
-    {
-        string url = $"{apiBaseUrl}/deletePlayer/{playerId}";
-
-        using (UnityWebRequest request = UnityWebRequest.Delete(url))
-        {
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log(" 플레이어 삭제 실패");
-            else
-                Debug.LogError(" 플레이어 삭제 실패: " + request.error);
-        }
-    }
-
-    // �÷��̾� ���� ��ȸ ��û
+    // 플레이어 정보 가져오기(By playerId), id는 나중에 googleId,guestId를 db에 추가해서 그걸로
+    // 사용할 예정
     [ServerRpc(RequireOwnership = false)]
     public void RequestGetPlayerServerRpc(int playerId, NetworkConnection conn = null) // conn에 클라 객체들에 대한 
     {
@@ -105,7 +110,7 @@ public class ServerToAPIManager : NetworkBehaviour
 
     private IEnumerator GetPlayer(int playerId, NetworkConnection conn)
     {
-        string url = $"{apiBaseUrl}/player/{playerId}";
+        string url = $"{apiBaseUrl}/players/{playerId}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {

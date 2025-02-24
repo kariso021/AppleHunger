@@ -11,6 +11,7 @@ public class ClientDatabaseManager : NetworkBehaviour
     {
         serverToAPIManager = FindAnyObjectByType<ServerToAPIManager>();
         //profilePopup = FindAnyObjectByType<ProfilePopup>();
+        //serverToAPIManager.RequestDeletePlayerServerRpc(2);
     }
 
     // Update is called once per frame
@@ -26,11 +27,16 @@ public class ClientDatabaseManager : NetworkBehaviour
         if (serverToAPIManager != null)
             serverToAPIManager.RequestUpdatePlayerDataServerRpc(ownerPlayerData);
     }
-    public void AddPlayer(string name, string icon, string board, int games, int wins, int losses, int rating, int currency, int icons, int boards)
+    public void AddPlayer(string name)
     {
 
         if (serverToAPIManager != null)
-            serverToAPIManager.RequestAddPlayerServerRpc(name, icon, board, games, wins, losses, rating, currency, icons, boards);
+            serverToAPIManager.RequestAddPlayerServerRpc(name);
+    }
+    public void DeletePlayer(int playerId)
+    {
+        if (serverToAPIManager != null)
+            serverToAPIManager.RequestDeletePlayerServerRpc(playerId);
     }
     public void GetPlayerData(int playerId)
     {
@@ -47,16 +53,14 @@ public class ClientDatabaseManager : NetworkBehaviour
 
         if (profilePopup != null)
         {
-            profilePopup.SetProfile(
-                null, // 프로필 이미지는 경로로 관리되므로, 나중에 로드 필요
-                ownerPlayerData.playerName,
-                ownerPlayerData.totalGames,
-                ownerPlayerData.wins,
-                ownerPlayerData.losses,
-                ownerPlayerData.rating,
-                ownerPlayerData.icons,
-                ownerPlayerData.boards
-            );
+            //2025-02-24 현재 구조를 변경중이므로 수정 필요
+            //profilePopup.SetProfile(
+            //    null, // 프로필 이미지는 경로로 관리되므로, 나중에 로드 필요
+            //    ownerPlayerData.playerName,
+            //    ownerPlayerData.rating,
+            //    //ownerPlayerData.icons,
+            //    //ownerPlayerData.boards
+            //);
         }
     }
 

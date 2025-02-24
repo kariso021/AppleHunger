@@ -17,6 +17,8 @@ public class ButtonController : MonoBehaviour
     public Button vfxOnOffButton; // 효과음
     public Button loginButton; // 일단 구글 로그인? or guest?
     public Button creditButton;
+    // 임시
+    public Button infoUpdateButton; // 임시로 만든 버튼, 후에 제거
 
     [Header("Collection Panel Buttons")]
     public Button customIconButton;
@@ -33,17 +35,21 @@ public class ButtonController : MonoBehaviour
     public Button closeButton1;
     public Button closeButton2;
 
+    //임시
+    private int id = 1;
+    public Button deleteButton;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
-        // Home Panel Buttons Binding
-        profileButton.onClick.AddListener(() =>
-        PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
+        deleteButton.onClick.AddListener(() =>
+        FindAnyObjectByType<ClientDatabaseManager>().DeletePlayer(2));      
 
         // 서버-클라 테스트 , 1은 임시 아이디
         profileButton.onClick.AddListener(() =>
-        FindAnyObjectByType<ClientDatabaseManager>().GetPlayerData(1));
+        FindAnyObjectByType<ClientDatabaseManager>().GetPlayerData(id++));
+        // Home Panel Buttons Binding
+        profileButton.onClick.AddListener(() =>
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
         // single,multi 플레이 관련 함수 바인딩
 
         // Ranking Panel Buttons
@@ -59,7 +65,9 @@ public class ButtonController : MonoBehaviour
         // login 도 구글 로그인 기능을 가져와 바인딩
         // 테스트 기능
         loginButton.onClick.AddListener(() =>
-        FindAnyObjectByType<ClientDatabaseManager>().ChangePlayerDataTest(100));
+        FindAnyObjectByType<ClientDatabaseManager>().AddPlayer(Random.Range(12345,99999).ToString()));
+        infoUpdateButton.onClick.AddListener(() =>
+        FindAnyObjectByType<ClientDatabaseManager>().DeletePlayer(5));//ChangePlayerDataTest(Random.Range(500,3700)));
         //
         creditButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));

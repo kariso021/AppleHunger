@@ -30,7 +30,7 @@ public class ProfilePopup : MonoBehaviour
     /// <param name="collectionIcon"></param>
     /// <param name="collectionBoard"></param>
     /// <param name="matchHistoryData"></param>
-    public void SetProfile(Sprite image, string name, int matches, int win, int lose, int rating,
+    public void SetProfile(Sprite image, string name, int matches, int win, int lose, float winRate,int rating,
                        int collectionIcon, int collectionBoard)
     {
         Debug.Log("정보 설정 시작");
@@ -41,20 +41,9 @@ public class ProfilePopup : MonoBehaviour
         if (nameText != null)
             nameText.text = name;
 
-        if (matchesText != null)
-            matchesText.text = matches.ToString();
-
-        if (winText != null)
-            winText.text = win.ToString();
-
-        if (loseText != null)
-            loseText.text = lose.ToString();
-
         if (ratingText != null)
             ratingText.text = $"{rating}";
 
-        // 승률 계산 및 적용
-        float winRate = matches > 0 ? (float)win / matches * 100f : 0f;
         if (winrateText != null)
             winrateText.text = $"{winRate:F2}%";
 
@@ -67,16 +56,4 @@ public class ProfilePopup : MonoBehaviour
 
         Debug.Log("정보 설정 끝");
     }
-    //private void UpdateMatchHistory(List<MatchHistory> matchHistoryData)
-    //{
-    //    if (matchHistory == null) return;
-
-    //    matchHistory.Clear(); // 기존 기록 삭제
-
-    //    foreach (MatchHistory match in matchHistoryData)
-    //    {
-    //        matchHistory.Add(match);
-    //    }
-    //}
-
 }
