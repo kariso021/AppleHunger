@@ -21,7 +21,7 @@ public class PlayerController : NetworkBehaviour
     private bool isDragRestricted = false;
     private bool isCooldownActive = false;
 
-    private float updateInterval = 0.016f; // 20 FPS
+    private float updateInterval = 0.05f; // 20 FPS
     private float timeSinceLastUpdate = 0f;
 
     [Header("Local Drag Box")]

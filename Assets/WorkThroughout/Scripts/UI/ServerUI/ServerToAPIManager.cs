@@ -4,29 +4,21 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Security.Cryptography.X509Certificates;
-using FishNet.Demo.AdditiveScenes;
 public class ServerToAPIManager : NetworkBehaviour
 {
     private string apiBaseUrl = "https://localhost";
 
-    ClientDatabaseManager clientDatabaseManager;
-
-    private void Start()
-    {
-        clientDatabaseManager = FindAnyObjectByType<ClientDatabaseManager>();
-    }
-
     [ServerRpc(RequireOwnership = false)]
-    public void RequestAddPlayerServerRpc(string name, NetworkConnection conn = null)
+    public void RequestAddPlayerServerRpc(string playerName, string profileIcon, string boardImage, int totalGames, int wins, int losses, int rating, int currency, int icons, int boards)
     {
-        StartCoroutine(AddPlayer(name,conn));
+        StartCoroutine(AddPlayer(playerName, profileIcon, boardImage, totalGames, wins, losses, rating, currency, icons, boards));
     }
 
-    private IEnumerator AddPlayer(string name, NetworkConnection conn)
+    private IEnumerator AddPlayer(string playerName, string profileIcon, string boardImage, int totalGames, int wins, int losses, int rating, int currency, int icons, int boards)
     {
-        string url = $"{apiBaseUrl}/players";
+        string url = $"{apiBaseUrl}/addPlayer";
 
-        PlayerData newPlayer = new PlayerData("deviceId-"+Random.Range(0,1000), "googleId-" + Random.Range(0, 1000), name, "profileIcon", "boardImage", Random.Range(900,1500), Random.Range(3000,15000));
+        PlayerData newPlayer = new PlayerData(0, playerName, profileIcon, boardImage, totalGames, wins, losses, rating, currency, icons, boards);
         string jsonData = JsonUtility.ToJson(newPlayer);
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
@@ -39,17 +31,39 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-            {
-                string responseText = request.downloadHandler.text;
-                PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(responseText);
-
-                Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
-            }
+                Debug.Log(" 플레이어 추가 성공");
             else
                 Debug.LogError("플레이어 추가 실패: " + request.error);
         }
     }
 
+
+    // �÷��̾� ���� ���� ��û
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestUpdatePlayerServerRpc(int playerId, string newName, string newProfileIcon, string newBoardImage)
+    {
+        StartCoroutine(UpdatePlayer(playerId, newName, newProfileIcon, newBoardImage));
+    }
+
+    private IEnumerator UpdatePlayer(int playerId, string newName, string newProfileIcon, string newBoardImage)
+    {
+        string url = $"{apiBaseUrl}/updatePlayer";
+        PlayerData updateData = new PlayerData(playerId, newName, newProfileIcon, newBoardImage, 0, 0, 0, 1200, 0, 0, 0);
+        string jsonData = JsonUtility.ToJson(updateData);
+
+        using (UnityWebRequest request = UnityWebRequest.PostWwwForm(url, jsonData))
+        {
+            request.SetRequestHeader("Content-Type", "application/json");
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log(" 플레이어 업데이트 성공");
+            else
+                Debug.LogError(" 플레이어 업데이트 실패: " + request.error);
+        }
+    }
+
+    // �÷��̾� ���� ��û
     [ServerRpc(RequireOwnership = false)]
     public void RequestDeletePlayerServerRpc(int playerId)
     {
@@ -58,50 +72,20 @@ public class ServerToAPIManager : NetworkBehaviour
 
     private IEnumerator DeletePlayer(int playerId)
     {
-        string url = $"{apiBaseUrl}/players/{playerId}";
+        string url = $"{apiBaseUrl}/deletePlayer/{playerId}";
 
         using (UnityWebRequest request = UnityWebRequest.Delete(url))
         {
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log(" 플레이어 삭제 성공");
+                Debug.Log(" 플레이어 삭제 실패");
             else
                 Debug.LogError(" 플레이어 삭제 실패: " + request.error);
         }
     }
 
-    // 플레이어 정보 수정
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestUpdatePlayerDataServerRpc(PlayerData updatedData, NetworkConnection conn = null)
-    {
-        StartCoroutine(UpdatePlayerData(updatedData, conn));
-    }
-
-    private IEnumerator UpdatePlayerData(PlayerData updatedData, NetworkConnection conn)
-    {
-        string url = $"{apiBaseUrl}/players/{updatedData.playerId}";
-
-        string jsonData = JsonUtility.ToJson(updatedData);
-        using (UnityWebRequest request = new UnityWebRequest(url, "PUT")) // PUT 사용
-        {
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log("플레이어 데이터 업데이트 성공");
-            else
-                Debug.LogError("업데이트 실패: " + request.error);
-        }
-    }
-
-
-    // 플레이어 정보 가져오기(By playerId), id는 나중에 googleId,guestId를 db에 추가해서 그걸로
-    // 사용할 예정
+    // �÷��̾� ���� ��ȸ ��û
     [ServerRpc(RequireOwnership = false)]
     public void RequestGetPlayerServerRpc(int playerId, NetworkConnection conn = null) // conn에 클라 객체들에 대한 
     {
@@ -110,7 +94,7 @@ public class ServerToAPIManager : NetworkBehaviour
 
     private IEnumerator GetPlayer(int playerId, NetworkConnection conn)
     {
-        string url = $"{apiBaseUrl}/players/{playerId}";
+        string url = $"{apiBaseUrl}/player/{playerId}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -131,7 +115,7 @@ public class ServerToAPIManager : NetworkBehaviour
     {
         
         Debug.Log(" 플레이어 정보 수신: " + jsonData);
-        
+        ClientDatabaseManager clientDatabaseManager = FindAnyObjectByType<ClientDatabaseManager>();
         if (clientDatabaseManager != null)
         {
             clientDatabaseManager.ApplyPlayerData(jsonData);
