@@ -8,7 +8,7 @@ public class MatchHistoryData
     public int player2Id;     // 플레이어 2 ID
     public int winnerId;      // 승리한 플레이어 ID
     public string matchDate;  // 매치 날짜 (JSON 변환을 위해 문자열)
-
+    // pushn
     public MatchHistoryData() { } // 기본 생성자가 있어야 json을 통한 변환이 가능함
     public MatchHistoryData(int matchId, int player1Id, int player2Id, int winnerId, string matchDate)
     {
