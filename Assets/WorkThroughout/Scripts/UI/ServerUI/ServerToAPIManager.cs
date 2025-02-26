@@ -1,32 +1,36 @@
-using FishNet.Object;
 using FishNet.Connection;
+using FishNet.Object;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections;
-using System.Security.Cryptography.X509Certificates;
-using FishNet.Demo.AdditiveScenes;
 public class ServerToAPIManager : NetworkBehaviour
 {
     private string apiBaseUrl = "https://localhost";
 
-    ClientDatabaseManager clientDatabaseManager;
 
     private void Start()
     {
-        clientDatabaseManager = FindAnyObjectByType<ClientDatabaseManager>();
     }
+
+    #region Players Data Region
 
     [ServerRpc(RequireOwnership = false)]
     public void RequestAddPlayerServerRpc(string name, NetworkConnection conn = null)
     {
-        StartCoroutine(AddPlayer(name,conn));
+        StartCoroutine(AddPlayer(name, conn));
     }
 
     private IEnumerator AddPlayer(string name, NetworkConnection conn)
     {
         string url = $"{apiBaseUrl}/players";
 
-        PlayerData newPlayer = new PlayerData("deviceId-"+Random.Range(0,1000), "googleId-" + Random.Range(0, 1000), name, "profileIcon", "boardImage", Random.Range(900,1500), Random.Range(3000,15000));
+        PlayerData newPlayer = new PlayerData("deviceId-" + UnityEngine.Random.Range(0, 1000),
+            "googleId-" + UnityEngine.Random.Range(0, 1000), name,
+            "profileIcon",
+            "boardImage",
+            UnityEngine.Random.Range(900, 1500), UnityEngine.Random.Range(3000, 15000));
         string jsonData = JsonUtility.ToJson(newPlayer);
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
@@ -40,14 +44,29 @@ public class ServerToAPIManager : NetworkBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                string responseText = request.downloadHandler.text;
-                PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(responseText);
+                string playerJsonData = request.downloadHandler.text;
+                PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(playerJsonData);
+
+                //// 🔹 서버에서 반환된 playerId를 포함한 데이터로 클라이언트에 저장
+                //PlayerData verifiedPlayer = new PlayerData(
+                //    response.playerId,newPlayer.deviceId, newPlayer.googleId,
+                //    newPlayer.playerName, newPlayer.profileIcon, newPlayer.boardImage,
+                //    newPlayer.rating, newPlayer.currency);
+
+                // 클라이언트에 Players 정보 저장
+                TargetReceivePlayerData(conn, playerJsonData);
 
                 Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
             }
             else
                 Debug.LogError("플레이어 추가 실패: " + request.error);
         }
+    }
+
+    [TargetRpc] // 서버 투 에이피아이 매니저 -> 클라 네트워크 매니저 -> 클라 순으로 진행되게 
+    private void TargetReceivePlayerData(NetworkConnection conn, string jsonData)
+    {
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerData(conn, jsonData);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -71,7 +90,7 @@ public class ServerToAPIManager : NetworkBehaviour
         }
     }
 
-    // 플레이어 정보 수정
+    // 플레이어 정보 수정 , 클라이언트에 저장된 데이터를 그대로 json으로 api서버에 넘김
     [ServerRpc(RequireOwnership = false)]
     public void RequestUpdatePlayerDataServerRpc(PlayerData updatedData, NetworkConnection conn = null)
     {
@@ -93,7 +112,7 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log("플레이어 데이터 업데이트 성공");
+                Debug.Log("플레이어 클라이언트 데이터를  데이터 서버로 업데이트 성공");
             else
                 Debug.LogError("업데이트 실패: " + request.error);
         }
@@ -117,7 +136,10 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                TargetReceivePlayerData(conn, request.downloadHandler.text);
+            {
+                string jsonData = request.downloadHandler.text;
+                TargetReceivePlayerData(conn, jsonData);
+            }
             else
             {
                 Debug.LogError(" 플레이어 조회 실패: " + request.error);
@@ -125,18 +147,284 @@ public class ServerToAPIManager : NetworkBehaviour
             }
         }
     }
+    #endregion
+
+    #region Player MatchRecords Region
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestAddMatchResultServerRpc(int winnerId, int loserId, NetworkConnection conn = null) // Matchrecords-ADD 과정
+    {
+        StartCoroutine(AddMatchResult(winnerId, loserId, conn));
+    }
+
+    private IEnumerator AddMatchResult(int winnerId, int loserId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/matchrecords";
+
+        // JSON 데이터 생성
+        string jsonData = $"{{\"winnerId\":{winnerId},\"loserId\":{loserId}}}";
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log($"✅ 매치 결과를 서버에 저장 성공! Winner: {winnerId}, Loser: {loserId}");
+            else
+                Debug.LogError($"❌ 매치 결과 저장 실패: {request.error}");
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestMatchResultServerRpc(int playerId, NetworkConnection conn = null) // Matchrecords-Get과정
+    {
+        StartCoroutine(GetMatchResult(playerId, conn));
+    }
+
+    private IEnumerator GetMatchResult(int playerId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/matchRecords/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string jsonData = request.downloadHandler.text; // Matchrecords 테이블에서 playerId가 동일한 컬럼들만 추려서 json형태로 list를 만들어 가져온다는 느낌
+                MatchHistoryResponse response = JsonUtility.FromJson<MatchHistoryResponse>(jsonData);
+
+                Debug.Log($"✅ 매치 기록 조회 성공! 총 {response.matches.Length}개 경기");
+
+                foreach (var match in response.matches)
+                {
+                    Debug.Log($"Match ID: {match.matchId}, Winner: {match.winnerId}, Date: {match.matchDate}");
+                    TargetReceiveMatchRecords(conn, jsonData);
+                }
+            }
+            else
+            {
+                Debug.LogError($"❌ 매치 기록 조회 실패: {request.error}");
+            }
+        }
+    }
+    [TargetRpc]
+    public void TargetReceiveMatchRecords(NetworkConnection conn, string jsonData)
+    {
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMatchRecords(conn, jsonData);
+    }
+
+    #endregion
+
+    #region Player Stat Region
+
+    // 플레이어 스탯(매치,승리,패배 수) 조회 API
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGetPlayerStatServerRpc(int playerId, NetworkConnection conn = null)
+    {
+        StartCoroutine(GetPlayerStat(playerId, conn));
+    }
+
+    private IEnumerator GetPlayerStat(int playerId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/playerStats/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                TargetReceivePlayerStat(conn, request.downloadHandler.text);
+            else
+            {
+                Debug.LogError("❌ 플레이어 스탯 조회 실패: " + request.error);
+                Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
+            }
+        }
+    }
 
     [TargetRpc]
-    private void TargetReceivePlayerData(NetworkConnection conn, string jsonData)
+    private void TargetReceivePlayerStat(NetworkConnection conn, string jsonData)
     {
-        
-        Debug.Log(" 플레이어 정보 수신: " + jsonData);
-        
-        if (clientDatabaseManager != null)
+        Debug.Log($"✅ 서버에서 받은 PlayerStats 데이터: {jsonData}");
+
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerStats(conn, jsonData);
+    }
+
+
+    #endregion
+
+    #region Player Item Region
+
+    // 플레이어 아이템 정보 조회(프로필 정보에 들어갈 내용)
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGetPlayerItemsServerRpc(int playerId, NetworkConnection conn = null)
+    {
+        StartCoroutine(GetPlayerItems(playerId, conn));
+    }
+
+    private IEnumerator GetPlayerItems(int playerId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/playerItems/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
-            clientDatabaseManager.ApplyPlayerData(jsonData);
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                TargetReceivePlayerItems(conn, request.downloadHandler.text);
+            else
+                Debug.LogError($"❌ PlayerItems 조회 실패: {request.error}");
         }
-        else
-            Debug.Log("클라 베이스 못찾음");
+    }
+
+    // JSON 데이터 로드 후 변환
+    [TargetRpc]
+    private void TargetReceivePlayerItems(NetworkConnection conn, string jsonData)
+    {
+        Debug.Log($"✅ 서버에서 받은 PlayerItems 데이터: {jsonData}");
+
+        // JSON 데이터를 List<PlayerItemData>로 변환
+        ClientDataManager.Instance.playerItemDataList = JsonUtility.FromJson<PlayerItemList>(jsonData).items;
+
+        // Dictionary 초기화 후 List 데이터를 Dictionary로 변환
+        ClientDataManager.Instance.playerItemDataDictionary.Clear();
+        foreach (PlayerItemData item in ClientDataManager.Instance.playerItemDataList)
+        {
+            if (!ClientDataManager.Instance.playerItemDataDictionary.ContainsKey(item.itemUniqueId))
+            {
+                ClientDataManager.Instance.playerItemDataDictionary.Add(item.itemUniqueId, item);
+            }
+        }
+
+        Debug.Log($"✅ 플레이어 아이템 {ClientDataManager.Instance.playerItemDataDictionary.Count}개 저장 완료!");
+    }
+
+
+    // 플레이어 아이템 해금
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestUnlockPlayerItemServerRpc(int playerId, int itemUniqueId, NetworkConnection conn = null)
+    {
+        StartCoroutine(UnlockPlayerItem(playerId, itemUniqueId, conn));
+    }
+
+    private IEnumerator UnlockPlayerItem(int playerId, int itemUniqueId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/playerItems/unlock";
+        string jsonData = JsonUtility.ToJson(new { playerId, itemUniqueId });
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "PUT"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log($"✅ 아이템 해금 성공! playerId: {playerId}, itemUniqueId: {itemUniqueId}");
+            else
+                Debug.LogError($"❌ 아이템 해금 실패: {request.error}");
+        }
+    }
+
+
+    #endregion
+
+    #region Player Login Region
+
+    // 로그인 정보 조회
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGetLoginRecordsServerRpc(int playerId, NetworkConnection conn = null)
+    {
+        StartCoroutine(GetLoginRecords(playerId, conn));
+    }
+
+    private IEnumerator GetLoginRecords(int playerId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/loginRecords/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                TargetReceiveLoginRecords(conn, request.downloadHandler.text);
+            else
+                Debug.LogError($"❌ LoginRecords 조회 실패: {request.error}");
+        }
+    }
+
+    [TargetRpc]
+    private void TargetReceiveLoginRecords(NetworkConnection conn, string jsonData)
+    {
+        Debug.Log($"✅ 서버에서 받은 LoginRecords 데이터: {jsonData}");
+
+        List<LoginRecordData> loginRecords = JsonUtility.FromJson<LoginRecordList>(jsonData).records;
+
+        foreach (var record in loginRecords)
+        {
+            Debug.Log($"📌 로그인 기록 - playerId: {record.playerId}, time: {record.loginTime}, IP: {record.ipAddress}");
+        }
+    }
+
+    // 로그인 정보 업데이트
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestUpdateLoginTimeServerRpc(int playerId, string ipAddress)
+    {
+        StartCoroutine(UpdateLoginTime(playerId, ipAddress));
+    }
+
+    private IEnumerator UpdateLoginTime(int playerId, string ipAddress)
+    {
+        string url = $"{apiBaseUrl}/loginRecords";
+        string jsonData = JsonUtility.ToJson(new { playerId, ipAddress });
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "PUT"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log("✅ 로그인 시간 업데이트 성공");
+            else
+                Debug.LogError($"❌ 로그인 시간 업데이트 실패: {request.error}");
+        }
+    }
+
+
+    // 🔹 데이터 구조
+    [System.Serializable]
+    public class LoginRecordData
+    {
+        public int loginId;
+        public int playerId;
+        public string loginTime;
+        public string ipAddress;
+    }
+
+    [System.Serializable]
+    public class LoginRecordList
+    {
+        public List<LoginRecordData> records;
+    }
+
+
+    #endregion
+    // JSON 파싱을 위한 클래스
+    [Serializable]
+    public class MatchHistoryResponse
+    {
+        public bool success;
+        public MatchHistoryData[] matches;
     }
 }

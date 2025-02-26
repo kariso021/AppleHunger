@@ -25,4 +25,15 @@ public class PlayerData
         this.rating = rating;
         this.currency = currency;
     }
+    public PlayerData(int playerId,string deviceId, string googleId, string name, string icon, string board, int rating, int currency)
+    {
+        this.playerId = playerId;
+        this.deviceId = deviceId;
+        this.googleId = googleId;
+        this.playerName = name;
+        this.profileIcon = icon;
+        this.boardImage = board;
+        this.rating = rating;
+        this.currency = currency;
+    }
 }

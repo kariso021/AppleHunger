@@ -17,8 +17,6 @@ public class ButtonController : MonoBehaviour
     public Button vfxOnOffButton; // 효과음
     public Button loginButton; // 일단 구글 로그인? or guest?
     public Button creditButton;
-    // 임시
-    public Button infoUpdateButton; // 임시로 만든 버튼, 후에 제거
 
     [Header("Collection Panel Buttons")]
     public Button customIconButton;
@@ -35,21 +33,35 @@ public class ButtonController : MonoBehaviour
     public Button closeButton1;
     public Button closeButton2;
 
+    [Header("Debug Buttons")]
+    public Button playerAdd;
+    public Button playerGet;
+    public Button playerPut;
+    public Button playerStatsGet;
+    public Button playerItemsGet;
+    public Button playerItemsUnlock;
+    public Button matchAdd;
+    public Button loginGet;
+    public Button loginPut;
+    public Button rankingGet;
+    public Button rankingGetFromId;
+
+    private ClientNetworkManager clientNetworkManager;
+
     //임시
     private int id = 1;
-    public Button deleteButton;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private void Awake()
+    {
+        clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
+    }
     void Start()
     {
-        deleteButton.onClick.AddListener(() =>
-        FindAnyObjectByType<ClientDatabaseManager>().DeletePlayer(2));      
+        
 
-        // 서버-클라 테스트 , 1은 임시 아이디
-        profileButton.onClick.AddListener(() =>
-        FindAnyObjectByType<ClientDatabaseManager>().GetPlayerData(id++));
-        // Home Panel Buttons Binding
-        profileButton.onClick.AddListener(() =>
-        PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
+        // Home Panel Buttons Binding , 임시로 방지
+        //profileButton.onClick.AddListener(() =>
+        //PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
         // single,multi 플레이 관련 함수 바인딩
 
         // Ranking Panel Buttons
@@ -63,12 +75,6 @@ public class ButtonController : MonoBehaviour
         // Setting Panel Buttons
         // bgm,vfx 는 후에 SoundManager에서 함수를 가져와 바인딩
         // login 도 구글 로그인 기능을 가져와 바인딩
-        // 테스트 기능
-        loginButton.onClick.AddListener(() =>
-        FindAnyObjectByType<ClientDatabaseManager>().AddPlayer(Random.Range(12345,99999).ToString()));
-        infoUpdateButton.onClick.AddListener(() =>
-        FindAnyObjectByType<ClientDatabaseManager>().DeletePlayer(5));//ChangePlayerDataTest(Random.Range(500,3700)));
-        //
         creditButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
 
@@ -99,6 +105,44 @@ public class ButtonController : MonoBehaviour
         PopupManager.Instance.ClosePopup());
         closeButton2.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
+
+
+
+        // Debug Buttons
+        // 테스트 기능
+        playerAdd.onClick.AddListener(() =>
+        clientNetworkManager.AddPlayer(Random.Range(12345, 99999).ToString()));
+
+        playerGet.onClick.AddListener(() =>
+        clientNetworkManager.GetPlayerData(ClientDataManager.Instance.playerData.playerId));
+
+        playerPut.onClick.AddListener(() =>
+        clientNetworkManager.UpdatePlayerData());
+
+        playerStatsGet.onClick.AddListener(() =>
+        clientNetworkManager.GetPlayerStats(ClientDataManager.Instance.playerData.playerId));
+
+        playerItemsGet.onClick.AddListener(() =>
+        clientNetworkManager.GetPlayerItems(ClientDataManager.Instance.playerData.playerId));
+
+        playerItemsUnlock.onClick.AddListener(() =>
+        clientNetworkManager.UnlockPlayerItems(ClientDataManager.Instance.playerData.playerId,102));
+
+        matchAdd.onClick.AddListener(() =>
+        clientNetworkManager.AddMatchRecords(ClientDataManager.Instance.playerData.playerId,
+        ClientDataManager.Instance.playerData.playerId + 1));
+
+        loginGet.onClick.AddListener(() =>
+        clientNetworkManager.GetLogin(ClientDataManager.Instance.playerData.playerId));
+
+        loginPut.onClick.AddListener(() =>
+        clientNetworkManager.UpdateLogin(ClientDataManager.Instance.playerData.playerId));
+
+        rankingGet.onClick.AddListener(() =>
+        clientNetworkManager.GetRankingList(ClientDataManager.Instance.playerData.playerId));
+
+        rankingGetFromId.onClick.AddListener(() =>
+        clientNetworkManager.GetRanking(ClientDataManager.Instance.playerData.playerId));
     }
 
     // Update is called once per frame
