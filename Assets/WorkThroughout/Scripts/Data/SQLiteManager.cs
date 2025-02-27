@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// 클라이언트 로컬 데이터 서버 관련 매니저
@@ -14,6 +15,8 @@ public class SQLiteManager : MonoBehaviour
     private string dbPath;
 
     public PlayerData player;
+    public List<PlayerRankingData> rankings = new List<PlayerRankingData>();
+    public PlayerRankingData myRankingData;
     public PlayerStatsData stats;
     public LoginData login;
     public List<MatchHistoryData> matches = new List<MatchHistoryData>();
@@ -26,7 +29,7 @@ public class SQLiteManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
             InitializeDatabase();
-            //LoadAllData();
+            LoadAllData();
 
         }
         else
@@ -107,6 +110,25 @@ public class SQLiteManager : MonoBehaviour
                     FOREIGN KEY (winnerId) REFERENCES players(playerId) ON DELETE CASCADE
                 );");
 
+            // 🔹 랭킹 테이블 (상위 50명의 랭킹 정보 저장)
+            ExecuteQuery(connection, @"
+            CREATE TABLE IF NOT EXISTS rankings (           
+                playerId INTEGER NOT NULL,         -- 플레이어 ID
+                playerName TEXT NOT NULL,          -- 플레이어 닉네임
+                rating INTEGER NOT NULL,           -- 레이팅 점수
+                rankPosition INTEGER PRIMARY KEY,  -- 랭킹 순위 (1~50)
+                FOREIGN KEY (playerId) REFERENCES players(playerId) ON DELETE CASCADE
+            );");
+            // ✅ 개별 플레이어 랭킹 테이블 생성
+            ExecuteQuery(connection, @"
+            CREATE TABLE IF NOT EXISTS myRanking (
+                playerId INTEGER PRIMARY KEY,
+                playerName TEXT NOT NULL,
+                rating INTEGER NOT NULL,
+                rankPosition INTEGER NOT NULL
+            );
+        ");
+
             Debug.Log("✅ SQLite 데이터베이스 초기화 완료 (Mono.Data.Sqlite)");
         }
     }
@@ -131,12 +153,15 @@ public class SQLiteManager : MonoBehaviour
         login = LoadLoginData();
         matches = LoadMatchHistory();
         items = LoadPlayerItems();
+        rankings = LoadRankings();
+        myRankingData = LoadMyRankingData();
 
         Debug.Log($"✅ 플레이어 데이터 불러오기 완료: {player?.playerName ?? "없음"}");
-        if(stats != null) Debug.Log($"✅ 플레이어 스탯 불러오기 완료: id = {stats.playerId} , total = {stats.totalGames} , wins = {stats.wins}");
+        if (stats != null) Debug.Log($"✅ 플레이어 스탯 불러오기 완료: id = {stats.playerId} , total = {stats.totalGames} , wins = {stats.wins}");
         Debug.Log($"✅ 로그인 데이터 불러오기 완료: {login?.loginTime ?? "없음"}");
         Debug.Log($"✅ 매치 기록 개수: {matches.Count}");
         Debug.Log($"✅ 보유 아이템 개수: {items.Count}");
+        Debug.Log($"✅ 랭킹 인원 수 : {rankings.Count}");
     }
 
     public void SavePlayerData(PlayerData player)
@@ -279,6 +304,54 @@ public class SQLiteManager : MonoBehaviour
             connection.Close();
         }
         Debug.Log("✅ 플레이어 아이템 SQLite에 저장 완료");
+    }
+
+    // 🔹 랭킹 데이터 저장
+    public void SaveRankingData(PlayerRankingData ranking)
+    {
+        using (var connection = new SqliteConnection(dbPath))
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                Debug.Log($"🔹 SQLite에 랭킹 저장: {ranking.playerName}, 랭킹: {ranking.rankPosition}");
+                command.CommandText = @"
+                INSERT OR REPLACE INTO rankings (playerId, playerName, rating, rankPosition)
+                VALUES (@playerId, @playerName, @rating, @rankPosition);";
+
+                command.Parameters.AddWithValue("@playerId", ranking.playerId);
+                command.Parameters.AddWithValue("@playerName", ranking.playerName);
+                command.Parameters.AddWithValue("@rating", ranking.rating);
+                command.Parameters.AddWithValue("@rankPosition", ranking.rankPosition);
+
+                command.ExecuteNonQuery();
+            }
+        }
+        Debug.Log("✅ 랭킹 데이터 SQLite 저장 완료!");
+    }
+    // 내 랭킹 데이터 저장
+    public void SaveMyRankingData(PlayerRankingData myRanking)
+    {
+        using (var connection = new SqliteConnection(dbPath))
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                INSERT OR REPLACE INTO myRanking 
+                (playerId, playerName, rating, rankPosition)
+                VALUES (@playerId, @playerName, @rating, @rankPosition);
+            ";
+
+                command.Parameters.AddWithValue("@playerId", myRanking.playerId);
+                command.Parameters.AddWithValue("@playerName", myRanking.playerName);
+                command.Parameters.AddWithValue("@rating", myRanking.rating);
+                command.Parameters.AddWithValue("@rankPosition", myRanking.rankPosition);
+
+                command.ExecuteNonQuery();
+            }
+        }
+        Debug.Log("✅ 내 랭킹 데이터 SQLite에 저장 완료!");
     }
 
     // ===================== 🟢 데이터 로드 함수들 ===================== //
@@ -437,4 +510,65 @@ public class SQLiteManager : MonoBehaviour
         }
         return itemList;
     }
+
+    // 🔹 랭킹 데이터 불러오기
+    public List<PlayerRankingData> LoadRankings()
+    {
+        List<PlayerRankingData> rankings = new List<PlayerRankingData>();
+
+        using (var connection = new SqliteConnection(dbPath))
+        {
+            connection.Open();
+            string query = "SELECT * FROM rankings ORDER BY rankPosition ASC";
+            using (var command = new SqliteCommand(query, connection))
+            {
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        rankings.Add(new PlayerRankingData(
+                            reader.GetInt32(0), // playerId
+                            reader.GetString(1), // playerName
+                            reader.GetInt32(2),  // rating
+                            reader.GetInt32(3)  // rankPosition
+                        ));
+                    }
+                }
+            }
+        }
+        return rankings;
+    }
+    // 내 랭킹 데이터 불러오기
+    public PlayerRankingData LoadMyRankingData()
+    {
+        using (var connection = new SqliteConnection(dbPath))
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM myRanking WHERE playerId = @playerId";
+                command.Parameters.AddWithValue("@playerId", player.playerId);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        PlayerRankingData myRanking = new PlayerRankingData(
+                            reader.GetInt32(0),  // playerId
+                            reader.GetString(1), // playerName
+                            reader.GetInt32(2),  // rating
+                            reader.GetInt32(3)   // rankPosition
+                        );
+
+                        Debug.Log($"✅ [SQLite] 내 랭킹 데이터 로드 성공: {myRanking.playerName} (Rank: {myRanking.rankPosition})");
+                        return myRanking;
+                    }
+                }
+            }
+        }
+
+        Debug.LogWarning("⚠️ [SQLite] 내 랭킹 데이터 없음!");
+        return null; // 저장된 내 랭킹 데이터가 없는 경우
+    }
+
 }

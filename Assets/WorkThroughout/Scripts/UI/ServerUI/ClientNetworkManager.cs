@@ -1,6 +1,7 @@
 ﻿using FishNet.Connection;
 using FishNet.Object;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class ClientNetworkManager : NetworkBehaviour
 {
@@ -27,7 +28,7 @@ public class ClientNetworkManager : NetworkBehaviour
     public void DeletePlayer(int playerId) => serverToAPIManager?.RequestDeletePlayerServerRpc(playerId);
 
     // 🔹 플레이어 정보 업데이트
-    public void UpdatePlayerData() => serverToAPIManager?.RequestUpdatePlayerDataServerRpc(SQLiteManager.Instance.LoadPlayerData());
+    public void UpdatePlayerData() => serverToAPIManager?.RequestUpdatePlayerDataServerRpc(SQLiteManager.Instance.player);
 
     // 🔹 플레이어 아이템 요청
     public void GetPlayerItems() => serverToAPIManager?.RequestGetPlayerItemsServerRpc(SQLiteManager.Instance.player.playerId);
@@ -35,12 +36,7 @@ public class ClientNetworkManager : NetworkBehaviour
     [TargetRpc]
     public void TargetReceivePlayerItems(NetworkConnection conn, string jsonData)
     {
-        PlayerItemList response = JsonUtility.FromJson<PlayerItemList>(jsonData);
-        foreach (var item in response.items)
-        {
-            //ClientDataManager.Instance.AddPlayerItem(item);
-            SQLiteManager.Instance.SavePlayerItem(item);
-        }
+        SQLiteManager.Instance.SavePlayerItem(JsonUtility.FromJson<PlayerItemData>(jsonData));
     }
     // 플레이어 아이템 해금 요청
     public void UnlockPlayerItems(int itemUniqueId)
@@ -86,7 +82,7 @@ public class ClientNetworkManager : NetworkBehaviour
     {
 
         if (serverToAPIManager != null)
-            serverToAPIManager.RequestUpdateLoginTimeServerRpc(playerId, "ipAddress-" + UnityEngine.Random.Range(1, 99999));
+            serverToAPIManager.RequestUpdateLoginTimeServerRpc(playerId, "::1");
     }
     // 🔹 로그인 요청
     public void GetLogin(int playerId) => serverToAPIManager?.RequestGetLoginRecordsServerRpc(playerId);
@@ -104,17 +100,46 @@ public class ClientNetworkManager : NetworkBehaviour
     // 랭킹 정보 업데이트 to DB
     public void GetRankingList()
     {
+        Debug.Log("🔹 [Client] 랭킹 데이터 요청 시작");
 
-        if (serverToAPIManager != null)
-            Debug.Log("아직 안됨");
+        // 상위 50명 랭킹 요청
+        serverToAPIManager?.RequestGetTopRankingServerRpc();
+
+        // 개별 플레이어 랭킹 요청
+        serverToAPIManager?.RequestGetMyRankingServerRpc(SQLiteManager.Instance.player.playerId);
     }
-    public void GetRanking()
+
+    // ✅ 서버에서 받은 상위 50명 랭킹 저장
+    [TargetRpc]
+    public void TargetReceiveTopRankingData(NetworkConnection conn, string jsonData)
     {
+        Debug.Log($"✅ [Client] 상위 50명 랭킹 데이터 수신: {jsonData}");
 
-        if (serverToAPIManager != null)
-            Debug.Log("아직 안됨");
+        RankingList rankingList = JsonUtility.FromJson<RankingList>(jsonData);
 
+        // SQLite에 저장
+        foreach (var rankingData in rankingList.rankings)
+        {
+            SQLiteManager.Instance.SaveRankingData(rankingData);
+        }
+
+        Debug.Log($"📌 상위 50명 랭킹 저장 완료 (총 {rankingList.rankings.Count}명)");
     }
+
+    // ✅ 서버에서 받은 내 개별 랭킹 저장
+    [TargetRpc]
+    public void TargetReceiveMyRankingData(NetworkConnection conn, string jsonData)
+    {
+        Debug.Log($"✅ [Client] 개별 랭킹 데이터 수신: {jsonData}");
+
+        MyRankingData myRankingData = JsonUtility.FromJson<MyRankingData>(jsonData);
+
+        // SQLite에 저장
+        SQLiteManager.Instance.SaveMyRankingData(myRankingData.myRanking);
+
+        Debug.Log($"📌 내 랭킹 저장 완료: {myRankingData.myRanking.playerName} (Rank: {myRankingData.myRanking.rankPosition})");
+    }
+
 
 
 }
@@ -131,4 +156,11 @@ public class PlayerStatsResponse
 {
     public bool success;
     public PlayerStatsData playerStats;
+}
+
+[System.Serializable]
+public class RankingDataResponse
+{
+    public bool success;
+    public PlayerRankingData[] rankings;
 }

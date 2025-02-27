@@ -279,12 +279,10 @@ public class ServerToAPIManager : NetworkBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text;
-
-                // 🔹 JSON 데이터를 PlayerItemList 형식으로 변환
-                PlayerItemList playerItemList = JsonUtility.FromJson<PlayerItemList>(jsonData);
+                PlayerItemsResponse response = JsonUtility.FromJson<PlayerItemsResponse>(jsonData);
 
                 // 🔹 리스트 안에 여러 개의 아이템이 들어있으므로, 각각을 TargetReceivePlayerItems로 넘겨줌
-                foreach (var playerItem in playerItemList.items)
+                foreach (var playerItem in response.items)
                 {
                     TargetReceivePlayerItems(conn, JsonUtility.ToJson(playerItem));
                 }
@@ -384,7 +382,8 @@ public class ServerToAPIManager : NetworkBehaviour
     private IEnumerator UpdateLoginTime(int playerId, string ipAddress)
     {
         string url = $"{apiBaseUrl}/loginRecords";
-        string jsonData = JsonUtility.ToJson(new { playerId, ipAddress });
+        string jsonData = JsonUtility.ToJson(new LoginUpdateRequest(playerId, ipAddress));
+        // JsonUtility는 명시적인 클래스 구조를 필요로 하기때문에 별도의 DTO(Data Transfer Object) 클래스 생성해서 넘겨줌
 
         using (UnityWebRequest request = new UnityWebRequest(url, "PUT"))
         {
@@ -401,8 +400,73 @@ public class ServerToAPIManager : NetworkBehaviour
                 Debug.LogError($"❌ 로그인 시간 업데이트 실패: {request.error}");
         }
     }
+    #endregion
+
+    #region Player Ranking Data
+    // 랭킹 정보 
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGetTopRankingServerRpc(NetworkConnection conn = null)
+    {
+        StartCoroutine(GetTopRankingData(conn));
+    }
+
+    private IEnumerator GetTopRankingData(NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/rankings";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"✅ [Server] 상위 50명 랭킹 조회 성공: {request.downloadHandler.text}");
+                TargetReceiveTopRankingData(conn, request.downloadHandler.text);
+            }
+            else
+            {
+                Debug.LogError($"❌ [Server] 상위 50명 랭킹 조회 실패: {request.error}");
+            }
+        }
+    }
+    [TargetRpc]
+    private void TargetReceiveTopRankingData(NetworkConnection conn, string jsonData)
+    {
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveTopRankingData(conn, jsonData);
+    }
 
 
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGetMyRankingServerRpc(int playerId, NetworkConnection conn = null)
+    {
+        StartCoroutine(GetMyRankingData(playerId, conn));
+    }
+
+    private IEnumerator GetMyRankingData(int playerId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/rankings/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"✅ [Server] 개별 랭킹 조회 성공: {request.downloadHandler.text}");
+                TargetReceiveMyRankingData(conn, request.downloadHandler.text);
+            }
+            else
+            {
+                Debug.LogError($"❌ [Server] 개별 랭킹 조회 실패: {request.error}");
+            }
+        }
+    }
+    [TargetRpc]
+    private void TargetReceiveMyRankingData(NetworkConnection conn, string jsonData)
+    {
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMyRankingData(conn, jsonData);
+    }
+    #endregion
     // 🔹 데이터 구조
     [System.Serializable]
     public class LoginRecordData
@@ -418,15 +482,32 @@ public class ServerToAPIManager : NetworkBehaviour
     {
         public List<LoginRecordData> records;
     }
-
-
-    #endregion
-    // JSON 파싱을 위한 클래스
-    [Serializable]
+ // JSON 파싱을 위한 클래스
+    [System.Serializable]
     public class MatchHistoryResponse
     {
         public bool success;
         public MatchHistoryData[] matches;
+    }
+
+    [System.Serializable]
+    public class PlayerItemsResponse
+    {
+        public bool success;
+        public PlayerItemData[] items;
+    }
+
+    [System.Serializable]
+    public class LoginUpdateRequest
+    {
+        public int playerId;
+        public string ipAddress;
+
+        public LoginUpdateRequest(int playerId, string ipAddress)
+        {
+            this.playerId = playerId;
+            this.ipAddress = ipAddress;
+        }
     }
 
 }

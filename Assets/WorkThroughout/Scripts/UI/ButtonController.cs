@@ -45,7 +45,6 @@ public class ButtonController : MonoBehaviour
     public Button loginGet;
     public Button loginPut;
     public Button rankingGet;
-    public Button rankingGetFromId;
     public Button localGet;
 
     private ClientNetworkManager clientNetworkManager;
@@ -145,9 +144,6 @@ public class ButtonController : MonoBehaviour
 
         rankingGet.onClick.AddListener(() =>
         clientNetworkManager.GetRankingList());
-
-        rankingGetFromId.onClick.AddListener(() =>
-        clientNetworkManager.GetRanking());
 
         localGet.onClick.AddListener(() =>
         SQLiteManager.Instance.LoadAllData());
