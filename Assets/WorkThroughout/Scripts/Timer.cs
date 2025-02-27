@@ -3,38 +3,57 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
-    public Slider timerSlider; // 타이머 슬라이더 UI
-    private GameServer gameServer; // 🟢 GameServer에서 시간 가져오기
+    public int roomId;
+    public Slider timerSlider; // 🎯 직접 참조
 
-    private void Awake() // ✅ Start() 대신 Awake()에서 GameServer 찾기
+    private float maxTime;
+    private float currentTime;
+    private bool isRunning = false;
+
+    public void InitializeTimer(float time)
     {
-        gameServer = FindObjectOfType<GameServer>();
+        maxTime = time;
+        currentTime = maxTime;
+        isRunning = false;
 
-        if (gameServer == null)
+        UpdateSlider(); // UI 초기화
+    }
+
+    public void StartTimer()
+    {
+        isRunning = true;
+    }
+
+    public void StopTimer()
+    {
+        isRunning = false;
+    }
+
+    private void Update()
+    {
+        if (!isRunning) return;
+
+        currentTime -= Time.deltaTime;
+        UpdateSlider(); // 🎯 UI 업데이트
+
+        if (currentTime <= 0)
         {
-            Debug.LogError("🚨 GameServer를 찾을 수 없습니다! Hierarchy에 추가했는지 확인하세요.");
-            return;
+            currentTime = 0;
+            StopTimer();
+            Debug.Log($"Room {roomId} 타이머 종료!");
         }
     }
 
-    private void Start()
-    {
-        if (gameServer != null)
-        {
-            timerSlider.maxValue = gameServer.gameTime;
-            timerSlider.value = gameServer.gameTime;
-        }
-    }
-
-    public void UpdateTimerUI(float currentTime)
+    private void UpdateSlider()
     {
         if (timerSlider != null)
         {
+            timerSlider.maxValue = maxTime;
             timerSlider.value = currentTime;
         }
         else
         {
-            Debug.LogError("🚨 TimerSlider가 연결되지 않았습니다! Inspector에서 확인하세요.");
+            Debug.LogError($"Room {roomId}의 TimerSlider가 설정되지 않음!");
         }
     }
 }

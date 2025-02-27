@@ -4,33 +4,26 @@ using UnityEngine;
 
 public class Apple : NetworkBehaviour
 {
-    private int value; // 내부에서만 변경 가능
-    private int scorevalue = 10;
+    private int value;
+    private int roomId;
+    private int scorevalue;
 
-    public int Value => value; // Getter를 사용하여 외부에서 읽기 가능
-    public int ScoreValue => scorevalue; // 점수 값도 읽기 가능
+    public int Value => value;
+    public int ScoreValue => scorevalue;
+    public int RoomId => roomId;
 
     [SerializeField] private TextMeshPro numberText;
 
-    public override void OnStartServer()
+    /// <summary>
+    /// Apple을 Room ID와 함께 초기화
+    /// </summary>
+    public void Initialize(int assignedRoomId, int assignedValue)
     {
-        base.OnStartServer();
-        value = Random.Range(1, 10); // 서버에서 랜덤 값 설정
-        scorevalue = 10;
-        UpdateAppleObserversRpc(value, scorevalue); // ✅ 모든 기존 클라이언트에 값 전송
-    }
+        roomId = assignedRoomId;
+        value = assignedValue;
 
-    [ObserversRpc(BufferLast = true)] // *******새로운 클라이언트도 최신 값 받도록 설정******** BufferLast = true 로 해주면 됨
-    private void UpdateAppleObserversRpc(int newValue, int newScoreValue)
-    {
-        value = newValue;
-        scorevalue = newScoreValue;
-        UpdateText(); // ✅ UI 업데이트
-    }
+        Debug.Log($"🍏 Apple Initialized - RoomID: {roomId}, Value: {value}");
 
-    public void SetValue(int newValue) // 클라이언트가 Apple의 Value 값을 업데이트할 수 있도록 설정
-    {
-        value = newValue;
         UpdateText();
     }
 
