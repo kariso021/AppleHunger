@@ -11,6 +11,7 @@ public class PlayerData
     public string boardImage;  // 인게임 보드 이미지 (경로)
     public int rating;         // 레이팅 점수
     public int currency;       // 보유 재화
+    public string createdAt;   // 유저 회원가입 시점
 
     //기본 생성자 추가 (JsonUtility와 Fish-Net이 필요로 함)
 
@@ -25,7 +26,7 @@ public class PlayerData
         this.rating = rating;
         this.currency = currency;
     }
-    public PlayerData(int playerId,string deviceId, string googleId, string name, string icon, string board, int rating, int currency)
+    public PlayerData(int playerId,string deviceId, string googleId, string name, string icon, string board, int rating, int currency, string createdAt)
     {
         this.playerId = playerId;
         this.deviceId = deviceId;
@@ -35,5 +36,6 @@ public class PlayerData
         this.boardImage = board;
         this.rating = rating;
         this.currency = currency;
+        this.createdAt = createdAt;
     }
 }

@@ -41,10 +41,12 @@ public class ButtonController : MonoBehaviour
     public Button playerItemsGet;
     public Button playerItemsUnlock;
     public Button matchAdd;
+    public Button matchGet;
     public Button loginGet;
     public Button loginPut;
     public Button rankingGet;
     public Button rankingGetFromId;
+    public Button localGet;
 
     private ClientNetworkManager clientNetworkManager;
 
@@ -114,35 +116,41 @@ public class ButtonController : MonoBehaviour
         clientNetworkManager.AddPlayer(Random.Range(12345, 99999).ToString()));
 
         playerGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerData(ClientDataManager.Instance.playerData.playerId));
+        clientNetworkManager.GetPlayerData());
 
         playerPut.onClick.AddListener(() =>
         clientNetworkManager.UpdatePlayerData());
 
         playerStatsGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerStats(ClientDataManager.Instance.playerData.playerId));
+        clientNetworkManager.GetPlayerStats());
 
         playerItemsGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerItems(ClientDataManager.Instance.playerData.playerId));
+        clientNetworkManager.GetPlayerItems());
 
         playerItemsUnlock.onClick.AddListener(() =>
-        clientNetworkManager.UnlockPlayerItems(ClientDataManager.Instance.playerData.playerId,102));
+        clientNetworkManager.UnlockPlayerItems(102));
 
         matchAdd.onClick.AddListener(() =>
-        clientNetworkManager.AddMatchRecords(ClientDataManager.Instance.playerData.playerId,
-        ClientDataManager.Instance.playerData.playerId + 1));
+        clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,
+        SQLiteManager.Instance.player.playerId + 1));
+
+        matchGet.onClick.AddListener(() =>
+        clientNetworkManager.GetMatchRecords(SQLiteManager.Instance.player.playerId));
 
         loginGet.onClick.AddListener(() =>
-        clientNetworkManager.GetLogin(ClientDataManager.Instance.playerData.playerId));
+        clientNetworkManager.GetLogin(SQLiteManager.Instance.player.playerId));
 
         loginPut.onClick.AddListener(() =>
-        clientNetworkManager.UpdateLogin(ClientDataManager.Instance.playerData.playerId));
+        clientNetworkManager.UpdateLogin(SQLiteManager.Instance.player.playerId));
 
         rankingGet.onClick.AddListener(() =>
-        clientNetworkManager.GetRankingList(ClientDataManager.Instance.playerData.playerId));
+        clientNetworkManager.GetRankingList());
 
         rankingGetFromId.onClick.AddListener(() =>
-        clientNetworkManager.GetRanking(ClientDataManager.Instance.playerData.playerId));
+        clientNetworkManager.GetRanking());
+
+        localGet.onClick.AddListener(() =>
+        SQLiteManager.Instance.LoadAllData());
     }
 
     // Update is called once per frame

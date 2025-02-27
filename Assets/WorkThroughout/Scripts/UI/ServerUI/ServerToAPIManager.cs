@@ -16,6 +16,11 @@ public class ServerToAPIManager : NetworkBehaviour
 
     #region Players Data Region
 
+    /// <summary>
+    /// 게임 실행시 단 한번만 발생해야 함. 서버에 유저정보를 하나 늘리는 개념이라서
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="conn"></param>
     [ServerRpc(RequireOwnership = false)]
     public void RequestAddPlayerServerRpc(string name, NetworkConnection conn = null)
     {
@@ -46,12 +51,6 @@ public class ServerToAPIManager : NetworkBehaviour
             {
                 string playerJsonData = request.downloadHandler.text;
                 PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(playerJsonData);
-
-                //// 🔹 서버에서 반환된 playerId를 포함한 데이터로 클라이언트에 저장
-                //PlayerData verifiedPlayer = new PlayerData(
-                //    response.playerId,newPlayer.deviceId, newPlayer.googleId,
-                //    newPlayer.playerName, newPlayer.profileIcon, newPlayer.boardImage,
-                //    newPlayer.rating, newPlayer.currency);
 
                 // 클라이언트에 Players 정보 저장
                 TargetReceivePlayerData(conn, playerJsonData);
@@ -122,14 +121,14 @@ public class ServerToAPIManager : NetworkBehaviour
     // 플레이어 정보 가져오기(By playerId), id는 나중에 googleId,guestId를 db에 추가해서 그걸로
     // 사용할 예정
     [ServerRpc(RequireOwnership = false)]
-    public void RequestGetPlayerServerRpc(int playerId, NetworkConnection conn = null) // conn에 클라 객체들에 대한 
+    public void RequestGetPlayerServerRpc(string deviceId, NetworkConnection conn = null) // conn에 클라 객체들에 대한 
     {
-        StartCoroutine(GetPlayer(playerId, conn));
+        StartCoroutine(GetPlayer(deviceId, conn));
     }
 
-    private IEnumerator GetPlayer(int playerId, NetworkConnection conn)
+    private IEnumerator GetPlayer(string deviceId, NetworkConnection conn)
     {
-        string url = $"{apiBaseUrl}/players/{playerId}";
+        string url = $"{apiBaseUrl}/players/{deviceId}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -203,7 +202,7 @@ public class ServerToAPIManager : NetworkBehaviour
                 foreach (var match in response.matches)
                 {
                     Debug.Log($"Match ID: {match.matchId}, Winner: {match.winnerId}, Date: {match.matchDate}");
-                    TargetReceiveMatchRecords(conn, jsonData);
+                    TargetReceiveMatchRecords(conn, match);
                 }
             }
             else
@@ -213,9 +212,9 @@ public class ServerToAPIManager : NetworkBehaviour
         }
     }
     [TargetRpc]
-    public void TargetReceiveMatchRecords(NetworkConnection conn, string jsonData)
+    public void TargetReceiveMatchRecords(NetworkConnection conn, MatchHistoryData matchHistoryData)
     {
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMatchRecords(conn, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMatchRecords(conn, matchHistoryData);
     }
 
     #endregion
@@ -238,7 +237,9 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
+            {
                 TargetReceivePlayerStat(conn, request.downloadHandler.text);
+            }
             else
             {
                 Debug.LogError("❌ 플레이어 스탯 조회 실패: " + request.error);
@@ -276,7 +277,18 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                TargetReceivePlayerItems(conn, request.downloadHandler.text);
+            {
+                string jsonData = request.downloadHandler.text;
+
+                // 🔹 JSON 데이터를 PlayerItemList 형식으로 변환
+                PlayerItemList playerItemList = JsonUtility.FromJson<PlayerItemList>(jsonData);
+
+                // 🔹 리스트 안에 여러 개의 아이템이 들어있으므로, 각각을 TargetReceivePlayerItems로 넘겨줌
+                foreach (var playerItem in playerItemList.items)
+                {
+                    TargetReceivePlayerItems(conn, JsonUtility.ToJson(playerItem));
+                }
+            }
             else
                 Debug.LogError($"❌ PlayerItems 조회 실패: {request.error}");
         }
@@ -288,20 +300,7 @@ public class ServerToAPIManager : NetworkBehaviour
     {
         Debug.Log($"✅ 서버에서 받은 PlayerItems 데이터: {jsonData}");
 
-        // JSON 데이터를 List<PlayerItemData>로 변환
-        ClientDataManager.Instance.playerItemDataList = JsonUtility.FromJson<PlayerItemList>(jsonData).items;
-
-        // Dictionary 초기화 후 List 데이터를 Dictionary로 변환
-        ClientDataManager.Instance.playerItemDataDictionary.Clear();
-        foreach (PlayerItemData item in ClientDataManager.Instance.playerItemDataList)
-        {
-            if (!ClientDataManager.Instance.playerItemDataDictionary.ContainsKey(item.itemUniqueId))
-            {
-                ClientDataManager.Instance.playerItemDataDictionary.Add(item.itemUniqueId, item);
-            }
-        }
-
-        Debug.Log($"✅ 플레이어 아이템 {ClientDataManager.Instance.playerItemDataDictionary.Count}개 저장 완료!");
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerItems(conn, jsonData);
     }
 
 
@@ -364,13 +363,15 @@ public class ServerToAPIManager : NetworkBehaviour
     private void TargetReceiveLoginRecords(NetworkConnection conn, string jsonData)
     {
         Debug.Log($"✅ 서버에서 받은 LoginRecords 데이터: {jsonData}");
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveLoginData(conn, jsonData);
 
-        List<LoginRecordData> loginRecords = JsonUtility.FromJson<LoginRecordList>(jsonData).records;
-
-        foreach (var record in loginRecords)
-        {
-            Debug.Log($"📌 로그인 기록 - playerId: {record.playerId}, time: {record.loginTime}, IP: {record.ipAddress}");
-        }
+        // 로그인 데이터를 여러개로 관리할 게 아니라 하나로 관리할 예정인데 이건 나중에 order같은걸 해서 빼던가 해야할거같음
+        //List<LoginRecordData> loginRecords = JsonUtility.FromJson<LoginRecordList>(jsonData).records;
+        
+        //foreach (var record in loginRecords)
+        //{
+        //    Debug.Log($"📌 로그인 기록 - playerId: {record.playerId}, time: {record.loginTime}, IP: {record.ipAddress}");
+        //}
     }
 
     // 로그인 정보 업데이트
@@ -427,4 +428,5 @@ public class ServerToAPIManager : NetworkBehaviour
         public bool success;
         public MatchHistoryData[] matches;
     }
+
 }
