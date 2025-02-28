@@ -13,8 +13,7 @@ public class ClientNetworkManager : NetworkBehaviour
     }
 
     // 🔹 플레이어 데이터 요청
-    public void GetPlayerData() => serverToAPIManager?.RequestGetPlayerServerRpc(SQLiteManager.Instance.player.deviceId);
-
+    public void GetPlayerData(string idType,string idValue) => serverToAPIManager?.RequestGetPlayerServerRpc(idType,idValue);
     [TargetRpc]
     public void TargetReceivePlayerData(NetworkConnection conn, string jsonData)
     {
@@ -115,15 +114,14 @@ public class ClientNetworkManager : NetworkBehaviour
     {
         Debug.Log($"✅ [Client] 상위 50명 랭킹 데이터 수신: {jsonData}");
 
-        RankingList rankingList = JsonUtility.FromJson<RankingList>(jsonData);
-
+        RankingDataResponse rankingListResponse = JsonUtility.FromJson<RankingDataResponse>(jsonData);
         // SQLite에 저장
-        foreach (var rankingData in rankingList.rankings)
+        foreach (var rankingData in rankingListResponse.topRankings)
         {
             SQLiteManager.Instance.SaveRankingData(rankingData);
         }
 
-        Debug.Log($"📌 상위 50명 랭킹 저장 완료 (총 {rankingList.rankings.Count}명)");
+        Debug.Log($"📌 상위 50명 랭킹 저장 완료 (총 {rankingListResponse.topRankings.Length}명)");
     }
 
     // ✅ 서버에서 받은 내 개별 랭킹 저장
@@ -162,5 +160,5 @@ public class PlayerStatsResponse
 public class RankingDataResponse
 {
     public bool success;
-    public PlayerRankingData[] rankings;
+    public PlayerRankingData[] topRankings;
 }

@@ -120,15 +120,21 @@ public class ServerToAPIManager : NetworkBehaviour
 
     // 플레이어 정보 가져오기(By playerId), id는 나중에 googleId,guestId를 db에 추가해서 그걸로
     // 사용할 예정
+    /// <summary>
+    /// idType = playerId,deviceId,googleId 중 택 1, idValue는 device,google의 경우 기기의 id값을, playerId는 playerId값을 입력
+    /// </summary>
+    /// <param name="idType"></param>
+    /// <param name="idValue"></param>
+    /// <param name="conn"></param>
     [ServerRpc(RequireOwnership = false)]
-    public void RequestGetPlayerServerRpc(string deviceId, NetworkConnection conn = null) // conn에 클라 객체들에 대한 
+    public void RequestGetPlayerServerRpc(string idType, string idValue, NetworkConnection conn = null)
     {
-        StartCoroutine(GetPlayer(deviceId, conn));
+        StartCoroutine(GetPlayer(idType, idValue, conn));
     }
 
-    private IEnumerator GetPlayer(string deviceId, NetworkConnection conn)
+    private IEnumerator GetPlayer(string idType, string idValue, NetworkConnection conn) // 
     {
-        string url = $"{apiBaseUrl}/players/{deviceId}";
+        string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -141,11 +147,12 @@ public class ServerToAPIManager : NetworkBehaviour
             }
             else
             {
-                Debug.LogError(" 플레이어 조회 실패: " + request.error);
+                Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
                 Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
             }
         }
     }
+
     #endregion
 
     #region Player MatchRecords Region
@@ -195,6 +202,7 @@ public class ServerToAPIManager : NetworkBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text; // Matchrecords 테이블에서 playerId가 동일한 컬럼들만 추려서 json형태로 list를 만들어 가져온다는 느낌
+                Debug.Log($"매치 데이터 json {jsonData}");
                 MatchHistoryResponse response = JsonUtility.FromJson<MatchHistoryResponse>(jsonData);
 
                 Debug.Log($"✅ 매치 기록 조회 성공! 총 {response.matches.Length}개 경기");

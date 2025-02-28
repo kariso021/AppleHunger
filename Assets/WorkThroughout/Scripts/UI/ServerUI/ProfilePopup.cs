@@ -1,5 +1,3 @@
-using NUnit.Framework;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +15,7 @@ public class ProfilePopup : MonoBehaviour
     public TMP_Text winrateText;
     public TMP_Text collectionIconText;
     public TMP_Text collectionBoardText;
-    
+
     /// <summary>
     /// 프로필에 대한 세부 정보를 보여주는 팝업 정보를 설정하는 함수.
     /// </summary>
@@ -30,24 +28,33 @@ public class ProfilePopup : MonoBehaviour
     /// <param name="collectionIcon"></param>
     /// <param name="collectionBoard"></param>
     /// <param name="matchHistoryData"></param>
-    public void SetProfile(Sprite image, string name, int matches, int win, int lose, float winRate,int rating,
+    public void SetProfile(string name, int matches, int win, int lose, float winRate, int rating,
                        int collectionIcon, int collectionBoard)
     {
         Debug.Log("정보 설정 시작");
         // 기본 정보 설정
-        if (profileImage != null)
-            profileImage.sprite = image;
+        //if (profileImage != null)
+        //    profileImage.sprite = image;
 
         if (nameText != null)
             nameText.text = name;
 
-        if (ratingText != null)
-            ratingText.text = $"{rating}";
+        if (matchesText != null)
+            matchesText.text = $"{matches}";
+
+        if (winText != null)
+            winText.text = $"{win}";
+
+        if (loseText != null)
+            loseText.text = $"{lose}";
 
         if (winrateText != null)
             winrateText.text = $"{winRate:F2}%";
 
-        // 컬렉션 정보 적용 (프로필 아이콘 & 보드)
+        if (ratingText != null)
+            ratingText.text = $"{rating}";
+
+        // 컬렉션 수
         if (collectionIconText != null)
             collectionIconText.text = $"{collectionIcon}";
 

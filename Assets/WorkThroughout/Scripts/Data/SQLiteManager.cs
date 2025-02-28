@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Rendering;
+
+
 
 /// <summary>
 /// 클라이언트 로컬 데이터 서버 관련 매니저
@@ -21,6 +22,16 @@ public class SQLiteManager : MonoBehaviour
     public LoginData login;
     public List<MatchHistoryData> matches = new List<MatchHistoryData>();
     public List<PlayerItemData> items = new List<PlayerItemData>();
+    public IdType idType;
+    /// <summary>
+    /// .ToString() 으로 idType에 넘겨줘야 함
+    /// </summary>
+    public enum IdType
+    {
+        deviceId,
+        googleId,
+        playerId
+    };
 
     private void Awake()
     {
@@ -41,6 +52,7 @@ public class SQLiteManager : MonoBehaviour
     private void Start()
     {
         player.deviceId = "deviceId-587";
+        //Debug.Log(Application.persistentDataPath);
     }
     private void InitializeDatabase()
     {
@@ -102,9 +114,18 @@ public class SQLiteManager : MonoBehaviour
                 CREATE TABLE IF NOT EXISTS matchRecords (
                     matchId INTEGER PRIMARY KEY,  
                     player1Id INTEGER NOT NULL,
+                    player1Name TEXT NOT NULL,
+                    player1Rating INTEGER NOT NULL,
+                    player1Icon TEXT NOT NULL,
+        
                     player2Id INTEGER NOT NULL,
+                    player2Name TEXT NOT NULL,
+                    player2Rating INTEGER NOT NULL,
+                    player2Icon TEXT NOT NULL,
+
                     winnerId INTEGER NOT NULL,
                     matchDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        
                     FOREIGN KEY (player1Id) REFERENCES players(playerId) ON DELETE CASCADE,
                     FOREIGN KEY (player2Id) REFERENCES players(playerId) ON DELETE CASCADE,
                     FOREIGN KEY (winnerId) REFERENCES players(playerId) ON DELETE CASCADE
@@ -224,7 +245,6 @@ public class SQLiteManager : MonoBehaviour
         }
     }
 
-
     // 🔹 로그인 데이터 저장
     public void SaveLoginData(LoginData login)
     {
@@ -260,14 +280,26 @@ public class SQLiteManager : MonoBehaviour
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"
-                    INSERT OR REPLACE INTO matchRecords 
-                    (matchId, player1Id, player2Id, winnerId, matchDate) 
-                    VALUES (@matchId, @player1Id, @player2Id, @winnerId, @matchDate);
-                ";
+                INSERT OR REPLACE INTO matchRecords 
+                (matchId, player1Id, player1Name, player1Rating, player1Icon,
+                 player2Id, player2Name, player2Rating, player2Icon, 
+                 winnerId, matchDate) 
+                VALUES (@matchId, @player1Id, @player1Name, @player1Rating, @player1Icon,
+                        @player2Id, @player2Name, @player2Rating, @player2Icon,
+                        @winnerId, @matchDate);
+            ";
 
                 command.Parameters.AddWithValue("@matchId", match.matchId);
                 command.Parameters.AddWithValue("@player1Id", match.player1Id);
+                command.Parameters.AddWithValue("@player1Name", match.player1Name);
+                command.Parameters.AddWithValue("@player1Rating", match.player1Rating);
+                command.Parameters.AddWithValue("@player1Icon", match.player1Icon);
+
                 command.Parameters.AddWithValue("@player2Id", match.player2Id);
+                command.Parameters.AddWithValue("@player2Name", match.player2Name);
+                command.Parameters.AddWithValue("@player2Rating", match.player2Rating);
+                command.Parameters.AddWithValue("@player2Icon", match.player2Icon);
+
                 command.Parameters.AddWithValue("@winnerId", match.winnerId);
                 command.Parameters.AddWithValue("@matchDate", match.matchDate);
 
@@ -277,6 +309,7 @@ public class SQLiteManager : MonoBehaviour
         }
         Debug.Log("✅ 매치 기록 SQLite에 저장 완료");
     }
+
 
     // 🔹 플레이어 아이템 저장
     public void SavePlayerItem(PlayerItemData item)
@@ -460,7 +493,12 @@ public class SQLiteManager : MonoBehaviour
         using (var connection = new SqliteConnection(dbPath))
         {
             connection.Open();
-            string query = "SELECT matchId, player1Id, player2Id, winnerId, strftime('%Y-%m-%d %H:%M:%S', matchDate) as matchDate FROM matchRecords ORDER BY matchDate DESC";
+            string query = @"
+            SELECT matchId, player1Id, player1Name, player1Rating, player1Icon, 
+                   player2Id, player2Name, player2Rating, player2Icon, 
+                   winnerId, strftime('%Y-%m-%d %H:%M:%S', matchDate) as matchDate 
+            FROM matchRecords ORDER BY matchDate DESC";
+
             using (var command = new SqliteCommand(query, connection))
             {
                 using (var reader = command.ExecuteReader())
@@ -470,9 +508,17 @@ public class SQLiteManager : MonoBehaviour
                         matchList.Add(new MatchHistoryData(
                             reader.GetInt32(0),  // matchId
                             reader.GetInt32(1),  // player1Id
-                            reader.GetInt32(2),  // player2Id
-                            reader.GetInt32(3),  // winnerId
-                            reader.GetValue(4).ToString()  // matchDate (자동 변환)
+                            reader.GetString(2), // player1Name
+                            reader.GetInt32(3),  // player1Rating
+                            reader.GetString(4), // player1Icon
+
+                            reader.GetInt32(5),  // player2Id
+                            reader.GetString(6), // player2Name
+                            reader.GetInt32(7),  // player2Rating
+                            reader.GetString(8), // player2Icon
+
+                            reader.GetInt32(9),  // winnerId
+                            reader.GetValue(10).ToString()  // matchDate
                         ));
                     }
                 }
@@ -480,6 +526,7 @@ public class SQLiteManager : MonoBehaviour
         }
         return matchList;
     }
+
 
 
     // 🔹 5️⃣ 플레이어 아이템 불러오기 (리스트 반환)

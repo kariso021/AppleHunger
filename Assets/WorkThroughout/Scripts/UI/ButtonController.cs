@@ -61,8 +61,8 @@ public class ButtonController : MonoBehaviour
         
 
         // Home Panel Buttons Binding , 임시로 방지
-        //profileButton.onClick.AddListener(() =>
-        //PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
+        profileButton.onClick.AddListener(() =>
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
         // single,multi 플레이 관련 함수 바인딩
 
         // Ranking Panel Buttons
@@ -115,7 +115,7 @@ public class ButtonController : MonoBehaviour
         clientNetworkManager.AddPlayer(Random.Range(12345, 99999).ToString()));
 
         playerGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerData());
+        clientNetworkManager.GetPlayerData("deviceId",SQLiteManager.Instance.player.deviceId));
 
         playerPut.onClick.AddListener(() =>
         clientNetworkManager.UpdatePlayerData());
@@ -130,8 +130,8 @@ public class ButtonController : MonoBehaviour
         clientNetworkManager.UnlockPlayerItems(102));
 
         matchAdd.onClick.AddListener(() =>
-        clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,
-        SQLiteManager.Instance.player.playerId + 1));
+        clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId + 3,
+        SQLiteManager.Instance.player.playerId));
 
         matchGet.onClick.AddListener(() =>
         clientNetworkManager.GetMatchRecords(SQLiteManager.Instance.player.playerId));
