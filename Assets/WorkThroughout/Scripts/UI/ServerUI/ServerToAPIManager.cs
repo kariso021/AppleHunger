@@ -1,3 +1,4 @@
+using FishNet;
 using FishNet.Connection;
 using FishNet.Object;
 using System;
@@ -474,6 +475,38 @@ public class ServerToAPIManager : NetworkBehaviour
     {
         FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMyRankingData(conn, jsonData);
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGetGetPlayerDetailsServerRpc(int playerId,NetworkConnection conn = null)
+    {
+        StartCoroutine(GetPlayerDetails(playerId,conn));
+    }
+
+    private IEnumerator GetPlayerDetails(int playerId, NetworkConnection conn)
+    {
+        string url = $"{apiBaseUrl}/playerDetails/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string json = request.downloadHandler.text;
+                TargetReceivePlayerDetailsData(conn, json);
+            }
+            else
+            {
+                Debug.LogError("❌ 플레이어 상세 정보 조회 실패: " + request.error);
+            }
+        }
+    }
+
+    [TargetRpc]
+    private void TargetReceivePlayerDetailsData(NetworkConnection conn, string jsonData)
+    {
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerDetailsData(conn, jsonData);
+    }
     #endregion
     // 🔹 데이터 구조
     [System.Serializable]
@@ -517,5 +550,5 @@ public class ServerToAPIManager : NetworkBehaviour
             this.ipAddress = ipAddress;
         }
     }
-
+  
 }

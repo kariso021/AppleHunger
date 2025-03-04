@@ -10,8 +10,8 @@ public class ButtonController : MonoBehaviour
     public Button singlePlayButton;
     public Button multiPlayButton;
     [Header("Ranking Panel Buttons")]
-    public Button rankProfileButton;
 
+    public Button myRankProfileButton;
     [Header("Setting Panel Buttons")]
     public Button bgmOnOffButton; // 배경음
     public Button vfxOnOffButton; // 효과음
@@ -30,9 +30,9 @@ public class ButtonController : MonoBehaviour
     public Button collectionButton;
 
     [Header("Close Buttons")]
-    public Button closeButton1;
-    public Button closeButton2;
-
+    public Button profileCloseButton;
+    public Button rankProfileCloseButton;
+    public Button creditCloseButton;
     [Header("Debug Buttons")]
     public Button playerAdd;
     public Button playerGet;
@@ -66,8 +66,9 @@ public class ButtonController : MonoBehaviour
         // single,multi 플레이 관련 함수 바인딩
 
         // Ranking Panel Buttons
-        rankProfileButton.onClick.AddListener(() =>
+        myRankProfileButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
+        
         // 후에 프로필 팝업의 각 텍스트마다 서버에서 정보를 받거나 혹은,
         // 이미 서버에서 각 랭크별로 인물의 정보를 담은 버튼을 생성하는 개념으로
         // 접근해야 하므로, 클라이언트에서 알아서 그 정보의 텍스트들을 기반으로 
@@ -102,9 +103,11 @@ public class ButtonController : MonoBehaviour
         NavManager.Instance.NavigateTo("Collection"));
 
         // Close Buttons
-        closeButton1.onClick.AddListener(() =>
+        profileCloseButton.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
-        closeButton2.onClick.AddListener(() =>
+        rankProfileCloseButton.onClick.AddListener(() =>
+        PopupManager.Instance.ClosePopup());
+        creditCloseButton.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
 
 

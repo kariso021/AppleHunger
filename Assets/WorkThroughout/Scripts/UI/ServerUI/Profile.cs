@@ -9,10 +9,10 @@ public class Profile : MonoBehaviour
     public TMP_Text ratingText; // 점수 or 랭킹
 
     // 프로필 데이터 설정 함수
-    public void SetProfile(Sprite image, string name,int matches,int win, int rating)
+    public void SetProfile(string name,int matches,int win, int rating)
     {
-        if (profileImage != null)
-            profileImage.sprite = image;
+        //if (profileImage != null)
+        //    profileImage.sprite = image;
 
         if (nameText != null)
             nameText.text = name;
@@ -21,6 +21,16 @@ public class Profile : MonoBehaviour
             recordText.text = $"{matches}전\n{win}승";
 
         if (ratingText != null)
-            ratingText.text = "Rating: " + rating.ToString();
+            ratingText.text = rating.ToString();
+    }
+
+    private void Start()
+    {
+        this.SetProfile(
+            SQLiteManager.Instance.player.playerName,
+            SQLiteManager.Instance.stats.totalGames,
+            SQLiteManager.Instance.stats.wins,
+            SQLiteManager.Instance.player.rating
+            );
     }
 }

@@ -1,3 +1,4 @@
+﻿using System;
 using UnityEngine;
 
 public class PopupManager : MonoBehaviour
@@ -7,9 +8,10 @@ public class PopupManager : MonoBehaviour
     [Header("Popup Panels")]
     public GameObject creditPopup;
     public GameObject profilePopup;
+    public GameObject rankProfilePopup;
 
-    private GameObject activePopup = null; // ���� Ȱ��ȭ�� �˾� ����
-
+    public GameObject activePopup = null; // 현재 활성화된 팝업 저장
+    private Action pendingOnComplete; // 콜백 저장
     private void Awake()
     {
         if (Instance == null)
@@ -32,35 +34,73 @@ public class PopupManager : MonoBehaviour
 
     public void ShowPopup(GameObject popup)
     {
-        // ���� ���� Ȱ��ȭ �� �˾��� �ִٸ�?
+        // 만약 현재 활성화 된 팝업이 있다면?
         if (activePopup != null)
         {
-            // �˾��� ���� �ݾƾ� ��
+            // 팝업을 먼저 닫아야 함
             ClosePopup();
         }
-      
+
         activePopup = popup;
         activePopup.SetActive(true);
 
-        FindAnyObjectByType<MatchRecordsManager>().CreateMatchRecords();
-
-        if (profilePopup != null)
+        if (popup.tag == "Profile")
         {
-            profilePopup.GetComponent<ProfilePopup>().SetProfile(
-                SQLiteManager.Instance.player.playerName,
-                SQLiteManager.Instance.stats.totalGames,
-                SQLiteManager.Instance.stats.wins,
-                SQLiteManager.Instance.stats.losses,
-                SQLiteManager.Instance.stats.winRate,
-                SQLiteManager.Instance.player.rating,
-                SQLiteManager.Instance.items.Count,
-                SQLiteManager.Instance.items.Count
-            );
+            pendingOnComplete = () => OnPlayerDetailsLoaded();
+            FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(SQLiteManager.Instance.player.playerId);
         }
 
-        Debug.Log($"active POP show {activePopup.name}");
     }
+    public void ShowPopup(GameObject popup,int playerId)
+    {
+        // 만약 현재 활성화 된 팝업이 있다면?
+        if (activePopup != null)
+        {
+            // 팝업을 먼저 닫아야 함
+            ClosePopup();
+        }
 
+        activePopup = popup;
+        activePopup.SetActive(true);
+
+        if (popup.tag == "Profile")
+        {
+            pendingOnComplete = () => OnPlayerDetailsLoaded();
+            FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(playerId);
+        }
+
+    }
+    // 🔹 데이터가 다 로드된 후 실행될 메서드
+    private void OnPlayerDetailsLoaded()
+    {
+        Debug.Log($"✅ PROFILE LOADED: {SQLiteManager.Instance.playerDetails.playerName} , {SQLiteManager.Instance.playerDetails.playerId}");
+
+        // 자기 자신의 프로필을 열람할 때만 매치 기록을 불러오기
+        if (SQLiteManager.Instance.player.playerId == SQLiteManager.Instance.playerDetails.playerId)
+        {
+            FindAnyObjectByType<MatchRecordsManager>().CreateMatchRecords();
+        }
+        if (activePopup != null) 
+        {
+            if (activePopup.tag == "Profile") // 현재 활성화 된 팝업이 프로필 관련일때만
+            {
+                activePopup.GetComponent<ProfilePopup>().SetProfile(
+                SQLiteManager.Instance.playerDetails.playerName,
+                SQLiteManager.Instance.playerDetails.totalGames,
+                SQLiteManager.Instance.playerDetails.wins,
+                SQLiteManager.Instance.playerDetails.losses,
+                SQLiteManager.Instance.playerDetails.winRate,
+                SQLiteManager.Instance.playerDetails.rating,
+                SQLiteManager.Instance.playerDetails.unlockIcons,
+                SQLiteManager.Instance.playerDetails.unlockBoards
+            );
+            }
+        }
+        else
+        {
+            Debug.Log("프로필 팝업이 없어요");
+        }
+    }
     public void ClosePopup()
     {
         if (activePopup == null) return;
@@ -69,5 +109,12 @@ public class PopupManager : MonoBehaviour
 
         activePopup.SetActive(false);
         activePopup = null;
+    }
+
+    // 🔹 클라이언트에서 데이터를 받은 후 실행
+    public void OnDataReceived()
+    {
+        pendingOnComplete?.Invoke(); // ✅ 저장된 콜백 실행
+        pendingOnComplete = null;  // ✅ 콜백 초기화
     }
 }

@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Apple
   - CloseButton
+  - Profile
+  - RankProfile
+  - Close
   layers:
   - Default
   - TransparentFX

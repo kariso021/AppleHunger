@@ -1,22 +1,32 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RankingData : MonoBehaviour
 {
-    public int playerId;       // 플레이어 ID
-    public string playerName;  // 플레이어 이름
-    public int rating;         // 레이팅 점수
-    public int rankPosition;   // 랭킹 순위
+    public int playerId {  get; private set; }
     public Sprite profileIcon;
+    public TMP_Text nameText;
+    public TMP_Text ratingText;
+    public TMP_Text rankText;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        
+        if (gameObject.tag == "Profile" || GetComponent<Button>() == null) return;
+
+        GetComponent<Button>().onClick.AddListener(() =>
+        PopupManager.Instance.ShowPopup(
+            FindAnyObjectByType<RankingRecordsManager>().rankProfilePopupGameObject,playerId));
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetRankingData(int playerId,string playerName, int rating, int rankPosition,string profileIcon)
     {
-        
+        this.playerId = playerId;
+        if (nameText != null)
+            nameText.text = playerName;
+        if (ratingText != null)
+            ratingText.text = rating.ToString();
+        if(rankText != null)
+            rankText.text = rankPosition.ToString();
     }
 }

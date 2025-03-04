@@ -46,8 +46,10 @@ public class PanelManager : MonoBehaviour
         // 특정 패널 활성화
         if (panels.ContainsKey(panelName))
         {
-            if(panelName == "Collection/Icon" || panelName == "Collection/Board")
+            if (panelName == "Collection/Icon" || panelName == "Collection/Board")
                 panels["Collection"].SetActive(true);
+            else if (panelName == "Ranking")
+                FindAnyObjectByType<RankingRecordsManager>().CreateRankRecords();
             panels[panelName].SetActive(true);
         }
         else

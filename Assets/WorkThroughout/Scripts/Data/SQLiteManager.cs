@@ -17,21 +17,13 @@ public class SQLiteManager : MonoBehaviour
 
     public PlayerData player;
     public List<PlayerRankingData> rankings = new List<PlayerRankingData>();
+    public Dictionary<int,PlayerRankingData> rankDictionary = new Dictionary<int,PlayerRankingData>();
     public PlayerRankingData myRankingData;
     public PlayerStatsData stats;
     public LoginData login;
     public List<MatchHistoryData> matches = new List<MatchHistoryData>();
     public List<PlayerItemData> items = new List<PlayerItemData>();
-    public IdType idType;
-    /// <summary>
-    /// .ToString() 으로 idType에 넘겨줘야 함
-    /// </summary>
-    public enum IdType
-    {
-        deviceId,
-        googleId,
-        playerId
-    };
+    public PlayerDetails playerDetails;
 
     private void Awake()
     {
@@ -41,7 +33,7 @@ public class SQLiteManager : MonoBehaviour
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
             InitializeDatabase();
             LoadAllData();
-
+            
         }
         else
         {
@@ -51,8 +43,9 @@ public class SQLiteManager : MonoBehaviour
 
     private void Start()
     {
+        saveRankDataToDictionary();
         player.deviceId = "deviceId-587";
-        //Debug.Log(Application.persistentDataPath);
+        Debug.Log(Application.persistentDataPath);
     }
     private void InitializeDatabase()
     {
@@ -132,25 +125,47 @@ public class SQLiteManager : MonoBehaviour
                 );");
 
             // 🔹 랭킹 테이블 (상위 50명의 랭킹 정보 저장)
+            // 🔹 rankings 테이블 (상위 50명의 랭킹 정보 저장)
             ExecuteQuery(connection, @"
-            CREATE TABLE IF NOT EXISTS rankings (           
-                playerId INTEGER NOT NULL,         -- 플레이어 ID
-                playerName TEXT NOT NULL,          -- 플레이어 닉네임
-                rating INTEGER NOT NULL,           -- 레이팅 점수
-                rankPosition INTEGER PRIMARY KEY,  -- 랭킹 순위 (1~50)
-                FOREIGN KEY (playerId) REFERENCES players(playerId) ON DELETE CASCADE
-            );");
+                CREATE TABLE IF NOT EXISTS rankings (           
+                    playerId INTEGER NOT NULL,         -- 플레이어 ID
+                    playerName TEXT NOT NULL,          -- 플레이어 닉네임
+                    rating INTEGER NOT NULL,           -- 레이팅 점수
+                    rankPosition INTEGER PRIMARY KEY,  -- 랭킹 순위 (1~50)
+                    profileIcon TEXT DEFAULT NULL,     -- 플레이어 프로필 아이콘 (마지막 컬럼)
+                    FOREIGN KEY (playerId) REFERENCES players(playerId) ON DELETE CASCADE
+                );");
+
             // ✅ 개별 플레이어 랭킹 테이블 생성
             ExecuteQuery(connection, @"
-            CREATE TABLE IF NOT EXISTS myRanking (
-                playerId INTEGER PRIMARY KEY,
-                playerName TEXT NOT NULL,
-                rating INTEGER NOT NULL,
-                rankPosition INTEGER NOT NULL
-            );
-        ");
+                CREATE TABLE IF NOT EXISTS myRanking (
+                    playerId INTEGER PRIMARY KEY,
+                    playerName TEXT NOT NULL,
+                    rating INTEGER NOT NULL,
+                    rankPosition INTEGER NOT NULL,
+                    profileIcon TEXT DEFAULT NULL  -- 프로필 아이콘 (마지막 컬럼)
+                );
+                ");
+
 
             Debug.Log("✅ SQLite 데이터베이스 초기화 완료 (Mono.Data.Sqlite)");
+
+            // 🔹 profileIcon이 NULL인 경우 기본값으로 업데이트
+            ExecuteQuery(connection, "UPDATE rankings SET profileIcon = '101' WHERE profileIcon IS NULL;");
+            ExecuteQuery(connection, "UPDATE myRanking SET profileIcon = '101' WHERE profileIcon IS NULL;");
+
+            Debug.Log("✅ profileIcon 기본값 업데이트 완료");
+
+            ExecuteQuery(connection, @"
+                DELETE FROM matchRecords 
+                WHERE matchId NOT IN (
+                    SELECT matchId FROM matchRecords 
+                    ORDER BY matchDate DESC 
+                    LIMIT 10
+                );
+            ");
+
+            Debug.Log("✅ matchRecords 10개 유지 완료");
         }
     }
 
@@ -183,6 +198,14 @@ public class SQLiteManager : MonoBehaviour
         Debug.Log($"✅ 매치 기록 개수: {matches.Count}");
         Debug.Log($"✅ 보유 아이템 개수: {items.Count}");
         Debug.Log($"✅ 랭킹 인원 수 : {rankings.Count}");
+    }
+
+    private void saveRankDataToDictionary()
+    {
+        foreach (var rankData in rankings)
+        {
+            rankDictionary.Add(rankData.playerId, rankData);
+        }
     }
 
     public void SavePlayerData(PlayerData player)
@@ -497,7 +520,8 @@ public class SQLiteManager : MonoBehaviour
             SELECT matchId, player1Id, player1Name, player1Rating, player1Icon, 
                    player2Id, player2Name, player2Rating, player2Icon, 
                    winnerId, strftime('%Y-%m-%d %H:%M:%S', matchDate) as matchDate 
-            FROM matchRecords ORDER BY matchDate DESC";
+            FROM matchRecords ORDER BY matchDate DESC
+            LIMIT 10;";
 
             using (var command = new SqliteCommand(query, connection))
             {
@@ -577,7 +601,8 @@ public class SQLiteManager : MonoBehaviour
                             reader.GetInt32(0), // playerId
                             reader.GetString(1), // playerName
                             reader.GetInt32(2),  // rating
-                            reader.GetInt32(3)  // rankPosition
+                            reader.GetInt32(3),  // rankPosition
+                            reader.GetString(4)
                         ));
                     }
                 }
@@ -604,7 +629,8 @@ public class SQLiteManager : MonoBehaviour
                             reader.GetInt32(0),  // playerId
                             reader.GetString(1), // playerName
                             reader.GetInt32(2),  // rating
-                            reader.GetInt32(3)   // rankPosition
+                            reader.GetInt32(3),   // rankPosition
+                            reader.GetString(4)
                         );
 
                         Debug.Log($"✅ [SQLite] 내 랭킹 데이터 로드 성공: {myRanking.playerName} (Rank: {myRanking.rankPosition})");

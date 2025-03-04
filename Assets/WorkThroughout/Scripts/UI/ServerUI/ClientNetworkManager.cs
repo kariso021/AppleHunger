@@ -1,5 +1,7 @@
 ﻿using FishNet.Connection;
 using FishNet.Object;
+using System;
+using System.Transactions;
 using UnityEngine;
 using static UnityEditor.Progress;
 
@@ -138,6 +140,26 @@ public class ClientNetworkManager : NetworkBehaviour
         Debug.Log($"📌 내 랭킹 저장 완료: {myRankingData.myRanking.playerName} (Rank: {myRankingData.myRanking.rankPosition})");
     }
 
+    [TargetRpc]
+    public void TargetReceivePlayerDetailsData(NetworkConnection conn, string jsonData)
+    {
+        Debug.Log($"✅ [Client] 상세 정보 수신: {jsonData}");
+
+        PlayerDetailsResponse playerDetailsResponse = JsonUtility.FromJson<PlayerDetailsResponse>(jsonData);
+        Debug.Log(playerDetailsResponse.playerDetails.ToString());
+        SQLiteManager.Instance.playerDetails = playerDetailsResponse.playerDetails;
+
+        Debug.Log($"📌 상세 정보 저장 완료: {playerDetailsResponse.playerDetails.playerName} (Rank: {playerDetailsResponse.playerDetails.rating})");
+
+        // ✅ 데이터 수신 완료 후 실행
+        FindAnyObjectByType<PopupManager>().OnDataReceived();
+
+    }
+    public void GetPlayerDetalis(int playerId) // 콜백 추가. 
+    {
+        if (serverToAPIManager != null)
+            serverToAPIManager.RequestGetGetPlayerDetailsServerRpc(playerId);
+    }
 
 
 }
