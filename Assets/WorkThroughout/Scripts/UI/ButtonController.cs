@@ -39,7 +39,7 @@ public class ButtonController : MonoBehaviour
     public Button playerPut;
     public Button playerStatsGet;
     public Button playerItemsGet;
-    public Button playerItemsUnlock;
+    public Button playerItemsPurchase;
     public Button matchAdd;
     public Button matchGet;
     public Button loginGet;
@@ -113,7 +113,7 @@ public class ButtonController : MonoBehaviour
 
 
         // Debug Buttons
-        // 테스트 기능
+            // 테스트 기능
         playerAdd.onClick.AddListener(() =>
         clientNetworkManager.AddPlayer(Random.Range(12345, 99999).ToString()));
 
@@ -124,17 +124,17 @@ public class ButtonController : MonoBehaviour
         clientNetworkManager.UpdatePlayerData());
 
         playerStatsGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerStats());
+        clientNetworkManager.GetPlayerStats(SQLiteManager.Instance.player.playerId));
 
         playerItemsGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerItems());
+        clientNetworkManager.GetPlayerItems(SQLiteManager.Instance.player.playerId));
 
-        playerItemsUnlock.onClick.AddListener(() =>
-        clientNetworkManager.UnlockPlayerItems(102));
+        playerItemsPurchase.onClick.AddListener(() =>
+        clientNetworkManager.PurchasePlayerItem(SQLiteManager.Instance.player.playerId,102));
 
         matchAdd.onClick.AddListener(() =>
-        clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId + 3,
-        SQLiteManager.Instance.player.playerId));
+        clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,
+        SQLiteManager.Instance.player.playerId + 4));
 
         matchGet.onClick.AddListener(() =>
         clientNetworkManager.GetMatchRecords(SQLiteManager.Instance.player.playerId));

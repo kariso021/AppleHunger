@@ -26,7 +26,14 @@ public class Profile : MonoBehaviour
 
     private void Start()
     {
-        this.SetProfile(
+        DataSyncManager.Instance.OnPlayerProfileChanged += profileUIupdate;
+
+        profileUIupdate();
+    }
+
+    private void profileUIupdate()
+    {
+        SetProfile(
             SQLiteManager.Instance.player.playerName,
             SQLiteManager.Instance.stats.totalGames,
             SQLiteManager.Instance.stats.wins,

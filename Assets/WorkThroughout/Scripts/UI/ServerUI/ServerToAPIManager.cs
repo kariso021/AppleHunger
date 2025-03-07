@@ -54,7 +54,7 @@ public class ServerToAPIManager : NetworkBehaviour
                 PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(playerJsonData);
 
                 // 클라이언트에 Players 정보 저장
-                TargetReceivePlayerData(conn, playerJsonData);
+                //TargetReceivePlayerData(conn, playerJsonData);
 
                 Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
             }
@@ -112,7 +112,12 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
+            {
                 Debug.Log("플레이어 클라이언트 데이터를  데이터 서버로 업데이트 성공");
+                // 🔹 데이터가 변경되었음을 알림 (자동 동기화)
+                DataSyncManager.Instance.PlayerDataUpdated();
+            }
+
             else
                 Debug.LogError("업데이트 실패: " + request.error);
         }
@@ -136,7 +141,6 @@ public class ServerToAPIManager : NetworkBehaviour
     private IEnumerator GetPlayer(string idType, string idValue, NetworkConnection conn) // 
     {
         string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
-
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
@@ -180,7 +184,14 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
+            {
                 Debug.Log($"✅ 매치 결과를 서버에 저장 성공! Winner: {winnerId}, Loser: {loserId}");
+
+                // 🔹 자동 동기화 트리거
+                DataSyncManager.Instance.MatchHistoryUpdated(); // 매치 기록 업데이트
+                DataSyncManager.Instance.PlayerStatsUpdated();  // 플레이어 스탯 업데이트
+                //DataSyncManager.Instance.PlayerRankingUpdated(); // 랭킹 업데이트 (승패 반영) , 랭킹은 굳이 실시간으로 체크해줄 필요가 없음. 서버에서 일정 시간마다 최신화를 해주는게 더 효율적
+            }
             else
                 Debug.LogError($"❌ 매치 결과 저장 실패: {request.error}");
         }
@@ -295,6 +306,8 @@ public class ServerToAPIManager : NetworkBehaviour
                 {
                     TargetReceivePlayerItems(conn, JsonUtility.ToJson(playerItem));
                 }
+
+                //DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
             }
             else
                 Debug.LogError($"❌ PlayerItems 조회 실패: {request.error}");
@@ -305,25 +318,22 @@ public class ServerToAPIManager : NetworkBehaviour
     [TargetRpc]
     private void TargetReceivePlayerItems(NetworkConnection conn, string jsonData)
     {
-        Debug.Log($"✅ 서버에서 받은 PlayerItems 데이터: {jsonData}");
-
         FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerItems(conn, jsonData);
     }
 
-
-    // 플레이어 아이템 해금
+    // 🔹 아이템 구매 요청
     [ServerRpc(RequireOwnership = false)]
-    public void RequestUnlockPlayerItemServerRpc(int playerId, int itemUniqueId, NetworkConnection conn = null)
+    public void RequestPurchaseItemServerRpc(int playerId, int itemUniqueId, NetworkConnection conn = null)
     {
-        StartCoroutine(UnlockPlayerItem(playerId, itemUniqueId, conn));
+        StartCoroutine(PurchaseItem(playerId, itemUniqueId, conn));
     }
 
-    private IEnumerator UnlockPlayerItem(int playerId, int itemUniqueId, NetworkConnection conn)
+    private IEnumerator PurchaseItem(int playerId, int itemUniqueId, NetworkConnection conn)
     {
-        string url = $"{apiBaseUrl}/playerItems/unlock";
-        string jsonData = JsonUtility.ToJson(new { playerId, itemUniqueId });
+        string url = $"{apiBaseUrl}/playerItems/purchase";
+        string jsonData = $"{{\"playerId\":{playerId}, \"itemUniqueId\":{itemUniqueId}}}";
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "PUT"))
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
@@ -333,11 +343,19 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log($"✅ 아이템 해금 성공! playerId: {playerId}, itemUniqueId: {itemUniqueId}");
+            {
+                Debug.Log($"✅ 아이템 구매 성공! playerId: {playerId}, itemUniqueId: {itemUniqueId}");
+                // 🔹 자동 동기화 트리거
+                DataSyncManager.Instance.PlayerDataUpdated();  // 재화(currency) 업데이트
+                DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
+            }
             else
-                Debug.LogError($"❌ 아이템 해금 실패: {request.error}");
+            {
+                Debug.LogError($"❌ 아이템 구매 실패: {request.error}");
+            }
         }
     }
+
 
 
     #endregion
@@ -404,7 +422,12 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
+            {
                 Debug.Log("✅ 로그인 시간 업데이트 성공");
+
+                // 🔹 자동 동기화 트리거
+                DataSyncManager.Instance.PlayerDataUpdated(); // 로그인 정보 업데이트
+            }
             else
                 Debug.LogError($"❌ 로그인 시간 업데이트 실패: {request.error}");
         }

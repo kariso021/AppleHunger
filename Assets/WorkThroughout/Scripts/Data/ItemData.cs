@@ -1,13 +1,66 @@
+ï»¿using TMPro;
 using UnityEngine;
-[CreateAssetMenu(fileName = "ItemData", menuName = "Items/Item Data")]
-public class ItemData : ScriptableObject
+using UnityEngine.UI;
+
+public class ItemData : MonoBehaviour
 {
-    public int itemId;       // º¸À¯ÇÑ ¾ÆÀÌÅÛÀÇ °íÀ¯ ID
-    public int playerId;     // ÇÃ·¹ÀÌ¾î ID
-    public int itemUniqueId; // °ÔÀÓ ³» ¾ÆÀÌÅÛÀÇ °íÀ¯ ID , iconÀº 101~ , board´Â 201~ ·Î ½ÃÀÛ
-    public string itemType;  // ¾ÆÀÌÅÛ À¯Çü ("icon", "board")
-    public bool isUnlocked;  // ¾ÆÀÌÅÛ ÇØ±İ ¿©ºÎ
-    public string acquiredAt; // ¾ÆÀÌÅÛ È¹µæ ³¯Â¥ (JSON º¯È¯À» À§ÇØ ¹®ÀÚ¿­)
-    public Sprite itemSprite; // ¾ÆÀÌÅÛ ÀÌ¹ÌÁö
-    public Sprite itemLockedImage; // ¾ÆÀÌÅÛ Àá±İ ÀÌ¹ÌÁö(¾ÆÀÌÅÛ ÀÌ¹ÌÁö À§¿¡ µ¡¾º¿ò)
+    public int itemId;       // ë³´ìœ í•œ ì•„ì´í…œì˜ ê³ ìœ  ID
+    public int playerId;     // í”Œë ˆì´ì–´ ID
+    public int itemUniqueId; // ê²Œì„ ë‚´ ì•„ì´í…œì˜ ê³ ìœ  ID , iconì€ 101~ , boardëŠ” 201~ ë¡œ ì‹œì‘
+    public string itemType;  // ì•„ì´í…œ ìœ í˜• ("icon", "board")
+    public int price;        // ì•„ì´í…œ ê°€ê²©
+    public bool isUnlocked;  // ì•„ì´í…œ í•´ê¸ˆ ì—¬ë¶€
+    public string acquiredAt; // ì•„ì´í…œ íšë“ ë‚ ì§œ (JSON ë³€í™˜ì„ ìœ„í•´ ë¬¸ìì—´)
+
+    public Image itemIcon;
+    public Image itemLockedImage;
+    public TMP_Text itemPriceText;
+    private Button itemButton;
+
+    private void Awake()
+    {
+        itemButton = GetComponent<Button>();
+    }
+
+    public void SetItemData(int playerId, int itemUniqueId, string itemType, int price, bool isUnlocked, string acquiredAt)
+    {
+        this.playerId = playerId;
+        this.itemUniqueId = itemUniqueId;
+        this.itemType = itemType;
+        this.price = price;
+        this.isUnlocked = isUnlocked;
+        this.acquiredAt = acquiredAt;
+
+        // UI ì—…ë°ì´íŠ¸
+        itemPriceText.text = price.ToString();
+        itemLockedImage.gameObject.SetActive(!isUnlocked);
+
+        // ê¸°ì¡´ ë²„íŠ¼ ì´ë²¤íŠ¸ ì œê±° í›„ ìƒˆë¡œìš´ ì´ë²¤íŠ¸ ì¶”ê°€
+        itemButton.onClick.RemoveAllListeners();
+        if (!isUnlocked)
+        {
+            itemButton.onClick.AddListener(() =>
+            {
+                Debug.Log($"ğŸ”“ ì•„ì´í…œ êµ¬ë§¤ ì‹œë„: {itemUniqueId}");
+                FindAnyObjectByType<ClientNetworkManager>().PurchasePlayerItem(SQLiteManager.Instance.player.playerId, itemUniqueId);
+            });
+        }
+        else
+        {
+            itemButton.onClick.AddListener(() => Debug.Log("âœ… ì´ë¯¸ í•´ê¸ˆëœ ì•„ì´í…œ"));
+        }
+    }
+
+    public void UpdateItem(bool newUnlockStatus)
+    {
+        isUnlocked = newUnlockStatus;
+        itemLockedImage.gameObject.SetActive(!isUnlocked);
+
+        // ë²„íŠ¼ ì´ë²¤íŠ¸ ê°±ì‹ 
+        itemButton.onClick.RemoveAllListeners();
+        if (isUnlocked)
+        {
+            itemButton.onClick.AddListener(() => Debug.Log("âœ… ì´ë¯¸ í•´ê¸ˆëœ ì•„ì´í…œ"));
+        }
+    }
 }

@@ -38,4 +38,18 @@ public class PlayerData
         this.currency = currency;
         this.createdAt = createdAt;
     }
+    public override string ToString()
+    {
+        return $"PlayerData: {{ " +
+               $"playerId: {playerId}, " +
+               $"deviceId: {deviceId}, " +
+               $"googleId: {googleId}, " +
+               $"playerName: {playerName}, " +
+               $"profileIcon: {profileIcon}, " +
+               $"boardImage: {boardImage}, " +
+               $"rating: {rating}, " +
+               $"currency: {currency}, " +
+               $"createdAt: {createdAt} }}";
+    }
+
 }

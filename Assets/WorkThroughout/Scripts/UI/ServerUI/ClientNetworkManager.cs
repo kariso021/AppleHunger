@@ -12,14 +12,55 @@ public class ClientNetworkManager : NetworkBehaviour
     private void Start()
     {
         serverToAPIManager = FindAnyObjectByType<ServerToAPIManager>();
+
+    }
+    #region DataSync
+    // ✅ 플레이어 데이터 동기화
+    private void SyncPlayerData()
+    {
+        Debug.Log("🔄 [Client] 플레이어 데이터 자동 동기화 시작...");
+        GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString());
     }
 
+    // ✅ 플레이어 아이템 동기화
+    private void SyncPlayerItems()
+    {
+        Debug.Log("🔄 [Client] 플레이어 아이템 자동 동기화 시작...");
+        GetPlayerItems(SQLiteManager.Instance.player.playerId);
+    }
+
+    // ✅ 플레이어 스탯 동기화
+    private void SyncPlayerStats()
+    {
+        Debug.Log("🔄 [Client] 플레이어 스탯 자동 동기화 시작...");
+        GetPlayerStats(SQLiteManager.Instance.player.playerId);
+    }
+
+    // ✅ 랭킹 동기화
+    private void SyncPlayerRanking()
+    {
+        Debug.Log("🔄 [Client] 랭킹 데이터 자동 동기화 시작...");
+        GetRankingList();
+    }
+
+    // ✅ 매치 기록 동기화
+    private void SyncMatchHistory()
+    {
+        Debug.Log("🔄 [Client] 매치 기록 자동 동기화 시작...");
+        GetMatchRecords(SQLiteManager.Instance.player.playerId);
+    }
+    #endregion
+    #region Player Data
     // 🔹 플레이어 데이터 요청
     public void GetPlayerData(string idType,string idValue) => serverToAPIManager?.RequestGetPlayerServerRpc(idType,idValue);
     [TargetRpc]
     public void TargetReceivePlayerData(NetworkConnection conn, string jsonData)
     {
         SQLiteManager.Instance.SavePlayerData(JsonUtility.FromJson<PlayerData>(jsonData));
+
+        // ✅ 저장 후 바로 다시 로드하여 확인
+        PlayerData loadedPlayer = SQLiteManager.Instance.LoadPlayerData();
+        Debug.Log($"✅ [Client] SQLite에서 불러온 PlayerData: {loadedPlayer.ToString()}");
     }
 
     // 🔹 플레이어 추가
@@ -30,24 +71,27 @@ public class ClientNetworkManager : NetworkBehaviour
 
     // 🔹 플레이어 정보 업데이트
     public void UpdatePlayerData() => serverToAPIManager?.RequestUpdatePlayerDataServerRpc(SQLiteManager.Instance.player);
-
+    #endregion
+    #region Player Items
     // 🔹 플레이어 아이템 요청
-    public void GetPlayerItems() => serverToAPIManager?.RequestGetPlayerItemsServerRpc(SQLiteManager.Instance.player.playerId);
+    public void GetPlayerItems(int playerId) => serverToAPIManager?.RequestGetPlayerItemsServerRpc(playerId);
 
     [TargetRpc]
     public void TargetReceivePlayerItems(NetworkConnection conn, string jsonData)
     {
         SQLiteManager.Instance.SavePlayerItem(JsonUtility.FromJson<PlayerItemData>(jsonData));
     }
-    // 플레이어 아이템 해금 요청
-    public void UnlockPlayerItems(int itemUniqueId)
-    {
 
+    // 플레이어 아이템 구매 요청
+    public void PurchasePlayerItem(int playerId,int itemUniqueId)
+    {
         if (serverToAPIManager != null)
-            serverToAPIManager.RequestUnlockPlayerItemServerRpc(SQLiteManager.Instance.player.playerId, itemUniqueId);
+            serverToAPIManager.RequestPurchaseItemServerRpc(playerId, itemUniqueId);
     }
+    #endregion
+    #region Player Stats
     // 🔹 플레이어 스탯 요청
-    public void GetPlayerStats() => serverToAPIManager?.RequestGetPlayerStatServerRpc(SQLiteManager.Instance.player.playerId);
+    public void GetPlayerStats(int playerId) => serverToAPIManager?.RequestGetPlayerStatServerRpc(playerId);
 
     [TargetRpc]
     public void TargetReceivePlayerStats(NetworkConnection conn, string jsonData)
@@ -56,7 +100,8 @@ public class ClientNetworkManager : NetworkBehaviour
         Debug.Log($"{playerStatsResponse.playerStats.playerId} , Total : {playerStatsResponse.playerStats.totalGames} , Winrate : {playerStatsResponse.playerStats.winRate}");
         SQLiteManager.Instance.SavePlayerStats(playerStatsResponse.playerStats);
     }
-
+    #endregion
+    #region Player Matches
     // 매치 업데이트 to DB
     public void AddMatchRecords(int winnerId, int loserId)
     {
@@ -77,7 +122,8 @@ public class ClientNetworkManager : NetworkBehaviour
     {
         SQLiteManager.Instance.SaveMatchHistory(matchHistoryData);
     }
-
+    #endregion
+    #region Player Login
     // 로그인 정보 업데이트 to DB
     public void UpdateLogin(int playerId)
     {
@@ -97,7 +143,8 @@ public class ClientNetworkManager : NetworkBehaviour
 
         SQLiteManager.Instance.SaveLoginData(response.records);
     }
-
+    #endregion
+    #region Player Ranking
     // 랭킹 정보 업데이트 to DB
     public void GetRankingList()
     {
@@ -160,7 +207,7 @@ public class ClientNetworkManager : NetworkBehaviour
         if (serverToAPIManager != null)
             serverToAPIManager.RequestGetGetPlayerDetailsServerRpc(playerId);
     }
-
+    #endregion
 
 }
 
@@ -183,4 +230,13 @@ public class RankingDataResponse
 {
     public bool success;
     public PlayerRankingData[] topRankings;
+}
+
+[System.Serializable]
+public class PurchaseResponse
+{
+    public bool success;
+    public string message;
+    public int remainingCurrency;
+    public string error;
 }

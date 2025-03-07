@@ -3,43 +3,55 @@ using UnityEngine;
 
 public class MatchRecordsManager : MonoBehaviour
 {
-    public GameObject matchDataPrefab;
-    public GameObject matchDataListHolder; // 캔버스에서 생성할 목록의 부모 객체
+    public GameObject matchDataListHolder; // 🔹 캔버스에서 생성할 목록의 부모 객체
+    private List<GameObject> activeMatchRecords = new List<GameObject>(); // 🔹 활성화된 매치 UI 오브젝트 저장 리스트
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
+        DataSyncManager.Instance.OnMatchHistoryChanged += UpdateMatchRecords;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDestroy()
     {
-
+        // ✅ 이벤트 구독 해제 (메모리 누수 방지)
+        DataSyncManager.Instance.OnMatchHistoryChanged -= UpdateMatchRecords;
     }
-    /// <summary>
-    /// 프로필 팝업창에 전적 리스트를 만드는 함수
-    /// </summary>
-    // 필요한 변수? playerId -> players -> playerName,rating,icon
+
+    // ✅ 전적 기록 UI 업데이트
+    private void UpdateMatchRecords()
+    {
+        Debug.Log("🔄 [MatchRecordsManager] 전적 데이터 변경 감지 → UI 갱신");
+
+        // ✅ SQLite 데이터가 최신화된 후 UI 갱신 실행
+        Invoke(nameof(CreateMatchRecords), 0.5f);
+    }
+
+    // ✅ 프로필 팝업이 열릴 때 실행 (최대 10개 유지)
     public void CreateMatchRecords()
     {
-        List<MatchHistoryData> matchHistoryList = SQLiteManager.Instance.LoadMatchHistory();
+        // 🔹 기존 오브젝트 초기화 (오래된 데이터 제거)
+        ResetMatchRecords();
 
+        List<MatchHistoryData> matchHistoryList = SQLiteManager.Instance.LoadMatchHistory();
         if (matchHistoryList.Count == 0) return;
+
+        int maxRecords = 10; // 🔹 최대 표시 개수 (Match Record)
+        int recordCount = 0;
 
         foreach (var match in matchHistoryList)
         {
-            // 상대 플레이어 ID 찾기
-            int opponentPlayerId = match.player1Id == SQLiteManager.Instance.player.playerId ? match.player2Id : match.player1Id;
+            if (recordCount >= maxRecords) break; // ✅ 최대 개수 제한
 
-            // 상대 플레이어 정보 설정
+            int opponentPlayerId = match.player1Id == SQLiteManager.Instance.player.playerId ? match.player2Id : match.player1Id;
             string opponentPlayerName = match.player1Id == opponentPlayerId ? match.player1Name : match.player2Name;
             int opponentPlayerRating = match.player1Id == opponentPlayerId ? match.player1Rating : match.player2Rating;
             string opponentPlayerIconUniqueId = match.player1Id == opponentPlayerId ? match.player1Icon : match.player2Icon;
 
-            // 🔹 프리팹 인스턴스 생성
-            GameObject matchInstance = Instantiate(matchDataPrefab, matchDataListHolder.transform);
+            // ✅ Object Pool에서 가져오기
+            GameObject matchInstance = ObjectPoolManager.Instance.GetFromPool("MatchRecord", Vector3.zero, Quaternion.identity, matchDataListHolder.transform);
+            if (matchInstance == null) continue; // 오브젝트 풀에서 가져올 수 없으면 continue
 
-            // 🔹 MatchData 스크립트 가져와서 데이터 설정
+            // ✅ 데이터 설정
             MatchData matchData = matchInstance.GetComponent<MatchData>();
             if (matchData != null)
             {
@@ -50,7 +62,19 @@ public class MatchRecordsManager : MonoBehaviour
                     opponentPlayerIconUniqueId
                 );
             }
+
+            activeMatchRecords.Add(matchInstance); // 🔹 활성화된 오브젝트 리스트에 추가
+            recordCount++;
         }
     }
 
+    // ✅ 기존 활성화된 매치 데이터 초기화 (비활성화 처리)
+    private void ResetMatchRecords()
+    {
+        foreach (var obj in activeMatchRecords)
+        {
+            ObjectPoolManager.Instance.ReturnToPool("MatchRecord", obj);
+        }
+        activeMatchRecords.Clear();
+    }
 }

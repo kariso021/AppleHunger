@@ -1,4 +1,5 @@
 ﻿using Mono.Data.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -17,7 +18,7 @@ public class SQLiteManager : MonoBehaviour
 
     public PlayerData player;
     public List<PlayerRankingData> rankings = new List<PlayerRankingData>();
-    public Dictionary<int,PlayerRankingData> rankDictionary = new Dictionary<int,PlayerRankingData>();
+    public Dictionary<int, PlayerRankingData> rankDictionary = new Dictionary<int, PlayerRankingData>();
     public PlayerRankingData myRankingData;
     public PlayerStatsData stats;
     public LoginData login;
@@ -25,6 +26,8 @@ public class SQLiteManager : MonoBehaviour
     public List<PlayerItemData> items = new List<PlayerItemData>();
     public PlayerDetails playerDetails;
 
+    // 데이터로드가 끝나면 실행될 이벤트
+    public event Action OnSQLiteDataLoaded;
     private void Awake()
     {
         if (instance == null)
@@ -33,7 +36,7 @@ public class SQLiteManager : MonoBehaviour
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
             InitializeDatabase();
             LoadAllData();
-            
+
         }
         else
         {
@@ -44,7 +47,7 @@ public class SQLiteManager : MonoBehaviour
     private void Start()
     {
         saveRankDataToDictionary();
-        player.deviceId = "deviceId-587";
+        player.deviceId = "deviceId-559";
         Debug.Log(Application.persistentDataPath);
     }
     private void InitializeDatabase()
@@ -87,10 +90,12 @@ public class SQLiteManager : MonoBehaviour
                     playerId INTEGER NOT NULL,
                     itemUniqueId INTEGER NOT NULL,
                     itemType TEXT CHECK(itemType IN ('icon', 'board')),
+                    price INTEGER DEFAULT 0,
                     isUnlocked INTEGER DEFAULT 0,
                     acquiredAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (playerId) REFERENCES players(playerId) ON DELETE CASCADE
                 );");
+
 
             // 🔹 로그인 기록 테이블
             ExecuteQuery(connection, @"
@@ -150,12 +155,6 @@ public class SQLiteManager : MonoBehaviour
 
             Debug.Log("✅ SQLite 데이터베이스 초기화 완료 (Mono.Data.Sqlite)");
 
-            // 🔹 profileIcon이 NULL인 경우 기본값으로 업데이트
-            ExecuteQuery(connection, "UPDATE rankings SET profileIcon = '101' WHERE profileIcon IS NULL;");
-            ExecuteQuery(connection, "UPDATE myRanking SET profileIcon = '101' WHERE profileIcon IS NULL;");
-
-            Debug.Log("✅ profileIcon 기본값 업데이트 완료");
-
             ExecuteQuery(connection, @"
                 DELETE FROM matchRecords 
                 WHERE matchId NOT IN (
@@ -198,6 +197,9 @@ public class SQLiteManager : MonoBehaviour
         Debug.Log($"✅ 매치 기록 개수: {matches.Count}");
         Debug.Log($"✅ 보유 아이템 개수: {items.Count}");
         Debug.Log($"✅ 랭킹 인원 수 : {rankings.Count}");
+
+        // 모든 데이터가 로드되면 그 떄 UI 업데이트를 실행
+        OnSQLiteDataLoaded?.Invoke();
     }
 
     private void saveRankDataToDictionary()
@@ -210,15 +212,16 @@ public class SQLiteManager : MonoBehaviour
 
     public void SavePlayerData(PlayerData player)
     {
+        //Debug.Log(player.ToString());
         using (var connection = new SqliteConnection(dbPath))
         {
             connection.Open();
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"
-                INSERT OR REPLACE INTO players 
-                (playerId, deviceId, googleId, playerName, profileIcon, boardImage, rating, currency, createdAt) 
-                VALUES (@playerId, @deviceId, @googleId, @playerName, @profileIcon, @boardImage, @rating, @currency, @createdAt);
+            INSERT OR REPLACE INTO players 
+            (playerId, deviceId, googleId, playerName, profileIcon, boardImage, rating, currency, createdAt) 
+            VALUES (@playerId, @deviceId, @googleId, @playerName, @profileIcon, @boardImage, @rating, @currency, @createdAt);
             ";
 
                 command.Parameters.AddWithValue("@playerId", player.playerId);
@@ -231,12 +234,12 @@ public class SQLiteManager : MonoBehaviour
                 command.Parameters.AddWithValue("@currency", player.currency);
                 command.Parameters.AddWithValue("@createdAt", player.createdAt);
 
-                command.ExecuteNonQuery();
+                int rowsAffected = command.ExecuteNonQuery();
+                //Debug.Log($"✅ 플레이어 데이터 저장 완료! 변경된 행 수: {rowsAffected}");
             }
-            connection.Close();
         }
-        Debug.Log("✅ 플레이어 데이터 SQLite에 저장 완료");
     }
+
     // 🔹 플레이어 스탯 저장
     public void SavePlayerStats(PlayerStatsData stats)
     {
@@ -343,15 +346,16 @@ public class SQLiteManager : MonoBehaviour
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"
-                    INSERT OR REPLACE INTO playerItems 
-                    (itemId, playerId, itemUniqueId, itemType, isUnlocked, acquiredAt) 
-                    VALUES (@itemId, @playerId, @itemUniqueId, @itemType, @isUnlocked, @acquiredAt);
-                ";
+                INSERT OR REPLACE INTO playerItems 
+                (itemId, playerId, itemUniqueId, itemType, price, isUnlocked, acquiredAt) 
+                VALUES (@itemId, @playerId, @itemUniqueId, @itemType, @price, @isUnlocked, @acquiredAt);
+            ";
 
                 command.Parameters.AddWithValue("@itemId", item.itemId);
                 command.Parameters.AddWithValue("@playerId", item.playerId);
                 command.Parameters.AddWithValue("@itemUniqueId", item.itemUniqueId);
                 command.Parameters.AddWithValue("@itemType", item.itemType);
+                command.Parameters.AddWithValue("@price", item.price); 
                 command.Parameters.AddWithValue("@isUnlocked", item.isUnlocked ? 1 : 0);
                 command.Parameters.AddWithValue("@acquiredAt", item.acquiredAt);
 
@@ -359,8 +363,9 @@ public class SQLiteManager : MonoBehaviour
             }
             connection.Close();
         }
-        Debug.Log("✅ 플레이어 아이템 SQLite에 저장 완료");
+        //Debug.Log("✅ 플레이어 아이템 SQLite에 저장 완료");
     }
+
 
     // 🔹 랭킹 데이터 저장
     public void SaveRankingData(PlayerRankingData ranking)
@@ -418,14 +423,15 @@ public class SQLiteManager : MonoBehaviour
         using (var connection = new SqliteConnection(dbPath))
         {
             connection.Open();
-            string query = "SELECT * FROM players LIMIT 1";
+            string query = "SELECT * FROM players Limit 1";//WHERE deviceId = @deviceId";//추가 가능
+
             using (var command = new SqliteCommand(query, connection))
             {
                 using (var reader = command.ExecuteReader())
                 {
                     if (reader.Read())
                     {
-                        return new PlayerData(
+                        PlayerData loadedPlayer = new PlayerData(
                             reader.GetInt32(0),  // playerId
                             reader.GetString(1), // deviceId
                             reader.GetString(2), // googleId
@@ -433,15 +439,19 @@ public class SQLiteManager : MonoBehaviour
                             reader.GetString(4), // profileIcon
                             reader.GetString(5), // boardImage
                             reader.GetInt32(6),  // rating
-                            reader.GetInt32(7),   // currency
-                            reader.GetString(8)  // createAt
+                            reader.GetInt32(7),  // currency
+                            reader.GetString(8)  // createdAt
                         );
+                        //Debug.Log($"✅ 불러온 플레이어 데이터: {loadedPlayer.ToString()}");
+                        return loadedPlayer;
                     }
                 }
             }
         }
+        Debug.Log("❌ SQLite에 플레이어 데이터 없음");
         return null; // 플레이어 데이터 없음
     }
+
 
     // 🔹 2️⃣ 플레이어 스탯 불러오기 (SQLite)
     public PlayerStatsData LoadPlayerStats()
@@ -462,7 +472,7 @@ public class SQLiteManager : MonoBehaviour
                         int losses = reader.GetInt32(3);
                         double winRate = reader.GetDouble(4); // REAL 값 가져오기
 
-                        Debug.Log($"✅ 플레이어 스탯 로드 성공: playerId={player.playerId}, totalGames={totalGames}, wins={wins}, losses={losses}, winRate={winRate}");
+                        //Debug.Log($"✅ 플레이어 스탯 로드 성공: playerId={player.playerId}, totalGames={totalGames}, wins={wins}, losses={losses}, winRate={winRate}");
 
                         return new PlayerStatsData(player.playerId, totalGames, wins, losses, (float)winRate);
                     }
@@ -472,8 +482,6 @@ public class SQLiteManager : MonoBehaviour
         Debug.LogWarning($"⚠️ playerStats 테이블에서 playerId={player.playerId} 데이터를 찾을 수 없음!");
         return null;
     }
-
-
 
     // 🔹 3️⃣ 로그인 기록 불러오기
     public LoginData LoadLoginData()
@@ -551,9 +559,7 @@ public class SQLiteManager : MonoBehaviour
         return matchList;
     }
 
-
-
-    // 🔹 5️⃣ 플레이어 아이템 불러오기 (리스트 반환)
+    // 🔹 플레이어 아이템 불러오기 (리스트 반환)
     public List<PlayerItemData> LoadPlayerItems()
     {
         List<PlayerItemData> itemList = new List<PlayerItemData>();
@@ -572,8 +578,9 @@ public class SQLiteManager : MonoBehaviour
                             reader.GetInt32(1),  // playerId
                             reader.GetInt32(2),  // itemUniqueId
                             reader.GetString(3), // itemType
-                            reader.GetInt32(4) == 1, // isUnlocked (SQLite에서는 INTEGER로 저장됨)
-                            reader.GetString(5)  // acquiredAt
+                            reader.GetInt32(4),  // 
+                            reader.GetInt32(5) == 1, // isUnlocked
+                            reader.GetString(6)  // acquiredAt
                         ));
                     }
                 }
@@ -581,6 +588,7 @@ public class SQLiteManager : MonoBehaviour
         }
         return itemList;
     }
+
 
     // 🔹 랭킹 데이터 불러오기
     public List<PlayerRankingData> LoadRankings()
@@ -602,7 +610,7 @@ public class SQLiteManager : MonoBehaviour
                             reader.GetString(1), // playerName
                             reader.GetInt32(2),  // rating
                             reader.GetInt32(3),  // rankPosition
-                            reader.GetString(4)
+                            !reader.IsDBNull(4) ? reader.GetString(4) : "101" // 🔹 NULL 체크 후 기본값 설정
                         ));
                     }
                 }
@@ -630,7 +638,7 @@ public class SQLiteManager : MonoBehaviour
                             reader.GetString(1), // playerName
                             reader.GetInt32(2),  // rating
                             reader.GetInt32(3),   // rankPosition
-                            reader.GetString(4)
+                            !reader.IsDBNull(4) ? reader.GetString(4) : "101" // 🔹 NULL 체크 후 기본값 설정
                         );
 
                         Debug.Log($"✅ [SQLite] 내 랭킹 데이터 로드 성공: {myRanking.playerName} (Rank: {myRanking.rankPosition})");
