@@ -63,9 +63,12 @@ public class MatchRecordsManager : MonoBehaviour
                 );
             }
 
+            AddressableManager.Instance.matchIconObj.Add(matchData.gameObject);
             activeMatchRecords.Add(matchInstance); // 🔹 활성화된 오브젝트 리스트에 추가
             recordCount++;
         }
+
+        AddressableManager.Instance.LoadMatchIconFromGroup();
     }
 
     // ✅ 기존 활성화된 매치 데이터 초기화 (비활성화 처리)

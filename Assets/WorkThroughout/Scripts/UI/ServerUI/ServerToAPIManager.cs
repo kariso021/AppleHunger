@@ -356,8 +356,6 @@ public class ServerToAPIManager : NetworkBehaviour
         }
     }
 
-
-
     #endregion
 
     #region Player Login Region

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class RankingRecordsManager : MonoBehaviour
 {
@@ -15,6 +14,7 @@ public class RankingRecordsManager : MonoBehaviour
     {
         // ✅ 랭킹 변경 이벤트 구독 (자동 갱신)
         DataSyncManager.Instance.OnPlayerRankingChanged += UpdateRankRecords;
+        
     }
 
     // ✅ 랭킹 UI 업데이트
@@ -65,6 +65,8 @@ public class RankingRecordsManager : MonoBehaviour
 
                 // 🔹 딕셔너리에 추가 (재사용을 위해)
                 rankingObjects[rankData.playerId] = rankingData;
+
+                AddressableManager.Instance.rankingIconObj.Add(rankingData.gameObject);
             }
 
             // 🔹 데이터 설정
@@ -75,6 +77,8 @@ public class RankingRecordsManager : MonoBehaviour
                 rankData.rankPosition,
                 rankData.profileIcon
             );
+
+            
 
             recordCount++;
         }
@@ -96,6 +100,12 @@ public class RankingRecordsManager : MonoBehaviour
             SQLiteManager.Instance.myRankingData.rankPosition,
             SQLiteManager.Instance.myRankingData.profileIcon
         );
+
+        if (!AddressableManager.Instance.rankingIconObj.Contains(myRankingData))
+            AddressableManager.Instance.rankingIconObj.Add(myRankingData.gameObject);
+
+        // 랭킹 프로필 이미지 갱신
+        AddressableManager.Instance.LoadRankingIconFromGroup();
     }
 
     // ✅ 데이터 변경 시 자동 갱신
@@ -103,5 +113,20 @@ public class RankingRecordsManager : MonoBehaviour
     {
         Debug.Log("🔄 [RankingRecordsManager] 랭킹 데이터 변경 감지 → UI 갱신");
         CreateRankRecords();
+    }
+
+    public void UpdateMyRankingRecords()
+    {
+        // ✅ 내 랭킹 데이터 갱신
+        myRankingData.GetComponent<RankingData>().SetRankingData(
+            SQLiteManager.Instance.myRankingData.playerId,
+            SQLiteManager.Instance.myRankingData.playerName,
+            SQLiteManager.Instance.myRankingData.rating,
+            SQLiteManager.Instance.myRankingData.rankPosition,
+            SQLiteManager.Instance.myRankingData.profileIcon
+        );
+
+        if (!AddressableManager.Instance.rankingIconObj.Contains(myRankingData))
+            AddressableManager.Instance.rankingIconObj.Add(myRankingData.gameObject);
     }
 }

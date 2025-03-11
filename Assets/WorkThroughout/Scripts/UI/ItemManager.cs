@@ -1,11 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ItemManager : MonoBehaviour
 {
     public GameObject itemDataIconListHolder;
     public GameObject itemDataBoardListHolder;
     private Dictionary<int, ItemData> activeItems = new Dictionary<int, ItemData>(); // 아이템 ID별 저장
+
+    public GameObject currentItemIcon;
+    public GameObject currentItemBoard;
 
     private void Start()
     {
@@ -17,9 +21,16 @@ public class ItemManager : MonoBehaviour
     public void CreateItemList(string type)
     {
         List<PlayerItemData> playerItemsList = SQLiteManager.Instance.LoadPlayerItems();
-        if (playerItemsList.Count == 0) return;
 
+        if (playerItemsList.Count == 0) return;
+       
         GameObject holder = type == "icon" ? itemDataIconListHolder : itemDataBoardListHolder;
+
+        // 현재 사용중인 아이템 표시를 위함
+        currentItemIcon.GetComponent<ItemData>().SetItemData(SQLiteManager.Instance.player.profileIcon);
+        currentItemBoard.GetComponent<ItemData>().SetItemData(SQLiteManager.Instance.player.boardImage);
+        currentItemIcon.GetComponent<ItemData>().itemIcon = currentItemIcon.GetComponent<Image>();
+        currentItemBoard.GetComponent<ItemData>().itemIcon = currentItemBoard.GetComponent<Image>();
 
         foreach (var itemData in playerItemsList)
         {
@@ -54,7 +65,28 @@ public class ItemManager : MonoBehaviour
                 );
 
                 activeItems[itemData.itemUniqueId] = newItem;
+
+                if (type == "icon")
+                    AddressableManager.Instance.itemIconObj.Add(itemInstance);
+                else
+                    AddressableManager.Instance.itemBoardObj.Add(itemInstance);
             }
+            
+        }
+
+        if (type == "icon")
+        {
+            if(!AddressableManager.Instance.itemIconObj.Contains(currentItemIcon))
+                AddressableManager.Instance.itemIconObj.Add(currentItemIcon);
+            Debug.Log("=================아이콘 이미지 변경=======================");
+            AddressableManager.Instance.LoadItemIconFromGroup();
+        }
+        else
+        {
+            if (!AddressableManager.Instance.itemBoardObj.Contains(currentItemBoard))
+                AddressableManager.Instance.itemBoardObj.Add(currentItemBoard);
+            Debug.Log("==================보드 이미지 변경==========================");
+            AddressableManager.Instance.LoadItemBoardFromGroup();
         }
     }
 

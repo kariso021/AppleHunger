@@ -51,7 +51,7 @@ public class PopupManager : MonoBehaviour
         }
 
     }
-    public void ShowPopup(GameObject popup,int playerId)
+    public void ShowPopup(GameObject popup, int playerId)
     {
         // 만약 현재 활성화 된 팝업이 있다면?
         if (activePopup != null)
@@ -76,11 +76,7 @@ public class PopupManager : MonoBehaviour
         Debug.Log($"✅ PROFILE LOADED: {SQLiteManager.Instance.playerDetails.playerName} , {SQLiteManager.Instance.playerDetails.playerId}");
 
         // 자기 자신의 프로필을 열람할 때만 매치 기록을 불러오기
-        if (SQLiteManager.Instance.player.playerId == SQLiteManager.Instance.playerDetails.playerId)
-        {
-            FindAnyObjectByType<MatchRecordsManager>().CreateMatchRecords();
-        }
-        if (activePopup != null) 
+        if (activePopup != null)
         {
             if (activePopup.tag == "Profile") // 현재 활성화 된 팝업이 프로필 관련일때만
             {
@@ -93,7 +89,16 @@ public class PopupManager : MonoBehaviour
                 SQLiteManager.Instance.playerDetails.rating,
                 SQLiteManager.Instance.playerDetails.unlockIcons,
                 SQLiteManager.Instance.playerDetails.unlockBoards
-            );
+                );
+
+
+                if (SQLiteManager.Instance.player.playerId == SQLiteManager.Instance.playerDetails.playerId)
+                {
+                    FindAnyObjectByType<MatchRecordsManager>().CreateMatchRecords();
+                    AddressableManager.Instance.LoadProfilePopupIconFromGroup();
+                }
+                else 
+                    AddressableManager.Instance.LoadRankProfilePopupIconFromGroup();
             }
         }
         else

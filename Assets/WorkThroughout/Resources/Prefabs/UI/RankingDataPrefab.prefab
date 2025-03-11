@@ -300,7 +300,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fd6b02e38f375741b30ad9f883d6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  profileIcon: {fileID: 0}
+  iconImage: {fileID: 3327695202122848491}
   nameText: {fileID: 6856216343172656414}
   ratingText: {fileID: 441642756913916476}
   rankText: {fileID: 553135546943692929}

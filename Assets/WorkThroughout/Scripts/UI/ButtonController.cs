@@ -85,10 +85,31 @@ public class ButtonController : MonoBehaviour
         NavManager.Instance.NavigateTo("Collection/Icon"));
         customBoadrButton.onClick.AddListener(() =>
         NavManager.Instance.NavigateTo("Collection/Board"));
+
         customIconConfrimButton.onClick.AddListener(() =>
         NavManager.Instance.NavigateTo("Collection"));
+
+        customIconConfrimButton.onClick.AddListener(() =>
+        SQLiteManager.Instance.player.profileIcon = 
+        FindAnyObjectByType<ItemManager>().currentItemIcon.
+        GetComponent<ItemData>().itemUniqueId.ToString());
+
+        customIconConfrimButton.onClick.AddListener(() =>
+        FindAnyObjectByType<RankingRecordsManager>().UpdateMyRankingRecords());
+
+        customIconConfrimButton.onClick.AddListener(() =>
+        clientNetworkManager.UpdatePlayerData());
+
         customBoardConfrimButton.onClick.AddListener(() =>
         NavManager.Instance.NavigateTo("Collection"));
+
+        customBoardConfrimButton.onClick.AddListener(() =>
+        SQLiteManager.Instance.player.boardImage =
+        FindAnyObjectByType<ItemManager>().currentItemBoard.
+        GetComponent<ItemData>().itemUniqueId.ToString());
+
+        customBoardConfrimButton.onClick.AddListener(() =>
+        clientNetworkManager.UpdatePlayerData());
 
         // NavBar Buttons
         // Button ¹ÙÀÎµù

@@ -591,14 +591,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 084575ca489217146b4779532281250a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerName: 
-  rating: 0
-  winnerId: 0
-  isWin: 0
   nameText: {fileID: 8514676572873924367}
   ratingText: {fileID: 526215129713224938}
   resultText: {fileID: 7834478793220864962}
-  iconSprite: {fileID: 0}
+  iconSprite: {fileID: 2600629388647034369}
 --- !u!1 &8851360866807022597
 GameObject:
   m_ObjectHideFlags: 0

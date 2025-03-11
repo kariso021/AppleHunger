@@ -47,8 +47,17 @@ public class ItemData : MonoBehaviour
         }
         else
         {
-            itemButton.onClick.AddListener(() => Debug.Log("✅ 이미 해금된 아이템"));
+            itemButton.onClick.AddListener(() => applySelectItemDataToCurrentItemData(itemType));
         }
+    }
+    /// <summary>
+    /// Collection 에서 현재 내가 사용하고 있는 아이콘,보드 이미지를 보여주기 위한 데이터만을 저장하는 함수
+    /// 그 외 용도는 SetItemData(int playerId, int itemUniqueId, string itemType, int price, bool isUnlocked, string acquiredAt) 참조
+    /// </summary>
+    /// <param name="itemUniqueId"></param>
+    public void SetItemData(string itemUniqueId)
+    {
+        this.itemUniqueId = int.Parse(itemUniqueId); // stoi 같은거
     }
 
     public void UpdateItem(bool newUnlockStatus)
@@ -60,7 +69,23 @@ public class ItemData : MonoBehaviour
         itemButton.onClick.RemoveAllListeners();
         if (isUnlocked)
         {
-            itemButton.onClick.AddListener(() => Debug.Log("✅ 이미 해금된 아이템"));
+            itemButton.onClick.AddListener(() => applySelectItemDataToCurrentItemData(itemType));
         }
     }
+
+    private void applySelectItemDataToCurrentItemData(string itemType)
+    {
+        if (itemType == "icon")
+        {
+            FindAnyObjectByType<ItemManager>().currentItemIcon.GetComponent<Image>().sprite = itemIcon.sprite;
+            FindAnyObjectByType<ItemManager>().currentItemIcon.GetComponent<ItemData>().itemUniqueId = this.itemUniqueId;
+        }
+        else
+        {
+            FindAnyObjectByType<ItemManager>().currentItemBoard.GetComponent<Image>().sprite = itemIcon.sprite;
+            FindAnyObjectByType<ItemManager>().currentItemBoard.GetComponent<ItemData>().itemUniqueId = this.itemUniqueId;
+        }
+
+    }
+
 }

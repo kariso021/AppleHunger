@@ -377,13 +377,14 @@ public class SQLiteManager : MonoBehaviour
             {
                 Debug.Log($"🔹 SQLite에 랭킹 저장: {ranking.playerName}, 랭킹: {ranking.rankPosition}");
                 command.CommandText = @"
-                INSERT OR REPLACE INTO rankings (playerId, playerName, rating, rankPosition)
-                VALUES (@playerId, @playerName, @rating, @rankPosition);";
+                INSERT OR REPLACE INTO rankings (playerId, playerName, rating, rankPosition, profileIcon)
+                VALUES (@playerId, @playerName, @rating, @rankPosition, @profileIcon);";
 
                 command.Parameters.AddWithValue("@playerId", ranking.playerId);
                 command.Parameters.AddWithValue("@playerName", ranking.playerName);
                 command.Parameters.AddWithValue("@rating", ranking.rating);
                 command.Parameters.AddWithValue("@rankPosition", ranking.rankPosition);
+                command.Parameters.AddWithValue("@profileIcon", ranking.profileIcon);
 
                 command.ExecuteNonQuery();
             }
@@ -400,14 +401,16 @@ public class SQLiteManager : MonoBehaviour
             {
                 command.CommandText = @"
                 INSERT OR REPLACE INTO myRanking 
-                (playerId, playerName, rating, rankPosition)
-                VALUES (@playerId, @playerName, @rating, @rankPosition);
+                (playerId, playerName, rating, rankPosition, profileIcon)
+                VALUES (@playerId, @playerName, @rating, @rankPosition, @profileIcon);
             ";
 
                 command.Parameters.AddWithValue("@playerId", myRanking.playerId);
                 command.Parameters.AddWithValue("@playerName", myRanking.playerName);
                 command.Parameters.AddWithValue("@rating", myRanking.rating);
                 command.Parameters.AddWithValue("@rankPosition", myRanking.rankPosition);
+                command.Parameters.AddWithValue("@profileIcon",myRanking.profileIcon);
+
 
                 command.ExecuteNonQuery();
             }

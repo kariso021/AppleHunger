@@ -85,6 +85,7 @@ public class DataSyncManager : MonoBehaviour
     {
         Debug.Log("🔄 플레이어 랭킹 변경 감지 → MySQL에서 최신 데이터 가져오기");
         FindAnyObjectByType<ClientNetworkManager>().GetRankingList();
+  
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
         Invoke(nameof(SyncSQLite), 1.0f);
