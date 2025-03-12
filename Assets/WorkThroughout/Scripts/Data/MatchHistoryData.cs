@@ -1,30 +1,29 @@
+ï»¿using Unity.Netcode;
 using System;
 
 [Serializable]
-public class MatchHistoryData
+public struct MatchHistoryData : INetworkSerializable
 {
-    public int matchId;         // ¸ÅÄ¡ ID (°íÀ¯°ª)
-    public int player1Id;       // ÇÃ·¹ÀÌ¾î 1 ID
-    public string player1Name;  // ÇÃ·¹ÀÌ¾î 1 ÀÌ¸§
-    public int player1Rating;   // ÇÃ·¹ÀÌ¾î 1 ·¹ÀÌÆÃ
-    public string player1Icon;  // ÇÃ·¹ÀÌ¾î 1 ÇÁ·ÎÇÊ ¾ÆÀÌÄÜ
+    public int matchId;
+    public int player1Id;
+    public string player1Name;
+    public int player1Rating;
+    public string player1Icon;
 
-    public int player2Id;       // ÇÃ·¹ÀÌ¾î 2 ID
-    public string player2Name;  // ÇÃ·¹ÀÌ¾î 2 ÀÌ¸§
-    public int player2Rating;   // ÇÃ·¹ÀÌ¾î 2 ·¹ÀÌÆÃ
-    public string player2Icon;  // ÇÃ·¹ÀÌ¾î 2 ÇÁ·ÎÇÊ ¾ÆÀÌÄÜ
+    public int player2Id;
+    public string player2Name;
+    public int player2Rating;
+    public string player2Icon;
 
-    public int winnerId;        // ½Â¸®ÇÑ ÇÃ·¹ÀÌ¾î ID
-    public string matchDate;    // ¸ÅÄ¡ ³¯Â¥ (JSON º¯È¯À» À§ÇØ ¹®ÀÚ¿­)
+    public int winnerId;
+    public string matchDate;
 
-    public MatchHistoryData() { } // ±âº» »ı¼ºÀÚ°¡ ÀÖ¾î¾ß jsonÀ» ÅëÇÑ º¯È¯ÀÌ °¡´ÉÇÔ
-
+    // ğŸ”¥ ì‚¬ìš©ì ì •ì˜ ìƒì„±ì ì¶”ê°€ (ëª¨ë“  í•„ë“œ ì´ˆê¸°í™”)
     public MatchHistoryData(int matchId, int player1Id, string player1Name, int player1Rating, string player1Icon,
                             int player2Id, string player2Name, int player2Rating, string player2Icon,
                             int winnerId, string matchDate)
     {
         this.matchId = matchId;
-
         this.player1Id = player1Id;
         this.player1Name = player1Name;
         this.player1Rating = player1Rating;
@@ -37,5 +36,21 @@ public class MatchHistoryData
 
         this.winnerId = winnerId;
         this.matchDate = matchDate;
+    }
+
+    // ğŸ”¥ Netcode ì§ë ¬í™” ì§€ì› (INetworkSerializable êµ¬í˜„)
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref matchId);
+        serializer.SerializeValue(ref player1Id);
+        serializer.SerializeValue(ref player1Name);
+        serializer.SerializeValue(ref player1Rating);
+        serializer.SerializeValue(ref player1Icon);
+        serializer.SerializeValue(ref player2Id);
+        serializer.SerializeValue(ref player2Name);
+        serializer.SerializeValue(ref player2Rating);
+        serializer.SerializeValue(ref player2Icon);
+        serializer.SerializeValue(ref winnerId);
+        serializer.SerializeValue(ref matchDate);
     }
 }

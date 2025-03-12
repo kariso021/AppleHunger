@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
-using FishNet.Object;
-using FishNet.Connection;
+using Unity.Netcode;
+
 public class UIServer : NetworkBehaviour
 {
-    // Start 같은 개념이네
-    public override void OnStartServer() // ✅ FishNet의 서버 시작 이벤트 활용
+    public override void OnNetworkSpawn()
     {
-        base.OnStartServer();
+        base.OnNetworkSpawn();
 
         // 서버에서만 실행되도록 보장
         if (!IsServer)

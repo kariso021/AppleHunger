@@ -1,19 +1,20 @@
-using System;
+ï»¿using System;
+using Unity.Netcode;
 [Serializable]
 
-public class PlayerData
+public class PlayerData : INetworkSerializable
 {
-    public int playerId;       // ÇÃ·¹ÀÌ¾î ID, Auto-Increment °è¿­ÀÌ¶ó »ı¼ºÀÚ¿¡¼­ µû·Î ÁöÁ¤ÇØÁÙ ÇÊ¿ä ¾øÀ½
-    public string deviceId;    // °Ô½ºÆ® ·Î±×ÀÎ¿ë ±â±â ID
-    public string googleId;    // ±¸±Û ·Î±×ÀÎ¿ë ID
-    public string playerName;  // ´Ğ³×ÀÓ
-    public string profileIcon; // ÇÁ·ÎÇÊ ¾ÆÀÌÄÜ (°æ·Î)
-    public string boardImage;  // ÀÎ°ÔÀÓ º¸µå ÀÌ¹ÌÁö (°æ·Î)
-    public int rating;         // ·¹ÀÌÆÃ Á¡¼ö
-    public int currency;       // º¸À¯ ÀçÈ­
-    public string createdAt;   // À¯Àú È¸¿ø°¡ÀÔ ½ÃÁ¡
+    public int playerId;       // í”Œë ˆì´ì–´ ID, Auto-Increment ê³„ì—´ì´ë¼ ìƒì„±ìì—ì„œ ë”°ë¡œ ì§€ì •í•´ì¤„ í•„ìš” ì—†ìŒ
+    public string deviceId;    // ê²ŒìŠ¤íŠ¸ ë¡œê·¸ì¸ìš© ê¸°ê¸° ID
+    public string googleId;    // êµ¬ê¸€ ë¡œê·¸ì¸ìš© ID
+    public string playerName;  // ë‹‰ë„¤ì„
+    public string profileIcon; // í”„ë¡œí•„ ì•„ì´ì½˜ (ê²½ë¡œ)
+    public string boardImage;  // ì¸ê²Œì„ ë³´ë“œ ì´ë¯¸ì§€ (ê²½ë¡œ)
+    public int rating;         // ë ˆì´íŒ… ì ìˆ˜
+    public int currency;       // ë³´ìœ  ì¬í™”
+    public string createdAt;   // ìœ ì € íšŒì›ê°€ì… ì‹œì 
 
-    //±âº» »ı¼ºÀÚ Ãß°¡ (JsonUtility¿Í Fish-NetÀÌ ÇÊ¿ä·Î ÇÔ)
+    //ê¸°ë³¸ ìƒì„±ì ì¶”ê°€ (JsonUtilityì™€ Fish-Netì´ í•„ìš”ë¡œ í•¨)
 
     public PlayerData() { }
     public PlayerData(string deviceId,string googleId,string name, string icon, string board, int rating, int currency)
@@ -50,6 +51,19 @@ public class PlayerData
                $"rating: {rating}, " +
                $"currency: {currency}, " +
                $"createdAt: {createdAt} }}";
+    }
+    // ğŸ”¥ Netcodeì—ì„œ ì§ë ¬í™” ê°€ëŠ¥í•˜ë„ë¡ INetworkSerializable êµ¬í˜„
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref playerId);
+        serializer.SerializeValue(ref deviceId);
+        serializer.SerializeValue(ref googleId);
+        serializer.SerializeValue(ref playerName);
+        serializer.SerializeValue(ref profileIcon);
+        serializer.SerializeValue(ref boardImage);
+        serializer.SerializeValue(ref rating);
+        serializer.SerializeValue(ref currency);
+        serializer.SerializeValue(ref createdAt);
     }
 
 }
