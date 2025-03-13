@@ -294,8 +294,8 @@ GameObject:
   m_Component:
   - component: {fileID: 198061383}
   - component: {fileID: 198061384}
-  - component: {fileID: 198061385}
   - component: {fileID: 198061386}
+  - component: {fileID: 198061387}
   m_Layer: 0
   m_Name: PoolManager
   m_TagString: Untagged
@@ -339,22 +339,6 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &198061385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 198061382}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cde903b2076fb0488ee0f58c9c93f08, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  applePrefab: {fileID: 4085994389983080293, guid: 888ca3dbd536bc94e83fb6a884d7d661, type: 3}
-  gridWidth: 5
-  gridHeight: 5
-  spacing: 1.1
 --- !u!114 &198061386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -368,8 +352,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PooledPrefabsList:
-  - Prefab: {fileID: 4085994389983080293, guid: 888ca3dbd536bc94e83fb6a884d7d661, type: 3}
+  - Prefab: {fileID: 5749813513355723202, guid: ba17bc469c1d84d4f8419864c978abea, type: 3}
     PrewarmCount: 40
+--- !u!114 &198061387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198061382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cde903b2076fb0488ee0f58c9c93f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  applePrefab: {fileID: 5749813513355723202, guid: ba17bc469c1d84d4f8419864c978abea, type: 3}
+  gridWidth: 5
+  gridHeight: 5
+  spacing: 1.5
 --- !u!1 &317170067
 GameObject:
   m_ObjectHideFlags: 0
@@ -1362,6 +1362,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1408497888}
   - component: {fileID: 1408497889}
+  - component: {fileID: 1408497890}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -1398,8 +1399,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NetworkConfig:
     ProtocolVersion: 0
-    NetworkTransport: {fileID: 0}
-    PlayerPrefab: {fileID: 3392427690449076057, guid: 3cd6e940a4e3eed47ad43103d39b9196, type: 3}
+    NetworkTransport: {fileID: 1408497890}
+    PlayerPrefab: {fileID: 314647617582520290, guid: c9c338941fe8aee46953f6608d4067aa, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 5e301c2a6d2648044973d5ffad491224, type: 2}
@@ -1421,6 +1422,33 @@ MonoBehaviour:
     OldPrefabList: []
   RunInBackground: 1
   LogLevel: 1
+--- !u!114 &1408497890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1408497887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ProtocolType: 0
+  m_MaxPacketQueueSize: 128
+  m_MaxPayloadSize: 6144
+  m_HeartbeatTimeoutMS: 500
+  m_ConnectTimeoutMS: 1000
+  m_MaxConnectAttempts: 60
+  m_DisconnectTimeoutMS: 30000
+  ConnectionData:
+    Address: 127.0.0.1
+    Port: 7777
+    ServerListenAddress: 127.0.0.1
+  DebugSimulator:
+    PacketDelayMS: 0
+    PacketJitterMS: 0
+    PacketDropRate: 0
 --- !u!1 &1485358724
 GameObject:
   m_ObjectHideFlags: 0
