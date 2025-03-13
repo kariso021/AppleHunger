@@ -1,0 +1,322 @@
+﻿using Unity.Netcode;
+using TMPro;
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.UI;
+using System;
+
+public class PlayerController : NetworkBehaviour
+{
+    private Camera mainCamera;
+    private List<GameObject> selectedApples = new List<GameObject>();
+    private ScoreManager scoreManager;
+    private Dictionary<GameObject, Color> originalColors = new Dictionary<GameObject, Color>();
+    private int currentSum = 0;
+    private Vector2 dragStartPos;
+    private Vector2 dragEndPos;
+    private bool isDragging = false;
+    private bool isDragRestricted = false;
+    private bool isCooldownActive = false;
+
+    private float updateInterval = 0.016f; // 20 FPS
+    private float timeSinceLastUpdate = 0f;
+
+    public static event Action<int, int, ulong> OnAppleCollected; // (사과 개수, 점수 값, 클라이언트 ID)
+
+    [Header("Local Drag Box")]
+    public GameObject localDragBox;
+    private SpriteRenderer localDragBoxRenderer;
+
+
+    [Header("Network Drag Box")]
+    private NetworkDragBoxManager networkDragBoxManager;
+
+    public Image flashImage;
+    private CanvasGroup flashCanvasGroup;
+
+
+
+    private void Awake()
+    {
+        EnhancedTouchSupport.Enable();
+
+
+        flashCanvasGroup = flashImage.GetComponent<CanvasGroup>();
+        if (flashCanvasGroup == null)
+        {
+            flashCanvasGroup = flashImage.gameObject.AddComponent<CanvasGroup>();
+        }
+        flashCanvasGroup.alpha = 0f;
+        flashCanvasGroup.blocksRaycasts = false;
+    }
+
+
+    private void Start()
+    {
+        mainCamera = Camera.main;
+        scoreManager = GetComponent<ScoreManager>(); // ScoreManager 연결
+
+        if (localDragBox != null)
+        {
+            localDragBoxRenderer = localDragBox.GetComponent<SpriteRenderer>();
+            localDragBoxRenderer.enabled = false;
+        }
+        else
+        {
+            Debug.LogError("🚨 Local DragBox가 씬에 존재하지 않습니다!");
+        }
+
+
+
+
+
+        //  자기 자신의 NetworkDragBoxManager 참조
+        networkDragBoxManager = GetComponentInChildren<NetworkDragBoxManager>();
+    }
+
+
+    private void OnEnable()
+    {
+        TouchSimulation.Enable();
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown += OnFingerDown;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove += OnFingerMove;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp += OnFingerUp;
+    }
+
+    private void OnDisable()
+    {
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= OnFingerDown;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove -= OnFingerMove;
+        UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp -= OnFingerUp;
+    }
+
+
+
+
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (!IsOwner) return;
+
+        if (localDragBox != null)
+        {
+            localDragBoxRenderer = localDragBox.GetComponent<SpriteRenderer>();
+            localDragBoxRenderer.enabled = true;
+        }
+        else
+        {
+            Debug.LogError("🚨 Local DragBox가 씬에 존재하지 않습니다!");
+        }
+    }
+
+    private void OnFingerDown(Finger finger)
+    {
+        if (!IsOwner || isDragRestricted || isCooldownActive) return;
+        dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
+        isDragging = false;
+    }
+
+    private void OnFingerMove(Finger finger)
+    {
+        if (!IsOwner || isDragRestricted || isCooldownActive) return;
+
+        timeSinceLastUpdate += Time.deltaTime;
+        if (timeSinceLastUpdate < updateInterval) return;
+        timeSinceLastUpdate = 0f;
+
+        if (!isDragging)
+        {
+            float dragThreshold = 0.1f;
+            if (Vector2.Distance(dragStartPos, mainCamera.ScreenToWorldPoint(finger.screenPosition)) > dragThreshold)
+            {
+                isDragging = true;
+                localDragBoxRenderer.enabled = true;
+                selectedApples.Clear();
+                currentSum = 0;
+
+                networkDragBoxManager.SendDragStartServerRpc(dragStartPos, OwnerClientId);
+            }
+        }
+
+        if (isDragging)
+        {
+            dragEndPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
+            UpdateLocalDragBox();
+            DetectAppleUnderCursor();
+
+            networkDragBoxManager.SendDragUpdateServerRpc(dragStartPos,dragEndPos,OwnerClientId);
+        }
+    }
+
+    private void OnFingerUp(Finger finger)
+    {
+        if (!isDragging) return;
+
+        if (currentSum == 10)
+        {
+            List<ulong> appleIds = new List<ulong>();
+            foreach (GameObject apple in selectedApples)
+            {
+                if (apple.TryGetComponent(out NetworkObject netObj))
+                {
+                    appleIds.Add(netObj.NetworkObjectId);
+                }
+            }
+
+            RequestAppleRemovalServerRpc(appleIds.ToArray(), currentSum, OwnerClientId);
+        }
+        else
+        {
+            ResetAppleColors();
+            StartCoroutine(TriggerFlashEffect());
+        }
+
+        localDragBoxRenderer.enabled = false;
+        isDragging = false;
+
+
+        networkDragBoxManager.SendDragEndServerRpc(OwnerClientId);
+    }
+
+    private void UpdateLocalDragBox()
+    {
+        Vector2 center = (dragStartPos + dragEndPos) / 2;
+        Vector2 size = new Vector2(Mathf.Abs(dragEndPos.x - dragStartPos.x), Mathf.Abs(dragEndPos.y - dragStartPos.y));
+
+        localDragBox.transform.position = center;
+        localDragBox.transform.localScale = new Vector3(size.x, size.y, 1);
+    }
+
+    private void DetectAppleUnderCursor()
+    {
+        Bounds dragBounds = new Bounds((dragStartPos + dragEndPos) / 2,
+                                       new Vector3(Mathf.Abs(dragEndPos.x - dragStartPos.x), Mathf.Abs(dragEndPos.y - dragStartPos.y), 1));
+
+        List<GameObject> applesToDeselect = new List<GameObject>();
+
+        foreach (GameObject apple in selectedApples)
+        {
+            if (apple == null) continue;
+            if (!dragBounds.Contains(apple.transform.position))
+            {
+                applesToDeselect.Add(apple);
+            }
+        }
+
+        foreach (GameObject apple in applesToDeselect)
+        {
+            if (apple != null && originalColors.ContainsKey(apple))
+            {
+                apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
+                selectedApples.Remove(apple);
+                currentSum -= apple.GetComponent<Apple>().Value;
+            }
+        }
+
+        foreach (GameObject apple in GameObject.FindGameObjectsWithTag("Apple"))
+        {
+            if (apple == null) continue;
+
+            if (dragBounds.Contains(apple.transform.position))
+            {
+                Apple appleComponent = apple.GetComponent<Apple>();
+                if (!selectedApples.Contains(apple) && appleComponent != null)
+                {
+                    SpriteRenderer appleRenderer = apple.GetComponent<SpriteRenderer>();
+
+                    if (!originalColors.ContainsKey(apple))
+                    {
+                        originalColors[apple] = appleRenderer.color;
+                    }
+
+                    selectedApples.Add(apple);
+                    currentSum += appleComponent.Value;
+                    appleRenderer.color = Color.yellow;
+                }
+            }
+        }
+    }
+
+    private void ResetAppleColors()
+    {
+        foreach (GameObject apple in selectedApples)
+        {
+            if (apple != null && originalColors.ContainsKey(apple))
+            {
+                apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
+            }
+        }
+        selectedApples.Clear();
+        currentSum = 0;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestAppleRemovalServerRpc(ulong[] appleIds, int sum, ulong clientId)
+    {
+        if (sum == 10)
+        {
+            Debug.Log($"Server: Removing {appleIds.Length} apples.");
+
+            int appleCount = appleIds.Length;
+            int AppleScoreValue = 0;
+
+            foreach (ulong appleId in appleIds)
+            {
+                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(appleId, out NetworkObject appleObj))
+                {
+                    if (appleObj.TryGetComponent(out Apple appleComponent))
+                    {
+                        AppleScoreValue = appleComponent.ScoreValue;
+                        appleObj.Despawn();
+                    }
+                }
+            }
+
+            // ✅ 이벤트 호출 (ScoreManager가 직접 처리하도록 위임)
+            OnAppleCollected?.Invoke(appleCount, AppleScoreValue, clientId);
+        }
+    }
+
+    //TrigerFlashImage
+
+    private IEnumerator TriggerFlashEffect()
+    {
+        isDragRestricted = true; // 드래그 제한
+
+        float flashDuration = 0.5f; // 총 지속 시간
+        float halfDuration = flashDuration / 2f; // 절반 동안 밝아지고 절반 동안 어두워짐
+        float elapsedTime = 0f;
+
+        if (flashCanvasGroup != null)
+        {
+            // 밝아지는 구간
+            while (elapsedTime < halfDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float alpha = Mathf.Lerp(0f, 0.5f, elapsedTime / halfDuration); // 부드럽게 증가
+                flashCanvasGroup.alpha = alpha;
+                yield return null;
+            }
+
+            elapsedTime = 0f;
+
+            // 어두워지는 구간
+            while (elapsedTime < halfDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float alpha = Mathf.Lerp(0.5f, 0f, elapsedTime / halfDuration); // 부드럽게 감소
+                flashCanvasGroup.alpha = alpha;
+                yield return null;
+            }
+
+            flashCanvasGroup.alpha = 0f; // 최종적으로 완전히 투명
+        }
+
+        yield return new WaitForSeconds(1.0f); // 1초간 드래그 제한 유지
+        isDragRestricted = false; // 드래그 제한 해제
+    }
+}

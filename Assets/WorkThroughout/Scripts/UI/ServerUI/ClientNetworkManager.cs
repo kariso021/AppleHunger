@@ -3,7 +3,6 @@ using System.Transactions;
 using Unity.Netcode;
 using Unity.Networking.Transport;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class ClientNetworkManager : NetworkBehaviour
 {
