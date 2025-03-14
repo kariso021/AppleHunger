@@ -340,7 +340,7 @@ public class SQLiteManager : MonoBehaviour
     // 🔹 플레이어 아이템 저장
     public void SavePlayerItem(PlayerItemData item)
     {
-        Debug.Log($"[DB INSERT 실행] -----  itemId : {item.itemId}, playerId : {item.playerId}");
+        
 
         using (var connection = new SqliteConnection(dbPath))
         {

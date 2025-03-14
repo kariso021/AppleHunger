@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 public class ServerToAPIManager : NetworkBehaviour
 {
-    private string apiBaseUrl = "https://localhost";
+    private string apiBaseUrl = "https://applehunger.site";
 
 
     private void Start()
