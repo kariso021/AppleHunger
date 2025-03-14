@@ -81,7 +81,7 @@ public class MatchMakerClient : MonoBehaviour
 
     private async void CreateATicket()
     {
-        var options = new CreateTicketOptions(queueName: "AppleModeB");
+        var options = new CreateTicketOptions(queueName: "AppleMode");
 
         var players = new List<Player>
             {
