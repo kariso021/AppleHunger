@@ -14,6 +14,7 @@ public class SQLiteManager : MonoBehaviour
     private static SQLiteManager instance;
     public static SQLiteManager Instance => instance;
 
+    private string dbName = "game_data.db";
     private string dbPath;
 
     public PlayerData player;
@@ -49,10 +50,11 @@ public class SQLiteManager : MonoBehaviour
         saveRankDataToDictionary();
         player.deviceId = "deviceId-559";
         Debug.Log(Application.persistentDataPath);
+        OnSQLiteDataLoaded?.Invoke();
     }
     private void InitializeDatabase()
     {
-        dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, "game_data.db");
+        dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
 
         using (var connection = new SqliteConnection(dbPath))
         {

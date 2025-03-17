@@ -39,5 +39,6 @@ public class Profile : MonoBehaviour
             SQLiteManager.Instance.stats.wins,
             SQLiteManager.Instance.player.rating
             );
+
     }
 }
