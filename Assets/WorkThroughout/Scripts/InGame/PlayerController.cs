@@ -20,6 +20,8 @@ public class PlayerController : NetworkBehaviour
     private bool isDragRestricted = false;
     private bool isCooldownActive = false;
 
+    public static event System.Action<ulong> OnPlayerInitialized;
+
     private float updateInterval = 0.016f; // 20 FPS
     private float timeSinceLastUpdate = 0f;
 
@@ -102,6 +104,7 @@ public class PlayerController : NetworkBehaviour
 
         if (!IsOwner) return;
 
+        OnPlayerInitialized?.Invoke(OwnerClientId);
         if (localDragBox != null)
         {
             localDragBoxRenderer = localDragBox.GetComponent<SpriteRenderer>();
@@ -254,6 +257,7 @@ public class PlayerController : NetworkBehaviour
         currentSum = 0;
     }
 
+
     [ServerRpc(RequireOwnership = false)]
     private void RequestAppleRemovalServerRpc(ulong[] appleIds, int sum, ulong clientId)
     {
@@ -276,8 +280,8 @@ public class PlayerController : NetworkBehaviour
                 }
             }
 
-            // ✅ 이벤트 호출 (ScoreManager가 직접 처리하도록 위임)
-            OnAppleCollected?.Invoke(appleCount, AppleScoreValue, clientId);
+            // ✅ 서버의 ScoreManager에게 점수 추가 요청
+            ScoreManager.Instance?.AddScore(clientId, appleCount, AppleScoreValue);
         }
     }
 

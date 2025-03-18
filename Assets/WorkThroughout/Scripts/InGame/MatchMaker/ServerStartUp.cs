@@ -82,7 +82,7 @@ public class ServerStartUp : MonoBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
     }
 
-    private void ClientDisconnected(ulong clientId) //실제로는 사용 x
+    private void ClientDisconnected(ulong clientId) 
     {
         if(!_backfilling && NetworkManager.Singleton.ConnectedClients.Count > 0&&NeedsPlayers())
         {

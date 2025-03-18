@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using Unity.Netcode;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -9,45 +10,73 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI myScoreText;
     [SerializeField] private TextMeshProUGUI opponentScoreText;
 
-    [Header("Game Timer UI")]
-    [SerializeField] private Slider timerSlider;
-
+    private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
     private ulong myPlayerId;
-    private float maxTime = 60f; // 전체 게임 시간 (서버에서 가져옴)
 
-    private void Start()
+    public static PlayerUI Instance { get; private set; }
+
+    private void Awake()
     {
-        myPlayerId = NetworkManager.Singleton.LocalClientId;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void OnEnable()
     {
-        ScoreManager.OnScoreUpdated += UpdateScoreUI;
-        GameTimer.OnTimerUpdated += UpdateTimerUI;
+        PlayerController.OnPlayerInitialized += SetPlayerId;
     }
 
     private void OnDisable()
     {
-        ScoreManager.OnScoreUpdated -= UpdateScoreUI;
-        GameTimer.OnTimerUpdated -= UpdateTimerUI;
+        PlayerController.OnPlayerInitialized -= SetPlayerId;
     }
 
-    /// ✅ 점수 업데이트
-    private void UpdateScoreUI(ulong playerId, int newScore, int newCombo)
+    /// ✅ `PlayerController`에서 받은 ID를 설정
+    private void SetPlayerId(ulong clientId)
     {
-        if (playerId == myPlayerId)
+        myPlayerId = clientId;
+        Debug.Log($"[Client] My Player ID Set by PlayerController: {myPlayerId}");
+    }
+
+    /// ✅ 서버에서 전달된 점수를 받아 UI 업데이트 (ClientRpc로 호출됨)
+    public static void UpdateScoreUI(ulong playerId, int newScore)
+    {
+        if (Instance != null)
         {
-            myScoreText.text = $"My Score: {newScore} (Combo: {newCombo})";
-        }
-        else
-        {
-            opponentScoreText.text = $"Opponent Score: {newScore}";
+            Instance.SetScoreUI(playerId, newScore);
         }
     }
 
-    /// ✅ 타이머 업데이트 (서버에서 값 받음)
-    private void UpdateTimerUI(float newTime)
+    /// ✅ 개별 플레이어 UI 업데이트
+    private void SetScoreUI(ulong playerId, int newScore)
     {
-        timerSlider.value = newTime / maxTime; // 0~1로 정규화
+        Debug.Log($"[Client] SetScoreUI - PlayerID: {playerId}, New Score: {newScore}, MyPlayerID: {myPlayerId}");
+
+        playerScores[playerId] = newScore;
+        RefreshUI();
+    }
+
+    /// ✅ UI 갱신 (내 점수와 상대 점수 구분)
+    private void RefreshUI()
+    {
+        if (playerScores.ContainsKey(myPlayerId))
+        {
+            myScoreText.text = $"My Score: {playerScores[myPlayerId]}";
+        }
+
+        foreach (var kvp in playerScores)
+        {
+            if (kvp.Key != myPlayerId)
+            {
+                opponentScoreText.text = $"Opponent Score: {kvp.Value}";
+                break; // 상대방 점수 하나만 표시 (멀티플레이어일 경우 리스트화 가능)
+            }
+        }
     }
 }

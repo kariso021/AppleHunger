@@ -1,30 +1,32 @@
 ﻿using System.Collections.Generic;
-using System;
 using Unity.Netcode;
 using UnityEngine;
-using System.Collections;
 
 public class ScoreManager : NetworkBehaviour
 {
-    private NetworkVariable<int> playerScore = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    private NetworkVariable<int> playerCombo = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public static ScoreManager Instance { get; private set; }
 
-    private Dictionary<ulong, Coroutine> comboCoroutines = new Dictionary<ulong, Coroutine>();
-    private int maxCombo = 5;
-    private float comboTimeLimit = 5f;
-    private int comboMultiplier = 1;
+    private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
 
-    public static event Action<ulong, int, int> OnScoreUpdated; // (ClientId, Score, Combo)
-
-    public override void OnNetworkSpawn()
+    private void Awake()
     {
-        if (IsServer) // 서버에서만 점수 관리
+        if (Instance == null)
         {
-            PlayerController.OnAppleCollected += HandleAppleCollected;
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
-    public override void OnNetworkDespawn()
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer) return;
+        PlayerController.OnAppleCollected += HandleAppleCollected;
+    }
+
+    private void OnDestroy()
     {
         if (IsServer)
         {
@@ -32,38 +34,38 @@ public class ScoreManager : NetworkBehaviour
         }
     }
 
-    /// ✅ 이벤트 기반 점수 계산
+    /// ✅ 사과를 먹었을 때 점수 처리 (서버에서 실행)
     private void HandleAppleCollected(int appleCount, int appleScoreValue, ulong clientId)
     {
-        if (!IsServer) return; // 서버에서만 실행
+        if (!IsServer) return;
 
-        int currentCombo = playerCombo.Value;
-        int totalComboValue = comboMultiplier * currentCombo;
-        int finalScore = appleCount * (totalComboValue + appleScoreValue);
-
-        playerScore.Value += finalScore;
-        playerCombo.Value = Mathf.Min(playerCombo.Value + 1, maxCombo);
-
-        // ✅ 클라이언트 UI 업데이트 이벤트 호출
-        OnScoreUpdated?.Invoke(clientId, playerScore.Value, playerCombo.Value);
-
-        StartComboTimer(clientId);
+        Debug.Log($"[Server] HandleAppleCollected - ClientID: {clientId}, AppleCount: {appleCount}, AppleScoreValue: {appleScoreValue}");
+        AddScore(clientId, appleCount, appleScoreValue);
     }
 
-    /// ✅ 콤보 타이머 (서버에서 실행)
-    private void StartComboTimer(ulong clientId)
+    /// ✅ 점수 추가 (서버에서 실행)
+    public void AddScore(ulong playerId, int appleCount, int appleScoreValue)
     {
-        if (comboCoroutines.ContainsKey(clientId) && comboCoroutines[clientId] != null)
+        if (!IsServer) return;
+
+        if (!playerScores.ContainsKey(playerId))
         {
-            StopCoroutine(comboCoroutines[clientId]);
+            playerScores[playerId] = 0;
         }
-        comboCoroutines[clientId] = StartCoroutine(ResetComboTimer(clientId));
+
+        int finalScore = appleCount * appleScoreValue;
+        playerScores[playerId] += finalScore;
+
+        Debug.Log($"[Server] AddScore - PlayerID: {playerId}, New Score: {playerScores[playerId]}");
+
+        UpdateScoreClientRpc(playerId, playerScores[playerId]);
     }
 
-    private IEnumerator ResetComboTimer(ulong clientId) // ✅ 제네릭 <T> 제거
+    /// ✅ 점수를 클라이언트 UI에 반영 (ClientRpc)
+    [ClientRpc]
+    private void UpdateScoreClientRpc(ulong playerId, int newScore)
     {
-        yield return new WaitForSeconds(comboTimeLimit);
-        playerCombo.Value = 0;
-        OnScoreUpdated?.Invoke(clientId, playerScore.Value, 0);
+        Debug.Log($"[ClientRpc] UpdateScoreClientRpc - PlayerID: {playerId}, Score: {newScore}");
+        PlayerUI.UpdateScoreUI(playerId, newScore);
     }
 }

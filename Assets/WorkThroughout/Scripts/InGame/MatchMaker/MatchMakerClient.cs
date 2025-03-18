@@ -33,6 +33,7 @@ public class MatchMakerClient : MonoBehaviour
     private async void SignIn()
     {
         await ClientSignIn(serviceProfileName:"AppleHungerPlayer");
+        //데이터베이스에서 가져온 정보로 가공된 뭔가...
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
     }
 
@@ -87,7 +88,7 @@ public class MatchMakerClient : MonoBehaviour
             {
             new Player(
                 PlayerID(),
-                new MatchmakingPlyaerData
+                new MatchmakingPlayerData
                 {
                     Skill = 100,
                 }
@@ -148,7 +149,7 @@ public class MatchMakerClient : MonoBehaviour
     }
 
     [Serializable]
-    public class MatchmakingPlyaerData
+    public class MatchmakingPlayerData
     {
         public int Skill;
     }
