@@ -22,21 +22,26 @@ public class ServerToAPIManager : NetworkBehaviour
     /// <param name="name"></param>
     /// <param name="conn"></param>
     [ServerRpc(RequireOwnership = false)]
-    public void RequestAddPlayerServerRpc(string name, ServerRpcParams rpcParams = default)
+    public void RequestAddPlayerServerRpc(ServerRpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(AddPlayer(name, clientId));
+        StartCoroutine(AddPlayer(clientId));
     }
 
-    private IEnumerator AddPlayer(string name, ulong clientId)
+    /// <summary>
+    /// 게임 최초 실행시 유저 데이터가 없다면 실행
+    /// </summary>
+    /// <param name="clientId"></param>
+    /// <returns></returns>
+    private IEnumerator AddPlayer(ulong clientId)
     {
         string url = $"{apiBaseUrl}/players";
 
-        PlayerData newPlayer = new PlayerData("deviceId-" + UnityEngine.Random.Range(0, 1000),
-            "googleId-" + UnityEngine.Random.Range(0, 1000), name,
+        PlayerData newPlayer = new PlayerData(SystemInfo.deviceUniqueIdentifier,
+            "", $"User_{UnityEngine.Random.Range(1000, 9999)}",
             "101",
             "201",
-            UnityEngine.Random.Range(900, 1500), UnityEngine.Random.Range(3000, 15000));
+            1200, 500);
         string jsonData = JsonUtility.ToJson(newPlayer);
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
@@ -54,7 +59,7 @@ public class ServerToAPIManager : NetworkBehaviour
                 PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(playerJsonData);
 
                 // 클라이언트에 Players 정보 저장
-                //TargetReceivePlayerData(conn, playerJsonData);
+                TargetReceivePlayerDataClientRpc(clientId,playerJsonData);
 
                 Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
             }
@@ -129,7 +134,7 @@ public class ServerToAPIManager : NetworkBehaviour
     // 플레이어 정보 가져오기(By playerId), id는 나중에 googleId,guestId를 db에 추가해서 그걸로
     // 사용할 예정
     /// <summary>
-    /// idType = playerId,deviceId,googleId 중 택 1, idValue는 device,google의 경우 기기의 id값을, playerId는 playerId값을 입력
+    /// player의 google 혹은 device Id를 이용해 정보를 조회하는 함수. 만약 정보가 없다면 플레이어가 새로운 계정인 것으로 간주하여 새 플레이어 생성
     /// </summary>
     /// <param name="idType"></param>
     /// <param name="idValue"></param>
@@ -157,6 +162,7 @@ public class ServerToAPIManager : NetworkBehaviour
             {
                 Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
                 Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
+                yield return StartCoroutine(AddPlayer(clientId));
             }
         }
     }

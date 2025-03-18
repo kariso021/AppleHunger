@@ -63,7 +63,7 @@ public class ClientNetworkManager : NetworkBehaviour
     }
 
     // 🔹 플레이어 추가
-    public void AddPlayer(string name) => serverToAPIManager?.RequestAddPlayerServerRpc(name);
+    public void AddPlayer(string name) => serverToAPIManager?.RequestAddPlayerServerRpc();
 
     // 🔹 플레이어 삭제
     public void DeletePlayer(int playerId) => serverToAPIManager?.RequestDeletePlayerServerRpc(playerId);

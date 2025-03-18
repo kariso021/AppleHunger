@@ -1,8 +1,12 @@
 ﻿using Mono.Data.Sqlite;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.VisualScripting;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
+using UnityEngine.Networking;
 
 
 
@@ -36,7 +40,7 @@ public class SQLiteManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
             InitializeDatabase();
-            LoadAllData();
+            //LoadAllData();
 
         }
         else
@@ -48,20 +52,53 @@ public class SQLiteManager : MonoBehaviour
     private void Start()
     {
         saveRankDataToDictionary();
-        player.deviceId = "deviceId-559";
+        //player.deviceId = "deviceId-559";
         Debug.Log(Application.persistentDataPath);
         OnSQLiteDataLoaded?.Invoke();
     }
     private void InitializeDatabase()
     {
-        dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
+        string rawDbPath = Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/");
+        dbPath = "URI=file:" + rawDbPath;  // SQLite 연결을 위해 여전히 사용
+        Debug.Log($"📂 SQLite DB 경로: {dbPath}");
+
+        if (File.Exists(rawDbPath) == false)
+        {
+            Debug.Log("📌 SQLite DB가 존재하지 않음 → 서버에서 데이터 가져오기");
+            StartCoroutine(CreateDatabaseAndFetchPlayerData()); // ✅ DB 생성 후 서버에서 데이터 가져오기
+        }
 
         using (var connection = new SqliteConnection(dbPath))
         {
             connection.Open();
+            createTables(connection);
+            Debug.Log("✅ SQLite DB 초기화 완료");
+        }
 
-            // 🔹 플레이어 테이블 (Auto-Increment 제거)
-            ExecuteQuery(connection, @"
+        LoadAllData();
+
+        //dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
+    }
+    private IEnumerator CreateDatabaseAndFetchPlayerData()
+    {
+        yield return StartCoroutine(CreateDatabase()); // ✅ SQLite DB 생성
+
+        // ✅ 서버에서 플레이어 데이터 가져오기
+        ClientNetworkManager clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
+        if (clientNetworkManager != null)
+        {
+            Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
+            clientNetworkManager.GetPlayerData("deviceId", SystemInfo.deviceUniqueIdentifier);
+        }
+        else
+        {
+            Debug.LogError("❌ ClientNetworkManager 찾을 수 없음!");
+        }
+    }
+    private void createTables(SqliteConnection connection)
+    {
+        // 🔹 플레이어 테이블 (Auto-Increment 제거)
+        ExecuteQuery(connection, @"
                 CREATE TABLE IF NOT EXISTS players (
                     playerId INTEGER PRIMARY KEY,  
                     deviceId TEXT UNIQUE,
@@ -74,8 +111,8 @@ public class SQLiteManager : MonoBehaviour
                     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );");
 
-            // 🔹 플레이어 스탯 테이블
-            ExecuteQuery(connection, @"
+        // 🔹 플레이어 스탯 테이블
+        ExecuteQuery(connection, @"
                 CREATE TABLE IF NOT EXISTS playerStats (
                     playerId INTEGER PRIMARY KEY,  
                     totalGames INTEGER DEFAULT 0,
@@ -85,8 +122,8 @@ public class SQLiteManager : MonoBehaviour
                     FOREIGN KEY (playerId) REFERENCES players(playerId) ON DELETE CASCADE
                 );");
 
-            // 🔹 플레이어 아이템 테이블
-            ExecuteQuery(connection, @"
+        // 🔹 플레이어 아이템 테이블
+        ExecuteQuery(connection, @"
                 CREATE TABLE IF NOT EXISTS playerItems (
                     itemId INTEGER PRIMARY KEY,  
                     playerId INTEGER NOT NULL,
@@ -99,8 +136,8 @@ public class SQLiteManager : MonoBehaviour
                 );");
 
 
-            // 🔹 로그인 기록 테이블
-            ExecuteQuery(connection, @"
+        // 🔹 로그인 기록 테이블
+        ExecuteQuery(connection, @"
                 CREATE TABLE IF NOT EXISTS loginRecords (
                     loginId INTEGER PRIMARY KEY,  
                     playerId INTEGER NOT NULL,
@@ -109,8 +146,8 @@ public class SQLiteManager : MonoBehaviour
                     FOREIGN KEY (playerId) REFERENCES players(playerId) ON DELETE CASCADE
                 );");
 
-            // 🔹 매치 기록 테이블
-            ExecuteQuery(connection, @"
+        // 🔹 매치 기록 테이블
+        ExecuteQuery(connection, @"
                 CREATE TABLE IF NOT EXISTS matchRecords (
                     matchId INTEGER PRIMARY KEY,  
                     player1Id INTEGER NOT NULL,
@@ -131,9 +168,9 @@ public class SQLiteManager : MonoBehaviour
                     FOREIGN KEY (winnerId) REFERENCES players(playerId) ON DELETE CASCADE
                 );");
 
-            // 🔹 랭킹 테이블 (상위 50명의 랭킹 정보 저장)
-            // 🔹 rankings 테이블 (상위 50명의 랭킹 정보 저장)
-            ExecuteQuery(connection, @"
+        // 🔹 랭킹 테이블 (상위 50명의 랭킹 정보 저장)
+        // 🔹 rankings 테이블 (상위 50명의 랭킹 정보 저장)
+        ExecuteQuery(connection, @"
                 CREATE TABLE IF NOT EXISTS rankings (           
                     playerId INTEGER NOT NULL,         -- 플레이어 ID
                     playerName TEXT NOT NULL,          -- 플레이어 닉네임
@@ -143,8 +180,8 @@ public class SQLiteManager : MonoBehaviour
                     FOREIGN KEY (playerId) REFERENCES players(playerId) ON DELETE CASCADE
                 );");
 
-            // ✅ 개별 플레이어 랭킹 테이블 생성
-            ExecuteQuery(connection, @"
+        // ✅ 개별 플레이어 랭킹 테이블 생성
+        ExecuteQuery(connection, @"
                 CREATE TABLE IF NOT EXISTS myRanking (
                     playerId INTEGER PRIMARY KEY,
                     playerName TEXT NOT NULL,
@@ -155,9 +192,9 @@ public class SQLiteManager : MonoBehaviour
                 ");
 
 
-            Debug.Log("✅ SQLite 데이터베이스 초기화 완료 (Mono.Data.Sqlite)");
+        Debug.Log("✅ SQLite 데이터베이스 초기화 완료 (Mono.Data.Sqlite)");
 
-            ExecuteQuery(connection, @"
+        ExecuteQuery(connection, @"
                 DELETE FROM matchRecords 
                 WHERE matchId NOT IN (
                     SELECT matchId FROM matchRecords 
@@ -166,9 +203,91 @@ public class SQLiteManager : MonoBehaviour
                 );
             ");
 
-            Debug.Log("✅ matchRecords 10개 유지 완료");
+        Debug.Log("✅ matchRecords 10개 유지 완료");
+    }
+    private IEnumerator CreateDatabase()
+    {
+        string streamingDbPath = Path.Combine(Application.streamingAssetsPath, dbName);
+        string persistentDbPath = Path.Combine(Application.persistentDataPath, dbName);
+
+        // 안드로이드에서는 `UnityWebRequest`로 `StreamingAssets`에서 DB 다운로드 시도
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            using (UnityWebRequest request = UnityWebRequest.Get(streamingDbPath))
+            {
+                yield return request.SendWebRequest(); // ✅ 다운로드 완료될 때까지 대기
+
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    try
+                    {
+                        File.WriteAllBytes(persistentDbPath, request.downloadHandler.data); // ✅ 다운로드된 DB 파일 저장
+                        Debug.Log("✅ Android에서 SQLite DB 복사 완료!");
+                        yield break; // ✅ DB 복사 성공했으므로 함수 종료
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("❌ Android에서 DB 저장 실패: " + e.Message);
+                    }
+                }
+                else
+                {
+                    Debug.LogError("❌ Android에서 DB 다운로드 실패: " + request.error);
+                }
+            }
+        }
+        else // PC, iOS 등에서는 `StreamingAssets`에서 직접 복사
+        {
+            try
+            {
+                if (File.Exists(streamingDbPath))
+                {
+                    File.Copy(streamingDbPath, persistentDbPath, true);
+                    Debug.Log("✅ SQLite DB 파일 복사 완료!");
+                    yield break; // DB 복사 성공했으므로 함수 종료
+                }
+                else
+                {
+                    Debug.LogError("❌ StreamingAssets 폴더에 DB 파일이 존재하지 않음!");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("❌ DB 복사 중 오류 발생: " + e.Message);
+            }
+        }
+
+        // `persistentDataPath`에도 DB 파일이 없으면 → "기본 DB 새로 생성"
+        if (!File.Exists(persistentDbPath))
+        {
+            Debug.LogWarning("⚠️ DB 파일이 어디에도 없음 → 새로 생성합니다.");
+            CreateNewDatabase(persistentDbPath); // 기본 DB 생성
         }
     }
+
+    private void CreateNewDatabase(string dbPath)
+    {
+        try
+        {
+            using (var connection = new SqliteConnection("URI=file:" + dbPath))
+            {
+                connection.Open();
+                Debug.Log("✅ 새 SQLite 데이터베이스 생성 완료!");
+
+                //기존 createTables() 재사용
+                createTables(connection);
+
+                //필요하면 기본 데이터 삽입 가능 (예: 초기 유저 추가)
+                //InsertDefaultData(connection);
+            }
+            Debug.Log("✅ 새 SQLite 데이터베이스 테이블 생성 완료!");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("❌ 새 DB 생성 실패: " + e.Message);
+        }
+    }
+
 
     /// <summary>
     /// SQLite 쿼리 실행 함수
