@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7026273773836996446}
   - component: {fileID: 9028910269298555174}
   - component: {fileID: 985721315488029380}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 2350532427070537737}
   - component: {fileID: 1588661145642682662}
   - component: {fileID: 4652640267574324351}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: apple
   m_TagString: Apple
   m_Icon: {fileID: 0}
@@ -276,7 +276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1074264902
+  GlobalObjectIdHash: 1246050572
   InScenePlacedSourceGlobalObjectIdHash: 3983921501
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1

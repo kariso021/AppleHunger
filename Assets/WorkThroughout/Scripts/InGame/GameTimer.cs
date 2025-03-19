@@ -5,17 +5,20 @@ using System;
 public class GameTimer : NetworkBehaviour
 {
     private NetworkVariable<float> remainingTime = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    private float totalGameTime = 60f; // 60초 게임 타이머
-    private double startTime; // 서버 기준 게임 시작 시간
+    private float totalGameTime = 10f;
+    private double startTime;
+    private bool isGameEnded = false; // 🔥 게임 종료가 한 번만 실행되도록 플래그 추가
 
-    public static event Action<float> OnTimerUpdated; // UI 갱신 이벤트
+    public static event Action OnGameEnded;
+    public static event Action<float> OnTimerUpdated;
 
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
-            startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat; // 서버 기준 시작 시간 저장
-            remainingTime.Value = totalGameTime; // 초기값 설정
+            startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+            remainingTime.Value = totalGameTime;
+            isGameEnded = false; // 🔹 게임 시작 시 플래그 초기화
         }
 
         if (IsClient)
@@ -36,22 +39,24 @@ public class GameTimer : NetworkBehaviour
     {
         if (IsServer)
         {
-            float elapsedTime = (float)(NetworkManager.Singleton.ServerTime.TimeAsFloat - startTime); // 경과 시간 계산
-            float newRemainingTime = Mathf.Max(0, totalGameTime - elapsedTime); // 남은 시간 계산
+            float elapsedTime = (float)(NetworkManager.Singleton.ServerTime.TimeAsFloat - startTime);
+            float newRemainingTime = Mathf.Max(0, totalGameTime - elapsedTime);
 
-            if (Mathf.Abs(newRemainingTime - remainingTime.Value) > 0.1f) // 너무 자주 동기화되지 않도록 체크
+            // 🔹 remainingTime을 업데이트
+            if (Mathf.Abs(newRemainingTime - remainingTime.Value) > 0.1f)
             {
                 remainingTime.Value = newRemainingTime;
+                Debug.Log($"{remainingTime.Value}");
             }
 
-            if (remainingTime.Value <= 0)
+            if (!isGameEnded && newRemainingTime <= 0)
             {
-                Debug.Log("[Server] 게임 종료!");
+                isGameEnded = true; 
+                OnGameEnded?.Invoke();
             }
         }
     }
 
-    /// ✅ 클라이언트에서 UI 업데이트 이벤트 호출
     private void HandleTimerUpdated(float oldTime, float newTime)
     {
         OnTimerUpdated?.Invoke(newTime);

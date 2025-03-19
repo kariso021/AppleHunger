@@ -10,6 +10,9 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI myScoreText;
     [SerializeField] private TextMeshProUGUI opponentScoreText;
 
+    [Header("Timer UI")]
+    [SerializeField] private Slider timerSlider;
+// ✅ 타이머 슬라
     private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
     private ulong myPlayerId;
 
@@ -30,11 +33,13 @@ public class PlayerUI : MonoBehaviour
     private void OnEnable()
     {
         PlayerController.OnPlayerInitialized += SetPlayerId;
+        GameTimer.OnTimerUpdated += UpdateTimerUI; // ✅ 타이머 업데이트 이벤트 연결
     }
 
     private void OnDisable()
     {
         PlayerController.OnPlayerInitialized -= SetPlayerId;
+        GameTimer.OnTimerUpdated -= UpdateTimerUI; // ✅ 타이머 이벤트 해제
     }
 
     /// ✅ `PlayerController`에서 받은 ID를 설정
@@ -77,6 +82,15 @@ public class PlayerUI : MonoBehaviour
                 opponentScoreText.text = $"Opponent Score: {kvp.Value}";
                 break; // 상대방 점수 하나만 표시 (멀티플레이어일 경우 리스트화 가능)
             }
+        }
+    }
+
+    /// ✅ 타이머 UI 업데이트
+    private void UpdateTimerUI(float remainingTime)
+    {
+        if (timerSlider != null)
+        {
+            timerSlider.value = remainingTime / 60f; // 60초 기준으로 슬라이더 값 조정
         }
     }
 }

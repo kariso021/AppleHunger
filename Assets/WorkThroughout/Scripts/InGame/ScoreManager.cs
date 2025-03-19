@@ -68,4 +68,9 @@ public class ScoreManager : NetworkBehaviour
         Debug.Log($"[ClientRpc] UpdateScoreClientRpc - PlayerID: {playerId}, Score: {newScore}");
         PlayerUI.UpdateScoreUI(playerId, newScore);
     }
+
+    public Dictionary<ulong, int> GetScores()
+    {
+        return new Dictionary<ulong, int>(playerScores); // 점수 복사하여 반환
+    }
 }
