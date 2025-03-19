@@ -20,8 +20,6 @@ public class RankingRecordsManager : MonoBehaviour
     // ✅ 랭킹 UI 업데이트
     public void CreateRankRecords()
     {
-        Debug.Log("재생성");
-
         List<PlayerRankingData> playerRankList = SQLiteManager.Instance.LoadRankings();
         if (playerRankList.Count == 0) return;
 

@@ -15,9 +15,10 @@ MonoBehaviour:
   m_DefaultGroup: 32bb7986ca5a06244a13afd1ddcffb21
   m_currentHash:
     serializedVersion: 2
-    Hash: d4402b902f56478091f8dbfa768fd576
+    Hash: 4c34f995dbfc07cff666e5f72c0b3dee
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 1
+  m_BundleLocalCatalog: 0
   m_CatalogRequestsTimeout: 0
   m_DisableCatalogUpdateOnStart: 0
   m_InternalIdNamingMode: 0
@@ -31,7 +32,7 @@ MonoBehaviour:
     m_ClassName: UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider
   m_IgnoreUnsupportedFilesInBuild: 0
   m_UniqueBundleIds: 1
-  m_EnableJsonCatalog: 0
+  m_EnableJsonCatalog: 1
   m_NonRecursiveBuilding: 1
   m_CCDEnabled: 0
   m_maxConcurrentWebRequests: 3
@@ -53,14 +54,15 @@ MonoBehaviour:
     m_Id: 27fd7cc9ad6130d4d933a883bb3cfdc4
   m_RemoteCatalogLoadPath:
     m_Id: dff8b51a604eaa34796f47cf6e5c3886
-  m_ContentStateBuildPathProfileVariableName: <default settings path>
+  m_ContentStateBuildPathProfileVariableName: Remote.BuildPath
   m_CustomContentStateBuildPath: 
   m_ContentStateBuildPath: 
   m_BuildAddressablesWithPlayerBuild: 0
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
-  - {fileID: 11400000, guid: 4d4e1393c1624f544b40b1905c3b70f3, type: 2}
   - {fileID: 11400000, guid: c2af501105d82704e9ad59d02415503d, type: 2}
+  - {fileID: 11400000, guid: c688e4225abe8414b9dc1ad4724574de, type: 2}
+  - {fileID: 11400000, guid: 22b6c604c4ae5aa45a5b52d943a9756e, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1
     m_BundleBuildPath: Temp/com.unity.addressables/AssetBundles
@@ -71,7 +73,7 @@ MonoBehaviour:
       m_ProfileName: Default
       m_Values:
       - m_Id: 27fd7cc9ad6130d4d933a883bb3cfdc4
-        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
+        m_Value: 'ServerData/[BuildTarget]'
       - m_Id: 2c7450ff6c04e4346a9fc42aa7c571e4
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
       - m_Id: 7eb6b8d51c984c94db3c6832a316c881
@@ -79,7 +81,21 @@ MonoBehaviour:
       - m_Id: 827e7fc6ddd123646944eee214798360
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
       - m_Id: dff8b51a604eaa34796f47cf6e5c3886
+        m_Value: 'https://s3.ap-northeast-2.amazonaws.com/dl.applehunger/[BuildTarget]'
+    - m_InheritedParent: 
+      m_Id: efbf61bd006565f4791b3cb7d998bcef
+      m_ProfileName: Server
+      m_Values:
+      - m_Id: 27fd7cc9ad6130d4d933a883bb3cfdc4
+        m_Value: 'ServerData/[BuildTarget]'
+      - m_Id: 2c7450ff6c04e4346a9fc42aa7c571e4
+        m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: 7eb6b8d51c984c94db3c6832a316c881
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
+      - m_Id: 827e7fc6ddd123646944eee214798360
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
+      - m_Id: dff8b51a604eaa34796f47cf6e5c3886
+        m_Value: 'https://s3.ap-northeast-2.amazonaws.com/dl.applehunger/[BuildTarget]'
     m_ProfileEntryNames:
     - m_Id: 27fd7cc9ad6130d4d933a883bb3cfdc4
       m_Name: Remote.BuildPath
@@ -114,4 +130,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1a441ee3b16a3524c80c50298db2a49f, type: 2}
   - {fileID: 11400000, guid: 90d867e4b3155f54f8b5f5013b41d0c1, type: 2}
   - {fileID: 11400000, guid: 4ec2d6ec925518841bbfc9eda71df4ae, type: 2}
-  m_ActiveProfileId: 9cabc8e5f24bb134b9bf2c57268fc2da
+  m_ActiveProfileId: efbf61bd006565f4791b3cb7d998bcef

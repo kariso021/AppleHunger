@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Netcode;
-using Unity.Networking.Transport;
 using UnityEngine;
 using UnityEngine.Networking;
-public class ServerToAPIManager : NetworkBehaviour
+public class ServerToAPIManager : MonoBehaviour
 {
     private string apiBaseUrl = "https://applehunger.site";
 
@@ -21,19 +19,16 @@ public class ServerToAPIManager : NetworkBehaviour
     /// </summary>
     /// <param name="name"></param>
     /// <param name="conn"></param>
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestAddPlayerServerRpc(ServerRpcParams rpcParams = default)
+    public void RequestAddPlayerServerRpc()
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(AddPlayer(clientId));
+        StartCoroutine(AddPlayer());
     }
 
     /// <summary>
     /// 게임 최초 실행시 유저 데이터가 없다면 실행
     /// </summary>
-    /// <param name="clientId"></param>
     /// <returns></returns>
-    private IEnumerator AddPlayer(ulong clientId)
+    private IEnumerator AddPlayer()
     {
         string url = $"{apiBaseUrl}/players";
 
@@ -59,7 +54,7 @@ public class ServerToAPIManager : NetworkBehaviour
                 PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(playerJsonData);
 
                 // 클라이언트에 Players 정보 저장
-                TargetReceivePlayerDataClientRpc(clientId,playerJsonData);
+                TargetReceivePlayerDataClientRpc(playerJsonData);
 
                 Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
             }
@@ -68,14 +63,12 @@ public class ServerToAPIManager : NetworkBehaviour
         }
     }
 
-    [ClientRpc] // 서버 투 에이피아이 매니저 -> 클라 네트워크 매니저 -> 클라 순으로 진행되게 
-    private void TargetReceivePlayerDataClientRpc(ulong clientId, string jsonData)
+    private void TargetReceivePlayerDataClientRpc(string jsonData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerDataClientRpc(clientId, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerDataClientRpc(jsonData);
     }
 
-    [ServerRpc(RequireOwnership = false)]
+
     public void RequestDeletePlayerServerRpc(int playerId)
     {
         StartCoroutine(DeletePlayer(playerId));
@@ -97,14 +90,12 @@ public class ServerToAPIManager : NetworkBehaviour
     }
 
     // 플레이어 정보 수정 , 클라이언트에 저장된 데이터를 그대로 json으로 api서버에 넘김
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestUpdatePlayerDataServerRpc(PlayerData updatedData, ServerRpcParams rpcParams = default)
+    public void RequestUpdatePlayerDataServerRpc(PlayerData updatedData)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(UpdatePlayerData(updatedData, clientId));
+        StartCoroutine(UpdatePlayerData(updatedData));
     }
 
-    private IEnumerator UpdatePlayerData(PlayerData updatedData, ulong clientId)
+    private IEnumerator UpdatePlayerData(PlayerData updatedData)
     {
         string url = $"{apiBaseUrl}/players/{updatedData.playerId}";
 
@@ -138,15 +129,12 @@ public class ServerToAPIManager : NetworkBehaviour
     /// </summary>
     /// <param name="idType"></param>
     /// <param name="idValue"></param>
-    /// <param name="conn"></param>
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGetPlayerServerRpc(string idType, string idValue, ServerRpcParams rpcParams = default)
+    public void RequestGetPlayerServerRpc(string idType, string idValue)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetPlayer(idType, idValue, clientId));
+        StartCoroutine(GetPlayer(idType, idValue));
     }
 
-    private IEnumerator GetPlayer(string idType, string idValue, ulong clientId) // 
+    private IEnumerator GetPlayer(string idType, string idValue) // 
     {
         string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
         using (UnityWebRequest request = UnityWebRequest.Get(url))
@@ -156,13 +144,13 @@ public class ServerToAPIManager : NetworkBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text;
-                TargetReceivePlayerDataClientRpc(clientId, jsonData);
+                TargetReceivePlayerDataClientRpc(jsonData);
             }
             else
             {
                 Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
                 Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
-                yield return StartCoroutine(AddPlayer(clientId));
+                yield return StartCoroutine(AddPlayer());
             }
         }
     }
@@ -170,14 +158,12 @@ public class ServerToAPIManager : NetworkBehaviour
     #endregion
 
     #region Player MatchRecords Region
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestAddMatchResultServerRpc(int winnerId, int loserId, ServerRpcParams rpcParams = default) // Matchrecords-ADD 과정
+    public void RequestAddMatchResultServerRpc(int winnerId, int loserId) // Matchrecords-ADD 과정
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(AddMatchResult(winnerId, loserId, clientId));
+        StartCoroutine(AddMatchResult(winnerId, loserId));
     }
 
-    private IEnumerator AddMatchResult(int winnerId, int loserId, ulong clientId)
+    private IEnumerator AddMatchResult(int winnerId, int loserId)
     {
         string url = $"{apiBaseUrl}/matchrecords";
 
@@ -206,15 +192,12 @@ public class ServerToAPIManager : NetworkBehaviour
                 Debug.LogError($"❌ 매치 결과 저장 실패: {request.error}");
         }
     }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestMatchResultServerRpc(int playerId, ServerRpcParams rpcParams = default)
+    public void RequestMatchResultServerRpc(int playerId)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetMatchResult(playerId, clientId));
+        StartCoroutine(GetMatchResult(playerId));
     }
 
-    private IEnumerator GetMatchResult(int playerId,ulong clientId)
+    private IEnumerator GetMatchResult(int playerId)
     {
         string url = $"{apiBaseUrl}/matchRecords/{playerId}";
 
@@ -233,7 +216,7 @@ public class ServerToAPIManager : NetworkBehaviour
                 foreach (var match in response.matches)
                 {
                     Debug.Log($"Match ID: {match.matchId}, Winner: {match.winnerId}, Date: {match.matchDate}");
-                    TargetReceiveMatchRecordsClientRpc(clientId, match);
+                    TargetReceiveMatchRecordsClientRpc(match);
                 }
             }
             else
@@ -242,11 +225,9 @@ public class ServerToAPIManager : NetworkBehaviour
             }
         }
     }
-    [ClientRpc]
-    public void TargetReceiveMatchRecordsClientRpc(ulong clientId, MatchHistoryData matchHistoryData)
+    public void TargetReceiveMatchRecordsClientRpc(MatchHistoryData matchHistoryData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMatchRecordsClientRpc(clientId, matchHistoryData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMatchRecordsClientRpc(matchHistoryData);
     }
 
     #endregion
@@ -254,14 +235,12 @@ public class ServerToAPIManager : NetworkBehaviour
     #region Player Stat Region
 
     // 플레이어 스탯(매치,승리,패배 수) 조회 API
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGetPlayerStatServerRpc(int playerId, ServerRpcParams rpcParams = default)
+    public void RequestGetPlayerStatServerRpc(int playerId)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetPlayerStat(playerId, clientId));
+        StartCoroutine(GetPlayerStat(playerId));
     }
 
-    private IEnumerator GetPlayerStat(int playerId, ulong clientId)
+    private IEnumerator GetPlayerStat(int playerId)
     {
         string url = $"{apiBaseUrl}/playerStats/{playerId}";
 
@@ -271,7 +250,7 @@ public class ServerToAPIManager : NetworkBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                TargetReceivePlayerStatClientRpc(clientId, request.downloadHandler.text);
+                TargetReceivePlayerStatClientRpc(request.downloadHandler.text);
             }
             else
             {
@@ -281,13 +260,11 @@ public class ServerToAPIManager : NetworkBehaviour
         }
     }
 
-    [ClientRpc]
-    private void TargetReceivePlayerStatClientRpc(ulong clientId, string jsonData)
+    private void TargetReceivePlayerStatClientRpc(string jsonData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
         Debug.Log($"✅ 서버에서 받은 PlayerStats 데이터: {jsonData}");
 
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerStatsClientRpc(clientId, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerStatsClientRpc(jsonData);
     }
 
 
@@ -296,14 +273,12 @@ public class ServerToAPIManager : NetworkBehaviour
     #region Player Item Region
 
     // 플레이어 아이템 정보 조회(프로필 정보에 들어갈 내용)
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGetPlayerItemsServerRpc(int playerId, ServerRpcParams rpcParams = default)
+    public void RequestGetPlayerItemsServerRpc(int playerId)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetPlayerItems(playerId, clientId));
+        StartCoroutine(GetPlayerItems(playerId));
     }
 
-    private IEnumerator GetPlayerItems(int playerId, ulong clientId)
+    private IEnumerator GetPlayerItems(int playerId)
     {
         string url = $"{apiBaseUrl}/playerItems/{playerId}";
 
@@ -319,7 +294,7 @@ public class ServerToAPIManager : NetworkBehaviour
                 // 🔹 리스트 안에 여러 개의 아이템이 들어있으므로, 각각을 TargetReceivePlayerItems로 넘겨줌
                 foreach (var playerItem in response.items)
                 {
-                    TargetReceivePlayerItemsClientRpc(clientId, JsonUtility.ToJson(playerItem));
+                    TargetReceivePlayerItemsClientRpc(JsonUtility.ToJson(playerItem));
                 }
 
                 //DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
@@ -330,22 +305,18 @@ public class ServerToAPIManager : NetworkBehaviour
     }
 
     // JSON 데이터 로드 후 변환
-    [ClientRpc]
-    private void TargetReceivePlayerItemsClientRpc(ulong clientId, string jsonData)
+    private void TargetReceivePlayerItemsClientRpc(string jsonData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerItemsClientRpc(clientId, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerItemsClientRpc(jsonData);
     }
 
     // 🔹 아이템 구매 요청
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestPurchaseItemServerRpc(int playerId, int itemUniqueId, ServerRpcParams rpcParams = default)
+    public void RequestPurchaseItemServerRpc(int playerId, int itemUniqueId)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(PurchaseItem(playerId, itemUniqueId, clientId));
+        StartCoroutine(PurchaseItem(playerId, itemUniqueId));
     }
 
-    private IEnumerator PurchaseItem(int playerId, int itemUniqueId,ulong clientId)
+    private IEnumerator PurchaseItem(int playerId, int itemUniqueId)
     {
         string url = $"{apiBaseUrl}/playerItems/purchase";
         string jsonData = $"{{\"playerId\":{playerId}, \"itemUniqueId\":{itemUniqueId}}}";
@@ -378,14 +349,12 @@ public class ServerToAPIManager : NetworkBehaviour
     #region Player Login Region
 
     // 로그인 정보 조회
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGetLoginRecordsServerRpc(int playerId, ServerRpcParams rpcParams = default)
+    public void RequestGetLoginRecordsServerRpc(int playerId)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetLoginRecords(playerId, clientId));
+        StartCoroutine(GetLoginRecords(playerId));
     }
 
-    private IEnumerator GetLoginRecords(int playerId, ulong clientId)
+    private IEnumerator GetLoginRecords(int playerId)
     {
         string url = $"{apiBaseUrl}/loginRecords/{playerId}";
 
@@ -394,18 +363,16 @@ public class ServerToAPIManager : NetworkBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                TargetReceiveLoginRecordsClientRpc(clientId, request.downloadHandler.text);
+                TargetReceiveLoginRecordsClientRpc(request.downloadHandler.text);
             else
                 Debug.LogError($"❌ LoginRecords 조회 실패: {request.error}");
         }
     }
 
-    [ClientRpc]
-    private void TargetReceiveLoginRecordsClientRpc(ulong clientId, string jsonData)
+    private void TargetReceiveLoginRecordsClientRpc(string jsonData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
         Debug.Log($"✅ 서버에서 받은 LoginRecords 데이터: {jsonData}");
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveLoginDataClientRpc(clientId, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveLoginDataClientRpc(jsonData);
 
         // 로그인 데이터를 여러개로 관리할 게 아니라 하나로 관리할 예정인데 이건 나중에 order같은걸 해서 빼던가 해야할거같음
         //List<LoginRecordData> loginRecords = JsonUtility.FromJson<LoginRecordList>(jsonData).records;
@@ -417,7 +384,6 @@ public class ServerToAPIManager : NetworkBehaviour
     }
 
     // 로그인 정보 업데이트
-    [ServerRpc(RequireOwnership = false)]
     public void RequestUpdateLoginTimeServerRpc(int playerId, string ipAddress)
     {
         StartCoroutine(UpdateLoginTime(playerId, ipAddress));
@@ -453,14 +419,12 @@ public class ServerToAPIManager : NetworkBehaviour
 
     #region Player Ranking Data
     // 랭킹 정보 
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGetTopRankingServerRpc(ServerRpcParams rpcParams = default)
+    public void RequestGetTopRankingServerRpc()
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetTopRankingData(clientId));
+        StartCoroutine(GetTopRankingData());
     }
 
-    private IEnumerator GetTopRankingData(ulong clientId)
+    private IEnumerator GetTopRankingData()
     {
         string url = $"{apiBaseUrl}/rankings";
 
@@ -471,7 +435,7 @@ public class ServerToAPIManager : NetworkBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log($"✅ [Server] 상위 50명 랭킹 조회 성공: {request.downloadHandler.text}");
-                TargetReceiveTopRankingDataClientRpc(clientId, request.downloadHandler.text);
+                TargetReceiveTopRankingDataClientRpc(request.downloadHandler.text);
             }
             else
             {
@@ -479,22 +443,18 @@ public class ServerToAPIManager : NetworkBehaviour
             }
         }
     }
-    [ClientRpc]
-    private void TargetReceiveTopRankingDataClientRpc(ulong clientId, string jsonData)
+    private void TargetReceiveTopRankingDataClientRpc(string jsonData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveTopRankingDataClientRpc(clientId, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveTopRankingDataClientRpc(jsonData);
     }
 
 
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGetMyRankingServerRpc(int playerId, ServerRpcParams rpcParams = default)
+    public void RequestGetMyRankingServerRpc(int playerId)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetMyRankingData(playerId, clientId));
+        StartCoroutine(GetMyRankingData(playerId));
     }
 
-    private IEnumerator GetMyRankingData(int playerId, ulong clientId)
+    private IEnumerator GetMyRankingData(int playerId)
     {
         string url = $"{apiBaseUrl}/rankings/{playerId}";
 
@@ -505,7 +465,7 @@ public class ServerToAPIManager : NetworkBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log($"✅ [Server] 개별 랭킹 조회 성공: {request.downloadHandler.text}");
-                TargetReceiveMyRankingDataClientRpc(clientId, request.downloadHandler.text);
+                TargetReceiveMyRankingDataClientRpc(request.downloadHandler.text);
             }
             else
             {
@@ -513,21 +473,17 @@ public class ServerToAPIManager : NetworkBehaviour
             }
         }
     }
-    [ClientRpc]
-    private void TargetReceiveMyRankingDataClientRpc(ulong clientId, string jsonData)
+    private void TargetReceiveMyRankingDataClientRpc(string jsonData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMyRankingDataClientRpc(clientId, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMyRankingDataClientRpc(jsonData);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGetGetPlayerDetailsServerRpc(int playerId, ServerRpcParams rpcParams = default)
+    public void RequestGetGetPlayerDetailsServerRpc(int playerId)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        StartCoroutine(GetPlayerDetails(playerId, clientId));
+        StartCoroutine(GetPlayerDetails(playerId));
     }
 
-    private IEnumerator GetPlayerDetails(int playerId, ulong clientId)
+    private IEnumerator GetPlayerDetails(int playerId)
     {
         string url = $"{apiBaseUrl}/playerDetails/{playerId}";
 
@@ -538,7 +494,7 @@ public class ServerToAPIManager : NetworkBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string json = request.downloadHandler.text;
-                TargetReceivePlayerDetailsDataClientRpc(clientId, json);
+                TargetReceivePlayerDetailsDataClientRpc(json);
             }
             else
             {
@@ -546,12 +502,9 @@ public class ServerToAPIManager : NetworkBehaviour
             }
         }
     }
-
-    [ClientRpc]
-    private void TargetReceivePlayerDetailsDataClientRpc(ulong clientId, string jsonData)
+    private void TargetReceivePlayerDetailsDataClientRpc(string jsonData)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId) return;
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerDetailsDataClientRpc(clientId, jsonData);
+        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerDetailsDataClientRpc(jsonData);
     }
     #endregion
     // 🔹 데이터 구조

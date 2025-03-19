@@ -3,8 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using Unity.VisualScripting;
-using UnityEditor.MemoryProfiler;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -52,9 +50,8 @@ public class SQLiteManager : MonoBehaviour
     private void Start()
     {
         saveRankDataToDictionary();
-        //player.deviceId = "deviceId-559";
-        Debug.Log(Application.persistentDataPath);
         OnSQLiteDataLoaded?.Invoke();
+        DataSyncManager.Instance.PlayerItemsUpdated();
     }
     private void InitializeDatabase()
     {
@@ -66,13 +63,6 @@ public class SQLiteManager : MonoBehaviour
         {
             Debug.Log("📌 SQLite DB가 존재하지 않음 → 서버에서 데이터 가져오기");
             StartCoroutine(CreateDatabaseAndFetchPlayerData()); // ✅ DB 생성 후 서버에서 데이터 가져오기
-        }
-
-        using (var connection = new SqliteConnection(dbPath))
-        {
-            connection.Open();
-            createTables(connection);
-            Debug.Log("✅ SQLite DB 초기화 완료");
         }
 
         LoadAllData();
@@ -89,10 +79,6 @@ public class SQLiteManager : MonoBehaviour
         {
             Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
             clientNetworkManager.GetPlayerData("deviceId", SystemInfo.deviceUniqueIdentifier);
-        }
-        else
-        {
-            Debug.LogError("❌ ClientNetworkManager 찾을 수 없음!");
         }
     }
     private void createTables(SqliteConnection connection)
@@ -461,7 +447,7 @@ public class SQLiteManager : MonoBehaviour
     // 🔹 플레이어 아이템 저장
     public void SavePlayerItem(PlayerItemData item)
     {
-        
+
 
         using (var connection = new SqliteConnection(dbPath))
         {
@@ -478,7 +464,7 @@ public class SQLiteManager : MonoBehaviour
                 command.Parameters.AddWithValue("@playerId", item.playerId);
                 command.Parameters.AddWithValue("@itemUniqueId", item.itemUniqueId);
                 command.Parameters.AddWithValue("@itemType", item.itemType);
-                command.Parameters.AddWithValue("@price", item.price); 
+                command.Parameters.AddWithValue("@price", item.price);
                 command.Parameters.AddWithValue("@isUnlocked", item.isUnlocked ? 1 : 0);
                 command.Parameters.AddWithValue("@acquiredAt", item.acquiredAt);
 
@@ -532,7 +518,7 @@ public class SQLiteManager : MonoBehaviour
                 command.Parameters.AddWithValue("@playerName", myRanking.playerName);
                 command.Parameters.AddWithValue("@rating", myRanking.rating);
                 command.Parameters.AddWithValue("@rankPosition", myRanking.rankPosition);
-                command.Parameters.AddWithValue("@profileIcon",myRanking.profileIcon);
+                command.Parameters.AddWithValue("@profileIcon", myRanking.profileIcon);
 
 
                 command.ExecuteNonQuery();

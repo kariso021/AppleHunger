@@ -46,7 +46,8 @@ public class AddressableManager : MonoBehaviour
     }
     void Start()
     {
-        StartCoroutine(initAddressable());
+        // 20250318 ¼öÁ¤
+        //StartCoroutine(initAddressable());
         DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadProfileIconFromGroup();
         DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadMyRankingIconFromGroup();
         //DataSyncManager.Instance.OnMatchHistoryChanged += () =>

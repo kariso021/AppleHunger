@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Transactions;
-using Unity.Netcode;
-using Unity.Networking.Transport;
 using UnityEngine;
 
-public class ClientNetworkManager : NetworkBehaviour
+public class ClientNetworkManager : MonoBehaviour
 {
     private ServerToAPIManager serverToAPIManager;
 
@@ -52,8 +50,8 @@ public class ClientNetworkManager : NetworkBehaviour
     #region Player Data
     // 🔹 플레이어 데이터 요청
     public void GetPlayerData(string idType, string idValue) => serverToAPIManager?.RequestGetPlayerServerRpc(idType, idValue);
-    [ClientRpc]
-    public void TargetReceivePlayerDataClientRpc(ulong clientId, string jsonData)
+
+    public void TargetReceivePlayerDataClientRpc(string jsonData)
     {
         SQLiteManager.Instance.SavePlayerData(JsonUtility.FromJson<PlayerData>(jsonData));
 
@@ -75,8 +73,7 @@ public class ClientNetworkManager : NetworkBehaviour
     // 🔹 플레이어 아이템 요청
     public void GetPlayerItems(int playerId) => serverToAPIManager?.RequestGetPlayerItemsServerRpc(playerId);
 
-    [ClientRpc]
-    public void TargetReceivePlayerItemsClientRpc(ulong clientId, string jsonData)
+    public void TargetReceivePlayerItemsClientRpc(string jsonData)
     {
         SQLiteManager.Instance.SavePlayerItem(JsonUtility.FromJson<PlayerItemData>(jsonData));
     }
@@ -92,8 +89,7 @@ public class ClientNetworkManager : NetworkBehaviour
     // 🔹 플레이어 스탯 요청
     public void GetPlayerStats(int playerId) => serverToAPIManager?.RequestGetPlayerStatServerRpc(playerId);
 
-    [ClientRpc] 
-    public void TargetReceivePlayerStatsClientRpc(ulong clientId, string jsonData)
+    public void TargetReceivePlayerStatsClientRpc(string jsonData)
     {
         PlayerStatsResponse playerStatsResponse = JsonUtility.FromJson<PlayerStatsResponse>(jsonData);
         Debug.Log($"{playerStatsResponse.playerStats.playerId} , Total : {playerStatsResponse.playerStats.totalGames} , Winrate : {playerStatsResponse.playerStats.winRate}");
@@ -116,8 +112,7 @@ public class ClientNetworkManager : NetworkBehaviour
             serverToAPIManager.RequestMatchResultServerRpc(playerId);
     }
 
-    [ClientRpc]
-    public void TargetReceiveMatchRecordsClientRpc(ulong clientId, MatchHistoryData matchHistoryData)
+    public void TargetReceiveMatchRecordsClientRpc(MatchHistoryData matchHistoryData)
     {
         SQLiteManager.Instance.SaveMatchHistory(matchHistoryData);
     }
@@ -133,8 +128,7 @@ public class ClientNetworkManager : NetworkBehaviour
     // 🔹 로그인 요청
     public void GetLogin(int playerId) => serverToAPIManager?.RequestGetLoginRecordsServerRpc(playerId);
 
-    [ClientRpc]
-    public void TargetReceiveLoginDataClientRpc(ulong clientId, string jsonData)
+    public void TargetReceiveLoginDataClientRpc(string jsonData)
     {
         LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonData);
 
@@ -157,8 +151,7 @@ public class ClientNetworkManager : NetworkBehaviour
     }
 
     // ✅ 서버에서 받은 상위 50명 랭킹 저장
-    [ClientRpc]
-    public void TargetReceiveTopRankingDataClientRpc(ulong clientId, string jsonData)
+    public void TargetReceiveTopRankingDataClientRpc(string jsonData)
     {
         Debug.Log($"✅ [Client] 상위 50명 랭킹 데이터 수신: {jsonData}");
 
@@ -173,8 +166,7 @@ public class ClientNetworkManager : NetworkBehaviour
     }
 
     // ✅ 서버에서 받은 내 개별 랭킹 저장
-    [ClientRpc]
-    public void TargetReceiveMyRankingDataClientRpc(ulong clientId, string jsonData)
+    public void TargetReceiveMyRankingDataClientRpc(string jsonData)
     {
         Debug.Log($"✅ [Client] 개별 랭킹 데이터 수신: {jsonData}");
 
@@ -186,8 +178,7 @@ public class ClientNetworkManager : NetworkBehaviour
         Debug.Log($"📌 내 랭킹 저장 완료: {myRankingData.myRanking.playerName} (Rank: {myRankingData.myRanking.rankPosition})");
     }
 
-    [ClientRpc]
-    public void TargetReceivePlayerDetailsDataClientRpc(ulong clientId, string jsonData)
+    public void TargetReceivePlayerDetailsDataClientRpc(string jsonData)
     {
         Debug.Log($"✅ [Client] 상세 정보 수신: {jsonData}");
 
