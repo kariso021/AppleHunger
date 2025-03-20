@@ -15,20 +15,10 @@ public class ServerToAPIManager : MonoBehaviour
     #region Players Data Region
 
     /// <summary>
-    /// 게임 실행시 단 한번만 발생해야 함. 서버에 유저정보를 하나 늘리는 개념이라서
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="conn"></param>
-    public void RequestAddPlayerServerRpc()
-    {
-        StartCoroutine(AddPlayer());
-    }
-
-    /// <summary>
     /// 게임 최초 실행시 유저 데이터가 없다면 실행
     /// </summary>
     /// <returns></returns>
-    private IEnumerator AddPlayer()
+    public IEnumerator AddPlayer()
     {
         string url = $"{apiBaseUrl}/players";
 
@@ -69,12 +59,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
 
 
-    public void RequestDeletePlayerServerRpc(int playerId)
-    {
-        StartCoroutine(DeletePlayer(playerId));
-    }
-
-    private IEnumerator DeletePlayer(int playerId)
+    public IEnumerator DeletePlayer(int playerId)
     {
         string url = $"{apiBaseUrl}/players/{playerId}";
 
@@ -90,12 +75,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
 
     // 플레이어 정보 수정 , 클라이언트에 저장된 데이터를 그대로 json으로 api서버에 넘김
-    public void RequestUpdatePlayerDataServerRpc(PlayerData updatedData)
-    {
-        StartCoroutine(UpdatePlayerData(updatedData));
-    }
-
-    private IEnumerator UpdatePlayerData(PlayerData updatedData)
+    public IEnumerator UpdatePlayerData(PlayerData updatedData)
     {
         string url = $"{apiBaseUrl}/players/{updatedData.playerId}";
 
@@ -129,12 +109,7 @@ public class ServerToAPIManager : MonoBehaviour
     /// </summary>
     /// <param name="idType"></param>
     /// <param name="idValue"></param>
-    public void RequestGetPlayerServerRpc(string idType, string idValue)
-    {
-        StartCoroutine(GetPlayer(idType, idValue));
-    }
-
-    private IEnumerator GetPlayer(string idType, string idValue) // 
+    public IEnumerator GetPlayer(string idType, string idValue,bool isFirstTime) // 
     {
         string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
         using (UnityWebRequest request = UnityWebRequest.Get(url))
@@ -150,7 +125,8 @@ public class ServerToAPIManager : MonoBehaviour
             {
                 Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
                 Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
-                yield return StartCoroutine(AddPlayer());
+                if(isFirstTime)
+                    yield return StartCoroutine(AddPlayer());
             }
         }
     }
@@ -158,12 +134,7 @@ public class ServerToAPIManager : MonoBehaviour
     #endregion
 
     #region Player MatchRecords Region
-    public void RequestAddMatchResultServerRpc(int winnerId, int loserId) // Matchrecords-ADD 과정
-    {
-        StartCoroutine(AddMatchResult(winnerId, loserId));
-    }
-
-    private IEnumerator AddMatchResult(int winnerId, int loserId)
+    public IEnumerator AddMatchResult(int winnerId, int loserId)
     {
         string url = $"{apiBaseUrl}/matchrecords";
 
@@ -192,12 +163,7 @@ public class ServerToAPIManager : MonoBehaviour
                 Debug.LogError($"❌ 매치 결과 저장 실패: {request.error}");
         }
     }
-    public void RequestMatchResultServerRpc(int playerId)
-    {
-        StartCoroutine(GetMatchResult(playerId));
-    }
-
-    private IEnumerator GetMatchResult(int playerId)
+    public IEnumerator GetMatchResult(int playerId)
     {
         string url = $"{apiBaseUrl}/matchRecords/{playerId}";
 
@@ -235,12 +201,7 @@ public class ServerToAPIManager : MonoBehaviour
     #region Player Stat Region
 
     // 플레이어 스탯(매치,승리,패배 수) 조회 API
-    public void RequestGetPlayerStatServerRpc(int playerId)
-    {
-        StartCoroutine(GetPlayerStat(playerId));
-    }
-
-    private IEnumerator GetPlayerStat(int playerId)
+    public IEnumerator GetPlayerStat(int playerId)
     {
         string url = $"{apiBaseUrl}/playerStats/{playerId}";
 
@@ -273,12 +234,7 @@ public class ServerToAPIManager : MonoBehaviour
     #region Player Item Region
 
     // 플레이어 아이템 정보 조회(프로필 정보에 들어갈 내용)
-    public void RequestGetPlayerItemsServerRpc(int playerId)
-    {
-        StartCoroutine(GetPlayerItems(playerId));
-    }
-
-    private IEnumerator GetPlayerItems(int playerId)
+    public IEnumerator GetPlayerItems(int playerId)
     {
         string url = $"{apiBaseUrl}/playerItems/{playerId}";
 
@@ -311,12 +267,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
 
     // 🔹 아이템 구매 요청
-    public void RequestPurchaseItemServerRpc(int playerId, int itemUniqueId)
-    {
-        StartCoroutine(PurchaseItem(playerId, itemUniqueId));
-    }
-
-    private IEnumerator PurchaseItem(int playerId, int itemUniqueId)
+    public IEnumerator PurchaseItem(int playerId, int itemUniqueId)
     {
         string url = $"{apiBaseUrl}/playerItems/purchase";
         string jsonData = $"{{\"playerId\":{playerId}, \"itemUniqueId\":{itemUniqueId}}}";
@@ -349,12 +300,8 @@ public class ServerToAPIManager : MonoBehaviour
     #region Player Login Region
 
     // 로그인 정보 조회
-    public void RequestGetLoginRecordsServerRpc(int playerId)
-    {
-        StartCoroutine(GetLoginRecords(playerId));
-    }
 
-    private IEnumerator GetLoginRecords(int playerId)
+    public IEnumerator GetLoginRecords(int playerId)
     {
         string url = $"{apiBaseUrl}/loginRecords/{playerId}";
 
@@ -384,12 +331,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
 
     // 로그인 정보 업데이트
-    public void RequestUpdateLoginTimeServerRpc(int playerId, string ipAddress)
-    {
-        StartCoroutine(UpdateLoginTime(playerId, ipAddress));
-    }
-
-    private IEnumerator UpdateLoginTime(int playerId, string ipAddress)
+    public IEnumerator UpdateLoginTime(int playerId, string ipAddress)
     {
         string url = $"{apiBaseUrl}/loginRecords";
         string jsonData = JsonUtility.ToJson(new LoginUpdateRequest(playerId, ipAddress));
@@ -419,12 +361,8 @@ public class ServerToAPIManager : MonoBehaviour
 
     #region Player Ranking Data
     // 랭킹 정보 
-    public void RequestGetTopRankingServerRpc()
-    {
-        StartCoroutine(GetTopRankingData());
-    }
 
-    private IEnumerator GetTopRankingData()
+    public IEnumerator GetTopRankingData()
     {
         string url = $"{apiBaseUrl}/rankings";
 
@@ -449,12 +387,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
 
 
-    public void RequestGetMyRankingServerRpc(int playerId)
-    {
-        StartCoroutine(GetMyRankingData(playerId));
-    }
-
-    private IEnumerator GetMyRankingData(int playerId)
+    public IEnumerator GetMyRankingData(int playerId)
     {
         string url = $"{apiBaseUrl}/rankings/{playerId}";
 
@@ -478,14 +411,11 @@ public class ServerToAPIManager : MonoBehaviour
         FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMyRankingDataClientRpc(jsonData);
     }
 
-    public void RequestGetGetPlayerDetailsServerRpc(int playerId)
-    {
-        StartCoroutine(GetPlayerDetails(playerId));
-    }
-
-    private IEnumerator GetPlayerDetails(int playerId)
+    public IEnumerator GetPlayerDetails(int playerId)
     {
         string url = $"{apiBaseUrl}/playerDetails/{playerId}";
+        
+        Debug.Log($"URL 확인 : {url}");
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -493,6 +423,7 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
+                Debug.Log("겟 플레이어 ");
                 string json = request.downloadHandler.text;
                 TargetReceivePlayerDetailsDataClientRpc(json);
             }

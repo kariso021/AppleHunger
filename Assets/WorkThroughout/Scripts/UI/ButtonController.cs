@@ -136,10 +136,10 @@ public class ButtonController : MonoBehaviour
         // Debug Buttons
             // 테스트 기능
         playerAdd.onClick.AddListener(() =>
-        clientNetworkManager.AddPlayer(Random.Range(12345, 99999).ToString()));
+        clientNetworkManager.AddPlayer());
 
         playerGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerData("deviceId",SQLiteManager.Instance.player.deviceId));
+        clientNetworkManager.GetPlayerData("deviceId",SQLiteManager.Instance.player.deviceId, false));
 
         playerPut.onClick.AddListener(() =>
         clientNetworkManager.UpdatePlayerData());

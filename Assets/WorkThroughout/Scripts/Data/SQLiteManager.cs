@@ -37,9 +37,7 @@ public class SQLiteManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
-            InitializeDatabase();
-            //LoadAllData();
-
+            StartCoroutine(InitializeDatabase());
         }
         else
         {
@@ -47,24 +45,27 @@ public class SQLiteManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        saveRankDataToDictionary();
-        OnSQLiteDataLoaded?.Invoke();
-        DataSyncManager.Instance.PlayerItemsUpdated();
-    }
-    private void InitializeDatabase()
+    private IEnumerator InitializeDatabase()
     {
         string rawDbPath = Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/");
         dbPath = "URI=file:" + rawDbPath;  // SQLite 연결을 위해 여전히 사용
         Debug.Log($"📂 SQLite DB 경로: {dbPath}");
 
-        if (File.Exists(rawDbPath) == false)
+        // ✅ Step 1: SQLite DB가 존재하는지 확인
+        if (File.Exists(rawDbPath))
         {
-            Debug.Log("📌 SQLite DB가 존재하지 않음 → 서버에서 데이터 가져오기");
-            StartCoroutine(CreateDatabaseAndFetchPlayerData()); // ✅ DB 생성 후 서버에서 데이터 가져오기
+            Debug.Log("✅ SQLite DB가 이미 존재합니다. 서버 요청 없이 로컬 DB 사용.");
+
+            // ✅ Step 2: DB가 존재하면 서버에서 데이터를 받을 필요 없이 로드 후 종료
+            LoadAllData();
+            saveRankDataToDictionary();
+            DataSyncManager.Instance.PlayerItemsUpdated();
+            yield break;
         }
 
+        yield return StartCoroutine(CreateDatabaseAndFetchPlayerData());
+
+        Debug.Log("데이터 찾기 끝난듯");
         LoadAllData();
 
         //dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
@@ -72,14 +73,6 @@ public class SQLiteManager : MonoBehaviour
     private IEnumerator CreateDatabaseAndFetchPlayerData()
     {
         yield return StartCoroutine(CreateDatabase()); // ✅ SQLite DB 생성
-
-        // ✅ 서버에서 플레이어 데이터 가져오기
-        ClientNetworkManager clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
-        if (clientNetworkManager != null)
-        {
-            Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
-            clientNetworkManager.GetPlayerData("deviceId", SystemInfo.deviceUniqueIdentifier);
-        }
     }
     private void createTables(SqliteConnection connection)
     {
@@ -196,25 +189,31 @@ public class SQLiteManager : MonoBehaviour
         string streamingDbPath = Path.Combine(Application.streamingAssetsPath, dbName);
         string persistentDbPath = Path.Combine(Application.persistentDataPath, dbName);
 
-        // 안드로이드에서는 `UnityWebRequest`로 `StreamingAssets`에서 DB 다운로드 시도
-        if (Application.platform == RuntimePlatform.Android)
+        // 📌 Step 2: `streamingAssetsPath`에서 복사 (PC, iOS)
+        if (Application.platform != RuntimePlatform.Android)
+        {
+            if (File.Exists(streamingDbPath))
+            {
+                File.Copy(streamingDbPath, persistentDbPath, true);
+                Debug.Log("✅ SQLite DB 파일 복사 완료! (PC, iOS)");
+                yield break;
+            }
+            else
+            {
+                Debug.LogError("❌ StreamingAssets 폴더에 DB 파일이 존재하지 않음!");
+            }
+        }
+        else // 📌 Step 3: `streamingAssetsPath`에서 다운로드 (Android)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(streamingDbPath))
             {
-                yield return request.SendWebRequest(); // ✅ 다운로드 완료될 때까지 대기
+                yield return request.SendWebRequest();
 
                 if (request.result == UnityWebRequest.Result.Success)
                 {
-                    try
-                    {
-                        File.WriteAllBytes(persistentDbPath, request.downloadHandler.data); // ✅ 다운로드된 DB 파일 저장
-                        Debug.Log("✅ Android에서 SQLite DB 복사 완료!");
-                        yield break; // ✅ DB 복사 성공했으므로 함수 종료
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("❌ Android에서 DB 저장 실패: " + e.Message);
-                    }
+                    File.WriteAllBytes(persistentDbPath, request.downloadHandler.data);
+                    Debug.Log("✅ Android에서 SQLite DB 복사 완료!");
+                    yield break;
                 }
                 else
                 {
@@ -222,36 +221,17 @@ public class SQLiteManager : MonoBehaviour
                 }
             }
         }
-        else // PC, iOS 등에서는 `StreamingAssets`에서 직접 복사
-        {
-            try
-            {
-                if (File.Exists(streamingDbPath))
-                {
-                    File.Copy(streamingDbPath, persistentDbPath, true);
-                    Debug.Log("✅ SQLite DB 파일 복사 완료!");
-                    yield break; // DB 복사 성공했으므로 함수 종료
-                }
-                else
-                {
-                    Debug.LogError("❌ StreamingAssets 폴더에 DB 파일이 존재하지 않음!");
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("❌ DB 복사 중 오류 발생: " + e.Message);
-            }
-        }
 
-        // `persistentDataPath`에도 DB 파일이 없으면 → "기본 DB 새로 생성"
+        // 📌 Step 4: `persistentDataPath`에도 DB가 없으면 새로 생성
         if (!File.Exists(persistentDbPath))
         {
             Debug.LogWarning("⚠️ DB 파일이 어디에도 없음 → 새로 생성합니다.");
-            CreateNewDatabase(persistentDbPath); // 기본 DB 생성
+            yield return StartCoroutine(CreateNewDatabase(persistentDbPath));
         }
     }
 
-    private void CreateNewDatabase(string dbPath)
+
+    private IEnumerator CreateNewDatabase(string dbPath)
     {
         try
         {
@@ -259,12 +239,7 @@ public class SQLiteManager : MonoBehaviour
             {
                 connection.Open();
                 Debug.Log("✅ 새 SQLite 데이터베이스 생성 완료!");
-
-                //기존 createTables() 재사용
                 createTables(connection);
-
-                //필요하면 기본 데이터 삽입 가능 (예: 초기 유저 추가)
-                //InsertDefaultData(connection);
             }
             Debug.Log("✅ 새 SQLite 데이터베이스 테이블 생성 완료!");
         }
@@ -272,7 +247,80 @@ public class SQLiteManager : MonoBehaviour
         {
             Debug.LogError("❌ 새 DB 생성 실패: " + e.Message);
         }
+
+        // ✅ 서버에서 플레이어 데이터 가져오기 (먼저 실행해야 함)
+        ClientNetworkManager clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
+        if (clientNetworkManager != null)
+        {
+            Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
+
+            // ✅ 먼저 플레이어 데이터를 받아옴
+            yield return StartCoroutine(clientNetworkManager.GetPlayerData("deviceId", SystemInfo.deviceUniqueIdentifier,true));
+
+
+            // ✅ 플레이어 ID가 `0`이 아닐 때까지 기다림
+            yield return new WaitUntil(() => SQLiteManager.Instance.LoadPlayerData().playerId != 0);
+            // ✅ player.playerId가 설정된 후에 나머지 요청을 병렬 실행
+            Debug.Log($"✅ 플레이어 ID 확인: {SQLiteManager.Instance.LoadPlayerData().playerId}");
+
+            // ✅ 병렬 요청을 위한 플래그 설정
+            bool isPlayerStatsLoaded = false;
+            bool isLoginDataLoaded = false;
+            bool isMatchRecordsLoaded = false;
+            bool isPlayerItemsLoaded = false;
+            bool isRankingListLoaded = false;
+
+            // ✅ 나머지 데이터를 병렬로 요청
+            StartCoroutine(LoadPlayerStatsServerRpc(clientNetworkManager, () => isPlayerStatsLoaded = true));
+            StartCoroutine(LoadLoginDataServerRpc(clientNetworkManager, () => isLoginDataLoaded = true));
+            StartCoroutine(LoadMatchRecordsServerRpc(clientNetworkManager, () => isMatchRecordsLoaded = true));
+            StartCoroutine(LoadPlayerItemsServerRpc(clientNetworkManager, () => isPlayerItemsLoaded = true));
+            StartCoroutine(LoadRankingListServerRpc(clientNetworkManager, () => isRankingListLoaded = true));
+
+            // ✅ 모든 요청이 끝날 때까지 대기
+            yield return new WaitUntil(() =>
+                isPlayerStatsLoaded &&
+                isLoginDataLoaded &&
+                isMatchRecordsLoaded &&
+                isPlayerItemsLoaded &&
+                isRankingListLoaded
+            );
+
+            Debug.Log("✅ [Client] 모든 데이터 동기화 완료!");
+        }
     }
+    #region Init Data Load
+    private IEnumerator LoadPlayerStatsServerRpc(ClientNetworkManager clientNetworkManager, Action onComplete)
+    {
+        yield return StartCoroutine(clientNetworkManager.GetPlayerStats(SQLiteManager.Instance.LoadPlayerData().playerId));
+        onComplete();
+    }
+
+    private IEnumerator LoadLoginDataServerRpc(ClientNetworkManager clientNetworkManager, Action onComplete)
+    {
+        yield return StartCoroutine(clientNetworkManager.GetLogin(SQLiteManager.Instance.LoadPlayerData().playerId));
+        onComplete();
+    }
+
+    private IEnumerator LoadMatchRecordsServerRpc(ClientNetworkManager clientNetworkManager, Action onComplete)
+    {
+        yield return StartCoroutine(clientNetworkManager.GetMatchRecords(SQLiteManager.Instance.LoadPlayerData().playerId));
+        onComplete();
+    }
+
+    private IEnumerator LoadPlayerItemsServerRpc(ClientNetworkManager clientNetworkManager, Action onComplete)
+    {
+        yield return StartCoroutine(clientNetworkManager.GetPlayerItems(SQLiteManager.Instance.LoadPlayerData().playerId));
+        onComplete();
+    }
+
+    private IEnumerator LoadRankingListServerRpc(ClientNetworkManager clientNetworkManager, Action onComplete)
+    {
+        yield return StartCoroutine(clientNetworkManager.GetRankingList());
+        onComplete();
+    }
+
+    #endregion
 
 
     /// <summary>
@@ -484,7 +532,6 @@ public class SQLiteManager : MonoBehaviour
             connection.Open();
             using (var command = connection.CreateCommand())
             {
-                Debug.Log($"🔹 SQLite에 랭킹 저장: {ranking.playerName}, 랭킹: {ranking.rankPosition}");
                 command.CommandText = @"
                 INSERT OR REPLACE INTO rankings (playerId, playerName, rating, rankPosition, profileIcon)
                 VALUES (@playerId, @playerName, @rating, @rankPosition, @profileIcon);";
@@ -498,7 +545,6 @@ public class SQLiteManager : MonoBehaviour
                 command.ExecuteNonQuery();
             }
         }
-        Debug.Log("✅ 랭킹 데이터 SQLite 저장 완료!");
     }
     // 내 랭킹 데이터 저장
     public void SaveMyRankingData(PlayerRankingData myRanking)

@@ -44,7 +44,7 @@ public class DataSyncManager : MonoBehaviour
     public void PlayerDataUpdated()
     {
         Debug.Log("🔄 플레이어 데이터 변경 감지 → MySQL에서 최신 데이터 가져오기");
-        FindAnyObjectByType<ClientNetworkManager>().GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString());
+        FindAnyObjectByType<ClientNetworkManager>().GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false);
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
         Invoke(nameof(SyncSQLite), 1.0f); // 1초 후 SQLite 갱신

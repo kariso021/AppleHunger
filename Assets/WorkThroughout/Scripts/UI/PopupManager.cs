@@ -46,8 +46,9 @@ public class PopupManager : MonoBehaviour
 
         if (popup.tag == "Profile")
         {
+            Debug.Log("쇼 팝업 클라이언트 아이디");
             pendingOnComplete = () => OnPlayerDetailsLoaded();
-            FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(SQLiteManager.Instance.player.playerId);
+            StartCoroutine(FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(SQLiteManager.Instance.player.playerId));
         }
 
     }
@@ -66,7 +67,7 @@ public class PopupManager : MonoBehaviour
         if (popup.tag == "Profile")
         {
             pendingOnComplete = () => OnPlayerDetailsLoaded();
-            FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(playerId);
+            StartCoroutine(FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(playerId));
         }
 
     }
