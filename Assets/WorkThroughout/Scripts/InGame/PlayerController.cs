@@ -58,7 +58,7 @@ public class PlayerController : NetworkBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
-        scoreManager = GetComponent<ScoreManager>(); // ScoreManager 연결
+        //scoreManager = GetComponent<ScoreManager>(); // ScoreManager 연결
 
         if (localDragBox != null)
         {
@@ -103,6 +103,8 @@ public class PlayerController : NetworkBehaviour
         base.OnNetworkSpawn();
 
         if (!IsOwner) return;
+
+        StartCoroutine(WaitAndRegisterPlayerId());
 
         OnPlayerInitialized?.Invoke(OwnerClientId);
         if (localDragBox != null)
@@ -322,5 +324,27 @@ public class PlayerController : NetworkBehaviour
 
         yield return new WaitForSeconds(1.0f); // 1초간 드래그 제한 유지
         isDragRestricted = false; // 드래그 제한 해제
+    }
+
+
+    private IEnumerator WaitAndRegisterPlayerId()
+    {
+        yield return null; // 한 프레임 기다림 (Netcode가 내부 Dictionary 등록 마치도록, )
+
+        //테스팅용
+        int playerId = 1;
+        if (SQLiteManager.Instance?.player != null)
+        {
+            playerId = SQLiteManager.Instance.player.playerId;
+        }
+
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.IsSpawned)
+        {
+            PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
+        }
+        else
+        {
+            Debug.LogError("❌ PlayerDataManager.Instance 가 아직 준비되지 않았습니다.");
+        }
     }
 }
