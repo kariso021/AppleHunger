@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ButtonController : MonoBehaviour
@@ -65,10 +66,14 @@ public class ButtonController : MonoBehaviour
         PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
         // single,multi 플레이 관련 함수 바인딩
 
+
+        multiPlayButton.onClick.AddListener(() => LoadInGameScene());
+
         // Ranking Panel Buttons
         myRankProfileButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.profilePopup));
-        
+
+
         // 후에 프로필 팝업의 각 텍스트마다 서버에서 정보를 받거나 혹은,
         // 이미 서버에서 각 랭크별로 인물의 정보를 담은 버튼을 생성하는 개념으로
         // 접근해야 하므로, 클라이언트에서 알아서 그 정보의 텍스트들을 기반으로 
@@ -173,10 +178,10 @@ public class ButtonController : MonoBehaviour
         SQLiteManager.Instance.LoadAllData());
     }
 
-    // Update is called once per frame
-    void Update()
+
+    private void LoadInGameScene()
     {
-            
+        SceneManager.LoadScene("InGame");
     }
 
 

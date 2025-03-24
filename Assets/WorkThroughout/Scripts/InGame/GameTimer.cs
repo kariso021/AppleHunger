@@ -46,7 +46,6 @@ public class GameTimer : NetworkBehaviour
             if (Mathf.Abs(newRemainingTime - remainingTime.Value) > 0.1f)
             {
                 remainingTime.Value = newRemainingTime;
-                Debug.Log($"{remainingTime.Value}");
             }
 
             if (!isGameEnded && newRemainingTime <= 0)

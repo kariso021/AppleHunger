@@ -33,7 +33,7 @@ public class GameEnding : NetworkBehaviour
         ShowGameOverScreenClientRpc(winnerId);
     }
 
-    /// ✅ 서버에서 승자 결정 (점수 기반)
+    // 서버에서 승자 결정 (점수 기반)
     private ulong DetermineWinner()
     {
         ulong winnerId = 0;
@@ -52,7 +52,7 @@ public class GameEnding : NetworkBehaviour
         return winnerId;
     }
 
-    /// ✅ 클라이언트 UI에 결과 표시
+    // 클라이언트 UI에 결과 표시
     [ClientRpc]
     private void ShowGameOverScreenClientRpc(ulong winnerId)
     {
@@ -70,14 +70,12 @@ public class GameEnding : NetworkBehaviour
         //Invoke(nameof(GoToLobby), 5f);
     }
 
-    /// ✅ 5초 후 로비 씬으로 이동
+    // 5초 후 로비 씬으로 이동
     private void GoToLobby()
     {
-        if (NetworkManager.Singleton.IsServer)
-        {
-            NetworkManager.Singleton.Shutdown();
-        }
+        
+        NetworkManager.Singleton.Shutdown();
 
-        SceneManager.LoadScene("LobbyScene");
+        SceneManager.LoadScene("Lobby");
     }
 }
