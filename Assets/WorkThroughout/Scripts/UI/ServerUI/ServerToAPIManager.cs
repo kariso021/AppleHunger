@@ -7,6 +7,23 @@ public class ServerToAPIManager : MonoBehaviour
 {
     private string apiBaseUrl = "https://applehunger.site";
 
+    private ServerToAPIManager instance;
+    public static ServerToAPIManager Instance => Instance;
+
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
 
     private void Start()
     {
@@ -55,7 +72,7 @@ public class ServerToAPIManager : MonoBehaviour
 
     private void TargetReceivePlayerDataClientRpc(string jsonData)
     {
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerDataClientRpc(jsonData);
+        ClientNetworkManager.Instance.TargetReceivePlayerDataClientRpc(jsonData);
     }
 
 
@@ -193,7 +210,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
     public void TargetReceiveMatchRecordsClientRpc(MatchHistoryData matchHistoryData)
     {
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMatchRecordsClientRpc(matchHistoryData);
+       ClientNetworkManager.Instance.TargetReceiveMatchRecordsClientRpc(matchHistoryData);
     }
 
     #endregion
@@ -225,7 +242,7 @@ public class ServerToAPIManager : MonoBehaviour
     {
         Debug.Log($"✅ 서버에서 받은 PlayerStats 데이터: {jsonData}");
 
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerStatsClientRpc(jsonData);
+        ClientNetworkManager.Instance.TargetReceivePlayerStatsClientRpc(jsonData);
     }
 
 
@@ -263,7 +280,7 @@ public class ServerToAPIManager : MonoBehaviour
     // JSON 데이터 로드 후 변환
     private void TargetReceivePlayerItemsClientRpc(string jsonData)
     {
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerItemsClientRpc(jsonData);
+        ClientNetworkManager.Instance.TargetReceivePlayerItemsClientRpc(jsonData);
     }
 
     // 🔹 아이템 구매 요청
@@ -319,7 +336,7 @@ public class ServerToAPIManager : MonoBehaviour
     private void TargetReceiveLoginRecordsClientRpc(string jsonData)
     {
         Debug.Log($"✅ 서버에서 받은 LoginRecords 데이터: {jsonData}");
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveLoginDataClientRpc(jsonData);
+        ClientNetworkManager.Instance.TargetReceiveLoginDataClientRpc(jsonData);
 
         // 로그인 데이터를 여러개로 관리할 게 아니라 하나로 관리할 예정인데 이건 나중에 order같은걸 해서 빼던가 해야할거같음
         //List<LoginRecordData> loginRecords = JsonUtility.FromJson<LoginRecordList>(jsonData).records;
@@ -383,7 +400,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
     private void TargetReceiveTopRankingDataClientRpc(string jsonData)
     {
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveTopRankingDataClientRpc(jsonData);
+        ClientNetworkManager.Instance.TargetReceiveTopRankingDataClientRpc(jsonData);
     }
 
 
@@ -408,7 +425,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
     private void TargetReceiveMyRankingDataClientRpc(string jsonData)
     {
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceiveMyRankingDataClientRpc(jsonData);
+        ClientNetworkManager.Instance.TargetReceiveMyRankingDataClientRpc(jsonData);
     }
 
     public IEnumerator GetPlayerDetails(int playerId)
@@ -435,7 +452,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
     private void TargetReceivePlayerDetailsDataClientRpc(string jsonData)
     {
-        FindAnyObjectByType<ClientNetworkManager>().TargetReceivePlayerDetailsDataClientRpc(jsonData);
+        ClientNetworkManager.Instance.TargetReceivePlayerDetailsDataClientRpc(jsonData);
     }
     #endregion
     // 🔹 데이터 구조

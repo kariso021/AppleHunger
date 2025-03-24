@@ -1,17 +1,31 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class NavManager : MonoBehaviour
 {
     public static NavManager Instance;
-
+    public static string currentScene;
+    public static string previousScene;
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
 
+    private void Start()
+    {
+        currentScene = SceneManager.GetActiveScene().name;
+    }
+
     public void NavigateTo(string panelName)
     {
         PanelManager.Instance.ShowPanel(panelName);
+    }
+
+    public static void LoadScene(string sceneName)
+    {
+        previousScene = SceneManager.GetActiveScene().name;
+        LoadingScene.nextScene = sceneName;
+        SceneManager.LoadScene("Loading");
     }
 }

@@ -25,12 +25,6 @@ public class DownManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        waitMessage.SetActive(true);
-        downMessage.SetActive(false);
-
-        StartCoroutine(InitAddresaable());
-        StartCoroutine(CheckUpdateFiles());
-
     }
 
     IEnumerator InitAddresaable()
@@ -82,7 +76,7 @@ public class DownManager : MonoBehaviour
             downValText.text = " 100%";
             downSlider.value = 1f;
             yield return new WaitForSeconds(2f);
-            LoadingScene.LoadScene("MainScene");
+            NavManager.LoadScene("MainScene");
         }
     }
 
@@ -200,6 +194,13 @@ public class DownManager : MonoBehaviour
         }
     }
 
+    public void OnDownloadCheck()
+    {
+        waitMessage.SetActive(true);
+        downMessage.SetActive(false);
 
+        StartCoroutine(InitAddresaable());
+        StartCoroutine(CheckUpdateFiles());
+    }
     #endregion
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 
 
@@ -43,6 +44,12 @@ public class SQLiteManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        if(NavManager.previousScene == "InGame" && NavManager.currentScene == "Lobby")
+            LoadAllData();
     }
 
     private IEnumerator InitializeDatabase()

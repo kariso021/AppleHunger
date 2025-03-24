@@ -47,18 +47,12 @@ public class LoadingScene : MonoBehaviour
                 if(loadingBar.value == 1f)
                 {
                     yield return new WaitForSeconds(2f);
+                    NavManager.currentScene = nextScene;
                     op.allowSceneActivation = true;
                     yield break;
                 }
             }
         }
-    }
-
-    public static void LoadScene(string sceneName)
-    {
-        nextScene = sceneName;
-        SceneManager.LoadScene("Loading");
-
     }
 
 }
