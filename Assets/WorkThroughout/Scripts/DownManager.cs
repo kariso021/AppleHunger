@@ -192,7 +192,7 @@ public class DownManager : MonoBehaviour
             {
                 downValText.text = "100%";
                 downSlider.value = 1f;
-                SceneManager.LoadScene("MainScene");
+                SceneManager.LoadScene("Lobby");
                 break;
             }
 

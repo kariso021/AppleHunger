@@ -79,8 +79,8 @@ public class ObjectPoolManager : MonoBehaviour
 
         GameObject obj = objectPool.Dequeue();
         obj.SetActive(true);
-        obj.transform.position = position;
-        obj.transform.rotation = rotation;
+        //obj.transform.position = position;
+        //obj.transform.rotation = rotation;
         if (parent != null) obj.transform.SetParent(parent);
 
         return obj;

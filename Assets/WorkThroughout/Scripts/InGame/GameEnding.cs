@@ -38,7 +38,9 @@ public class GameEnding : NetworkBehaviour
     {
         ulong winnerId = 0;
         int highestScore = int.MinValue;
+
         Dictionary<ulong, int> playerScores = ScoreManager.Instance.GetScores();
+
 
         foreach (var player in playerScores)
         {
@@ -48,6 +50,18 @@ public class GameEnding : NetworkBehaviour
                 winnerId = player.Key;
             }
         }
+
+        //ClientNetworkManager clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
+        // 게임 종료시 DB 추가되는 부분
+        //if(clientNetworkManager != null)
+        //{
+        //    clientNetworkManager.AddMatchRecords(winnerId, loserId);
+        //    SQLiteManager.Instance.player.currency += (100 + UnityEngine.Random.Range(10, 90));
+        //    // 레이팅 계산식 필요
+        //    //SQLiteManager.Instance.player.rating += newRating;
+        //    //SQLiteManager.Instance.SavePlayerData(SQLiteManager.Instance.player);
+        //    clientNetworkManager.UpdatePlayerData();
+        //}
 
         return winnerId;
     }
@@ -61,6 +75,7 @@ public class GameEnding : NetworkBehaviour
         if (NetworkManager.Singleton.LocalClientId == winnerId)
         {
             resultText.text = "Winner!";
+            
         }
         else
         {
