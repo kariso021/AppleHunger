@@ -10,9 +10,13 @@ public class PlayerDataManager : NetworkBehaviour
 
     private Dictionary<ulong, int> clientIdToNumber = new Dictionary<ulong, int>();
 
-    
+    public Dictionary<ulong, int> GetAllMappings()
+    {
+        return new Dictionary<ulong, int>(clientIdToNumber);
+    }
 
-   private void Awake()
+
+    private void Awake()
     {
         if (Instance == null)
         {

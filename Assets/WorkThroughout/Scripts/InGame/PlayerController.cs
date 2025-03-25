@@ -329,22 +329,44 @@ public class PlayerController : NetworkBehaviour
 
     private IEnumerator WaitAndRegisterPlayerId()
     {
-        yield return null; // 한 프레임 기다림 (Netcode가 내부 Dictionary 등록 마치도록, )
+        // 최대 5초까지만 기다리도록 설정 (무한루프 방지)
+        float timeout = 5f;
+        float timer = 0f;
 
-        //테스팅용
+        while ((PlayerDataManager.Instance == null) && timer < timeout)
+        {
+            Debug.Log("⏳ PlayerDataManager.Instance 로딩 대기 중...");
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // 타임아웃 발생 시 예외 처리
+        if (PlayerDataManager.Instance == null || !PlayerDataManager.Instance.IsSpawned)
+        {
+            Debug.LogError("❌ PlayerDataManager가 준비되지 않아 등록을 중단합니다.");
+            yield break;
+        }
+
+        // SQLiteManager 체크
         int playerId = 1;
         if (SQLiteManager.Instance?.player != null)
         {
             playerId = SQLiteManager.Instance.player.playerId;
         }
-
-        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.IsSpawned)
-        {
-            PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
-        }
         else
         {
-            Debug.LogError("❌ PlayerDataManager.Instance 가 아직 준비되지 않았습니다.");
+            Debug.LogWarning("⚠️ SQLiteManager가 null이거나 player 정보가 없어 기본값으로 등록함.");
+        }
+
+        // ✅ 최종 체크 후 ServerRpc 호출
+        try
+        {
+            PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
+            Debug.Log($"✅ playerId {playerId} 등록 성공!");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"❌ RegisterPlayerNumberServerRpc 호출 중 예외 발생: {ex}");
         }
     }
 }
