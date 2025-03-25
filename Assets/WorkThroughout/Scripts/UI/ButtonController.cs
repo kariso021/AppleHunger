@@ -144,13 +144,13 @@ public class ButtonController : MonoBehaviour
         clientNetworkManager.AddPlayer());
 
         playerGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerData("deviceId",SQLiteManager.Instance.player.deviceId, false));
+        StartCoroutine(clientNetworkManager.GetPlayerData("deviceId",SQLiteManager.Instance.player.deviceId, false)));
 
         playerPut.onClick.AddListener(() =>
-        clientNetworkManager.UpdatePlayerData());
+        StartCoroutine(clientNetworkManager.UpdatePlayerData()));
 
         playerStatsGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerStats(SQLiteManager.Instance.player.playerId));
+        StartCoroutine(clientNetworkManager.GetPlayerStats(SQLiteManager.Instance.player.playerId)));
 
         playerItemsGet.onClick.AddListener(() =>
         clientNetworkManager.GetPlayerItems(SQLiteManager.Instance.player.playerId));
@@ -159,8 +159,8 @@ public class ButtonController : MonoBehaviour
         clientNetworkManager.PurchasePlayerItem(SQLiteManager.Instance.player.playerId,102));
 
         matchAdd.onClick.AddListener(() =>
-        clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,
-        SQLiteManager.Instance.player.playerId + 4));
+        StartCoroutine(clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,
+        SQLiteManager.Instance.player.playerId + 4)));
 
         matchGet.onClick.AddListener(() =>
         clientNetworkManager.GetMatchRecords(SQLiteManager.Instance.player.playerId));

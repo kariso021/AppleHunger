@@ -10,6 +10,9 @@ public class RankingRecordsManager : MonoBehaviour
     private int maxRankRecords = 50; // 🔹 최대 랭킹 표시 개수
     private Dictionary<int, RankingData> rankingObjects = new Dictionary<int, RankingData>(); // 🔹 기존 오브젝트 저장
 
+
+    // 동일 등수에 대한 표기
+    int recordCount = 0;
     private void Start()
     {
         // ✅ 랭킹 변경 이벤트 구독 (자동 갱신)
@@ -68,6 +71,8 @@ public class RankingRecordsManager : MonoBehaviour
 
                 AddressableManager.Instance.rankingIconObj.Add(rankingData.gameObject);
             }
+
+            int displayRank = recordCount + 1;
 
             // 🔹 데이터 설정
             rankingData.SetRankingData(

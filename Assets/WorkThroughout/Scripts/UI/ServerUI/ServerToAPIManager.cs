@@ -463,7 +463,7 @@ public class ServerToAPIManager : MonoBehaviour
     /// <returns></returns>
     public IEnumerator CheckRankingShouldUpdate()
     {
-        string url = $"{apiBaseUrl}/rankings/shouldUpdate";
+        string url = $"{apiBaseUrl}/rankings/update/shouldUpdate";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
