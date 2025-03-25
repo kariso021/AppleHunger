@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class ClientNetworkManager : MonoBehaviour
 {
-    private ClientNetworkManager instance;
-    public static ClientNetworkManager Instance => Instance;
+    private static ClientNetworkManager instance;
+    public static ClientNetworkManager Instance => instance;
 
 
     private void Awake()

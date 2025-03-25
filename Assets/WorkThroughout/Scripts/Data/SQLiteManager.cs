@@ -38,6 +38,10 @@ public class SQLiteManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
+
+            player.deviceId = TransDataClass.deviceIdToApply;
+            player.googleId = TransDataClass.googleIdToApply;
+
             StartCoroutine(InitializeDatabase());
         }
         else
@@ -65,6 +69,7 @@ public class SQLiteManager : MonoBehaviour
 
             // ✅ Step 2: DB가 존재하면 서버에서 데이터를 받을 필요 없이 로드 후 종료
             LoadAllData();
+            yield return DataSyncManager.Instance.PlayerRankingUpdated();
             saveRankDataToDictionary();
             DataSyncManager.Instance.PlayerItemsUpdated();
             yield break;
@@ -256,13 +261,12 @@ public class SQLiteManager : MonoBehaviour
         }
 
         // ✅ 서버에서 플레이어 데이터 가져오기 (먼저 실행해야 함)
-        ClientNetworkManager clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
-        if (clientNetworkManager != null)
+        if (ClientNetworkManager.Instance != null)
         {
             Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
 
             // ✅ 먼저 플레이어 데이터를 받아옴
-            yield return StartCoroutine(clientNetworkManager.GetPlayerData("deviceId", SystemInfo.deviceUniqueIdentifier,true));
+            yield return StartCoroutine(ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? player.deviceId : player.googleId,true));
 
 
             // ✅ 플레이어 ID가 `0`이 아닐 때까지 기다림
@@ -278,11 +282,11 @@ public class SQLiteManager : MonoBehaviour
             bool isRankingListLoaded = false;
 
             // ✅ 나머지 데이터를 병렬로 요청
-            StartCoroutine(LoadPlayerStatsServerRpc(clientNetworkManager, () => isPlayerStatsLoaded = true));
-            StartCoroutine(LoadLoginDataServerRpc(clientNetworkManager, () => isLoginDataLoaded = true));
-            StartCoroutine(LoadMatchRecordsServerRpc(clientNetworkManager, () => isMatchRecordsLoaded = true));
-            StartCoroutine(LoadPlayerItemsServerRpc(clientNetworkManager, () => isPlayerItemsLoaded = true));
-            StartCoroutine(LoadRankingListServerRpc(clientNetworkManager, () => isRankingListLoaded = true));
+            StartCoroutine(LoadPlayerStatsServerRpc(ClientNetworkManager.Instance, () => isPlayerStatsLoaded = true));
+            StartCoroutine(LoadLoginDataServerRpc(ClientNetworkManager.Instance, () => isLoginDataLoaded = true));
+            StartCoroutine(LoadMatchRecordsServerRpc(ClientNetworkManager.Instance, () => isMatchRecordsLoaded = true));
+            StartCoroutine(LoadPlayerItemsServerRpc(ClientNetworkManager.Instance, () => isPlayerItemsLoaded = true));
+            StartCoroutine(LoadRankingListServerRpc(ClientNetworkManager.Instance, () => isRankingListLoaded = true));
 
             // ✅ 모든 요청이 끝날 때까지 대기
             yield return new WaitUntil(() =>
@@ -326,6 +330,8 @@ public class SQLiteManager : MonoBehaviour
         yield return StartCoroutine(clientNetworkManager.GetRankingList());
         onComplete();
     }
+
+
 
     #endregion
 

@@ -4560,8 +4560,8 @@ GameObject:
   - component: {fileID: 305469486}
   - component: {fileID: 305469485}
   - component: {fileID: 305469487}
-  - component: {fileID: 305469488}
   - component: {fileID: 305469489}
+  - component: {fileID: 305469488}
   - component: {fileID: 305469490}
   m_Layer: 0
   m_Name: DataCreateManager

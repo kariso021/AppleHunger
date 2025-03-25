@@ -7,8 +7,8 @@ public class ServerToAPIManager : MonoBehaviour
 {
     private string apiBaseUrl = "https://applehunger.site";
 
-    private ServerToAPIManager instance;
-    public static ServerToAPIManager Instance => Instance;
+    private static ServerToAPIManager instance;
+    public static ServerToAPIManager Instance => instance;
 
 
     private void Awake()
@@ -39,8 +39,8 @@ public class ServerToAPIManager : MonoBehaviour
     {
         string url = $"{apiBaseUrl}/players";
 
-        PlayerData newPlayer = new PlayerData(SystemInfo.deviceUniqueIdentifier,
-            "", $"User_{UnityEngine.Random.Range(1000, 9999)}",
+        PlayerData newPlayer = new PlayerData(SQLiteManager.Instance.player.deviceId,
+            SQLiteManager.Instance.player.googleId, $"User_{UnityEngine.Random.Range(1000, 9999)}",
             "101",
             "201",
             1200, 500);
@@ -212,6 +212,8 @@ public class ServerToAPIManager : MonoBehaviour
     {
        ClientNetworkManager.Instance.TargetReceiveMatchRecordsClientRpc(matchHistoryData);
     }
+
+
 
     #endregion
 
@@ -454,6 +456,47 @@ public class ServerToAPIManager : MonoBehaviour
     {
         ClientNetworkManager.Instance.TargetReceivePlayerDetailsDataClientRpc(jsonData);
     }
+
+    /// <summary>
+    /// 랭킹 업데이트를 위한 트리거 함수
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator CheckRankingShouldUpdate()
+    {
+        string url = $"{apiBaseUrl}/rankings/shouldUpdate";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string json = request.downloadHandler.text;
+                var result = JsonUtility.FromJson<RankingShouldUpdateResponse>(json);
+
+                if (result.shouldUpdate)
+                {
+                    Debug.Log(" 서버에서 랭킹 갱신 필요함 → 랭킹 데이터 요청 및 UI 갱신");
+
+                    // 랭킹 갱신
+                    yield return DataSyncManager.Instance.PlayerRankingUpdated();
+
+                    // UI 갱신 트리거
+                    DataSyncManager.Instance.InvokeUIRankingUpdateEvent();
+                }
+                else
+                {
+                    Debug.Log(" 랭킹 데이터는 최신 상태");
+                }
+            }
+            else
+            {
+                Debug.LogError($" 랭킹 갱신 여부 확인 실패: {request.error}");
+            }
+        }
+    }
+
+
     #endregion
     // 🔹 데이터 구조
     [System.Serializable]
@@ -497,5 +540,9 @@ public class ServerToAPIManager : MonoBehaviour
             this.ipAddress = ipAddress;
         }
     }
-
+    [System.Serializable]
+    public class RankingShouldUpdateResponse
+    {
+        public bool shouldUpdate;
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class DataSyncManager : MonoBehaviour
@@ -81,10 +82,10 @@ public class DataSyncManager : MonoBehaviour
     }
 
     // 🔹 랭킹 정보가 변경되었을 때 호출 (예: 레이팅 변화)
-    public void PlayerRankingUpdated()
+    public IEnumerator PlayerRankingUpdated()
     {
         Debug.Log("🔄 플레이어 랭킹 변경 감지 → MySQL에서 최신 데이터 가져오기");
-        FindAnyObjectByType<ClientNetworkManager>().GetRankingList();
+        yield return ClientNetworkManager.Instance.GetRankingList();
   
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
@@ -109,4 +110,11 @@ public class DataSyncManager : MonoBehaviour
         OnPlayerProfileChanged?.Invoke(); // 프로필 UI 업데이트 트리거
     }
 
+
+    public void InvokeUIRankingUpdateEvent()
+    {
+        Debug.Log("Ranking UI Update");
+
+        OnPlayerRankingChanged?.Invoke();
+    }
 }

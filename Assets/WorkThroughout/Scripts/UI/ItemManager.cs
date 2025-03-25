@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,14 +16,21 @@ public class ItemManager : MonoBehaviour
 
     private void OnEnable()
     {
-        DataSyncManager.Instance.OnPlayerItemsChanged += UpdateItemList;
+        StartCoroutine(SubscribeAfterFrame());
     }
 
     private void OnDisable()
     {
         DataSyncManager.Instance.OnPlayerItemsChanged -= UpdateItemList;
     }
-
+    private IEnumerator SubscribeAfterFrame()
+    {
+        yield return null; // 한 프레임 기다림
+        if (DataSyncManager.Instance != null)
+        {
+            DataSyncManager.Instance.OnPlayerItemsChanged += UpdateItemList;
+        }
+    }
     // ✅ 아이템 리스트 생성 또는 갱신
     public void CreateItemList(string type)
     {
