@@ -2,7 +2,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
-using Unity.Services.Matchmaker.Models;
+using System.Linq;
 
 public class GameEnding : NetworkBehaviour
 {
@@ -11,37 +11,48 @@ public class GameEnding : NetworkBehaviour
 
     private void OnEnable()
     {
-      
-       
-            Debug.Log("게임이벤트 등록 호출");
-            GameTimer.OnGameEnded += HandleGameEnd;
-        
+        GameTimer.OnGameEnded += HandleGameEnd;
     }
 
     private void OnDisable()
     {
- 
-        
-            GameTimer.OnGameEnded -= HandleGameEnd;
-        
+        GameTimer.OnGameEnded -= HandleGameEnd;
     }
 
-    /// ✅ 게임 종료 시 승자 결정 및 UI 표시
+    /// 서버에서 게임 종료 처리
     private void HandleGameEnd()
     {
+        if (!IsServer) return;
         DetermineWinner(out int winnerNumber, out List<int> loserNumbers);
+
+        // 모든 클라이언트에게 게임 결과 전송
         ShowGameOverScreenClientRpc(winnerNumber, loserNumbers.ToArray());
+
+        // 서버 DB 또는 기록 처리 (선택적으로) -> 이부분은 클라에서 결정해야되는 것.
+        SubmitMatchResultServerRpc(winnerNumber, loserNumbers.ToArray());
+
+        // 5초 후 로비 씬 이동
+        Invoke(nameof(GoToLobby), 5f);
     }
 
-    private void DetermineWinner(out int winnerNumber, out List<int> loserNumbers)
-    {
-        winnerNumber = -1;
-        loserNumbers = new List<int>();
+    /// 서버에서 승자 계산
+    private void DetermineWinner(out int winnerPlayerId, out List<int> loserPlayerIds)
+    { 
+        winnerPlayerId = -1;
+        loserPlayerIds = new List<int>();
 
-        Dictionary<ulong, int> scores = ScoreManager.Instance.GetScores();
+        var scores = ScoreManager.Instance.GetScores();
+        var playerDataManager = PlayerDataManager.Instance;
 
         int highestScore = int.MinValue;
         ulong winnerClientId = 0;
+
+        Debug.Log("🧾 [ScoreManager] 현재 점수 목록:");
+        foreach (var pair in scores)
+        {
+            int playerId = playerDataManager.GetNumberFromClientID(pair.Key);
+            Debug.Log($"🟡 ClientID: {pair.Key} → PlayerID: {playerId}, Score: {pair.Value}");
+        }
 
         foreach (var pair in scores)
         {
@@ -52,93 +63,91 @@ public class GameEnding : NetworkBehaviour
             }
         }
 
-        winnerNumber = PlayerDataManager.Instance.GetNumberFromClientID(winnerClientId);
+        winnerPlayerId = playerDataManager.GetNumberFromClientID(winnerClientId);
+
+        Debug.Log($"✅ [결과] 승자 ClientID: {winnerClientId} → PlayerID: {winnerPlayerId}, Score: {highestScore}");
 
         foreach (var pair in scores)
         {
-            ulong clientId = pair.Key;
-            if (clientId != winnerClientId)
+            if (pair.Key != winnerClientId)
             {
-                int loserNumber = PlayerDataManager.Instance.GetNumberFromClientID(clientId);
-                loserNumbers.Add(loserNumber);
+                int loserPlayerId = playerDataManager.GetNumberFromClientID(pair.Key);
+                loserPlayerIds.Add(loserPlayerId);
+                Debug.Log($"❌ 패자 ClientID: {pair.Key} → PlayerID: {loserPlayerId}");
             }
         }
     }
 
-
-
-
     [ClientRpc]
-    private void ShowGameOverScreenClientRpc(int winnerNumber, int[] loserNumbers)
+    private void ShowGameOverScreenClientRpc(int winnerPlayerId, int[] loserPlayerIds)
     {
         gameOverPanel.SetActive(true);
 
-        int myNumber = SQLiteManager.Instance.player.playerId; // ✅ 내 DB ID
+        int myPlayerId = SQLiteManager.Instance.player.playerId;
 
-        if (myNumber == winnerNumber)
+        if (myPlayerId == winnerPlayerId)
         {
             resultText.text = "Winner!";
         }
-        else if (System.Array.Exists(loserNumbers, number => number == myNumber))
+        else if (System.Array.Exists(loserPlayerIds, id => id == myPlayerId))
         {
             resultText.text = "Loser...";
         }
         else
         {
-            resultText.text = "???";
+            resultText.text = "Draw";
+        }
+    }
+
+
+
+    //이게 지금 되지 않고있는것. ServerRPC는 player 객체 또는 프리펩에서 호출되어야 정상적으로 작동
+    /// 서버에 Match 결과 제출 요청 (클라이언트에서 호출)
+    [ServerRpc(RequireOwnership = false)]
+    private void SubmitMatchResultServerRpc(int winnerPlayerId, int[] loserPlayerIds)
+    {
+
+        if (ClientNetworkManager.Instance == null)
+        {
+            Debug.Log("Client 네트워크매니저가 현재 없습니다");
+        }
+        else
+        {
+            Debug.Log("클라네트워크 매니저 존재하고 작동하고 있음");
+        }
+        ClientNetworkManager.Instance?.AddMatchRecords(winnerPlayerId, 3);
+        SavePlayerDataClientRpc(winnerPlayerId, NetworkManager.Singleton.ConnectedClientsIds.ToArray());
+    }
+
+
+
+    /// 각 클라이언트에게 DB 저장 요청
+    [ClientRpc]
+    private void SavePlayerDataClientRpc(int winnerPlayerId, ulong[] targetClientIds)
+    {
+        ulong myClientId = NetworkManager.Singleton.LocalClientId;
+
+        if (!System.Array.Exists(targetClientIds, id => id == myClientId))
+            return;
+
+        int myPlayerId = SQLiteManager.Instance.player.playerId;
+
+        if (myPlayerId == winnerPlayerId)
+        {
+            SQLiteManager.Instance.player.currency += (100 + UnityEngine.Random.Range(10, 90));
         }
 
-        //여기서 결정하면 됨
-
-
-        ClientNetworkManager.Instance?.AddMatchRecords(winnerNumber, loserNumbers[0]);
-        SQLiteManager.Instance.player.currency += (100 + UnityEngine.Random.Range(10, 90));
         SQLiteManager.Instance.SavePlayerData(SQLiteManager.Instance.player);
         ClientNetworkManager.Instance?.UpdatePlayerData();
-
-        //Invoke(nameof(GoToLobby), 5f);
     }
 
-
-
-    // 5초 후 로비 씬으로 이동
+    /// 씬 이동 (서버/클라 공통)
     private void GoToLobby()
     {
-        
-        NetworkManager.Singleton.Shutdown();
-
-        SceneManager.LoadScene("Lobby");
+        // 서버가 전환하고, 클라이언트도 자동 따라옴
+        if (IsClient)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
+        }
     }
-
-    // 업데이트 레이팅 부분
-
-    //public void UpdateRatings(Player playerA, Player playerB, bool playerAWon, float K, float R)
-    //{
-    //    float diff = playerB.Rating - playerA.Rating;
-
-    //    if (playerAWon)
-    //    {
-    //        float gain = K + diff * 0.3f;
-    //        float loss = K - diff * 0.1f;
-
-    //        gain = Mathf.Clamp(gain, K, R);
-    //        loss = Mathf.Clamp(loss, K * 0.25f, R);
-
-    //        playerA.Rating += gain;
-    //        playerB.Rating -= loss;
-    //    }
-    //    else
-    //    {
-    //        float gain = K + (-diff) * 0.3f; // B가 더 낮은 경우
-    //        float loss = K - (-diff) * 0.1f;
-
-    //        gain = Mathf.Clamp(gain, K, R);
-    //        loss = Mathf.Clamp(loss, K * 0.25f, R);
-
-    //        playerB.Rating += gain;
-    //        playerA.Rating -= loss;
-    //    }
-
-    //    Debug.Log($"[Rating Update] A: {playerA.Rating}, B: {playerB.Rating}");
-    //}
 }

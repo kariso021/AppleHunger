@@ -5,7 +5,7 @@ using System;
 public class GameTimer : NetworkBehaviour
 {
     private NetworkVariable<float> remainingTime = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    private float totalGameTime = 10f;
+    [SerializeField] private float totalGameTime = 60f;
     private double startTime;
     private bool isGameEnded = false; // 🔥 게임 종료가 한 번만 실행되도록 플래그 추가
 
