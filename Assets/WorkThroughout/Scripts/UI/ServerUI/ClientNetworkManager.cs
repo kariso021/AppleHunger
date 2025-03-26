@@ -27,35 +27,35 @@ public class ClientNetworkManager : MonoBehaviour
     private void SyncPlayerData()
     {
         Debug.Log("🔄 [Client] 플레이어 데이터 자동 동기화 시작...");
-        GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(),false);
+        StartCoroutine(GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(),false));
     }
 
     // ✅ 플레이어 아이템 동기화
     private void SyncPlayerItems()
     {
         Debug.Log("🔄 [Client] 플레이어 아이템 자동 동기화 시작...");
-        GetPlayerItems(SQLiteManager.Instance.player.playerId);
+        StartCoroutine(GetPlayerItems(SQLiteManager.Instance.player.playerId));
     }
 
     // ✅ 플레이어 스탯 동기화
     private void SyncPlayerStats()
     {
         Debug.Log("🔄 [Client] 플레이어 스탯 자동 동기화 시작...");
-        GetPlayerStats(SQLiteManager.Instance.player.playerId);
+        StartCoroutine(GetPlayerStats(SQLiteManager.Instance.player.playerId));
     }
 
     // ✅ 랭킹 동기화
     private void SyncPlayerRanking()
     {
         Debug.Log("🔄 [Client] 랭킹 데이터 자동 동기화 시작...");
-        GetRankingList();
+        StartCoroutine(GetRankingList());
     }
 
     // ✅ 매치 기록 동기화
     private void SyncMatchHistory()
     {
         Debug.Log("🔄 [Client] 매치 기록 자동 동기화 시작...");
-        GetMatchRecords(SQLiteManager.Instance.player.playerId);
+        StartCoroutine(GetMatchRecords(SQLiteManager.Instance.player.playerId));
     }
     #endregion
     #region Player Data
@@ -228,12 +228,7 @@ public class ClientNetworkManager : MonoBehaviour
     {
         if (ServerToAPIManager.Instance != null)
         {
-            Debug.Log("되고있긴한거니?");
             yield return StartCoroutine(ServerToAPIManager.Instance.GetPlayerDetails(playerId));
-        }
-        else
-        {
-            Debug.Log("서버 매니저가 없다는디요?");
         }
     }
     #endregion

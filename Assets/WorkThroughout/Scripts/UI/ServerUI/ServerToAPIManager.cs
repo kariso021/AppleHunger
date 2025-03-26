@@ -434,15 +434,12 @@ public class ServerToAPIManager : MonoBehaviour
     {
         string url = $"{apiBaseUrl}/playerDetails/{playerId}";
         
-        Debug.Log($"URL 확인 : {url}");
-
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("겟 플레이어 ");
                 string json = request.downloadHandler.text;
                 TargetReceivePlayerDetailsDataClientRpc(json);
             }

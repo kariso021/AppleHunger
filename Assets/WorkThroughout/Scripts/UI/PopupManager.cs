@@ -48,7 +48,7 @@ public class PopupManager : MonoBehaviour
         {
             Debug.Log("쇼 팝업 클라이언트 아이디");
             pendingOnComplete = () => OnPlayerDetailsLoaded();
-            StartCoroutine(FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(SQLiteManager.Instance.player.playerId));
+            StartCoroutine(ClientNetworkManager.Instance.GetPlayerDetalis(SQLiteManager.Instance.player.playerId));
         }
 
     }
@@ -67,7 +67,7 @@ public class PopupManager : MonoBehaviour
         if (popup.tag == "Profile")
         {
             pendingOnComplete = () => OnPlayerDetailsLoaded();
-            StartCoroutine(FindAnyObjectByType<ClientNetworkManager>().GetPlayerDetalis(playerId));
+            StartCoroutine(ClientNetworkManager.Instance.GetPlayerDetalis(playerId));
         }
 
     }
@@ -96,7 +96,10 @@ public class PopupManager : MonoBehaviour
                 if (SQLiteManager.Instance.player.playerId == SQLiteManager.Instance.playerDetails.playerId)
                 {
                     FindAnyObjectByType<MatchRecordsManager>().CreateMatchRecords();
-                    AddressableManager.Instance.LoadProfilePopupIconFromGroup();
+                    if(GameObject.Find("RankingPanel") == true) // 일단 임시 방편...
+                        AddressableManager.Instance.LoadRankProfilePopupIconFromGroup();
+                    else
+                        AddressableManager.Instance.LoadProfilePopupIconFromGroup();
                 }
                 else 
                     AddressableManager.Instance.LoadRankProfilePopupIconFromGroup();

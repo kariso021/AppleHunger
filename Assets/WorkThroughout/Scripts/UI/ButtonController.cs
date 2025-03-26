@@ -160,7 +160,7 @@ public class ButtonController : MonoBehaviour
 
         matchAdd.onClick.AddListener(() =>
         StartCoroutine(clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,
-        SQLiteManager.Instance.player.playerId + 4)));
+        4)));
 
         matchGet.onClick.AddListener(() =>
         clientNetworkManager.GetMatchRecords(SQLiteManager.Instance.player.playerId));

@@ -45,7 +45,7 @@ public class DataSyncManager : MonoBehaviour
     public void PlayerDataUpdated()
     {
         Debug.Log("🔄 플레이어 데이터 변경 감지 → MySQL에서 최신 데이터 가져오기");
-        FindAnyObjectByType<ClientNetworkManager>().GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false);
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
         Invoke(nameof(SyncSQLite), 1.0f); // 1초 후 SQLite 갱신
@@ -55,7 +55,7 @@ public class DataSyncManager : MonoBehaviour
     public void PlayerItemsUpdated()
     {
         Debug.Log("🔄 플레이어 아이템 변경 감지 → MySQL에서 최신 데이터 가져오기");
-        FindAnyObjectByType<ClientNetworkManager>().GetPlayerItems(SQLiteManager.Instance.player.playerId);
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerItems(SQLiteManager.Instance.player.playerId));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
         Invoke(nameof(SyncSQLite), 1.0f);
@@ -65,7 +65,7 @@ public class DataSyncManager : MonoBehaviour
     public void MatchHistoryUpdated()
     {
         Debug.Log("🔄 매치 기록 변경 감지 → MySQL에서 최신 데이터 가져오기");
-        FindAnyObjectByType<ClientNetworkManager>().GetMatchRecords(SQLiteManager.Instance.player.playerId);
+        StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
         Invoke(nameof(SyncSQLite), 1.0f);
@@ -75,7 +75,7 @@ public class DataSyncManager : MonoBehaviour
     public void PlayerStatsUpdated()
     {
         Debug.Log("🔄 플레이어 스탯 변경 감지 → MySQL에서 최신 데이터 가져오기");
-        FindAnyObjectByType<ClientNetworkManager>().GetPlayerStats(SQLiteManager.Instance.player.playerId);
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
         Invoke(nameof(SyncSQLite), 1.0f);

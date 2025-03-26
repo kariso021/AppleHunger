@@ -42,7 +42,7 @@ public class ItemData : MonoBehaviour
             itemButton.onClick.AddListener(() =>
             {
                 Debug.Log($"🔓 아이템 구매 시도: {itemUniqueId}");
-                FindAnyObjectByType<ClientNetworkManager>().PurchasePlayerItem(SQLiteManager.Instance.player.playerId, itemUniqueId);
+                StartCoroutine(ClientNetworkManager.Instance.PurchasePlayerItem(SQLiteManager.Instance.player.playerId, itemUniqueId));
             });
         }
         else
