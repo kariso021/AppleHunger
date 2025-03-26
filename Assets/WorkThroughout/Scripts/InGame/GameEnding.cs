@@ -9,6 +9,9 @@ public class GameEnding : NetworkBehaviour
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TMPro.TextMeshProUGUI resultText;
 
+    public static int LastWinnerId { get; private set; }
+    public static int LastLoserId { get; private set; }
+
     private void OnEnable()
     {
         GameTimer.OnGameEnded += HandleGameEnd;
@@ -23,131 +26,97 @@ public class GameEnding : NetworkBehaviour
     private void HandleGameEnd()
     {
         if (!IsServer) return;
-        DetermineWinner(out int winnerNumber, out List<int> loserNumbers);
 
-        // 모든 클라이언트에게 게임 결과 전송
-        ShowGameOverScreenClientRpc(winnerNumber, loserNumbers.ToArray());
+        DetermineWinner(out int winnerId, out int loserId);
 
-        // 서버 DB 또는 기록 처리 (선택적으로) -> 이부분은 클라에서 결정해야되는 것.
-        SubmitMatchResultServerRpc(winnerNumber, loserNumbers.ToArray());
+        // 전역 변수 설정
+        LastWinnerId = winnerId;
+        LastLoserId = loserId;
 
-        // 5초 후 로비 씬 이동
-        Invoke(nameof(GoToLobby), 5f);
+        // 클라이언트에 결과 전달
+        ShowGameOverScreenClientRpc(winnerId, loserId);
+
+        // 5초 후 로비 이동
+        //Invoke(nameof(GoToLobby), 5f);
     }
 
-    /// 서버에서 승자 계산
-    private void DetermineWinner(out int winnerPlayerId, out List<int> loserPlayerIds)
-    { 
+    /// 승자/패자 판단 (2명 전용)
+    private void DetermineWinner(out int winnerPlayerId, out int loserPlayerId)
+    {
         winnerPlayerId = -1;
-        loserPlayerIds = new List<int>();
+        loserPlayerId = -1;
 
         var scores = ScoreManager.Instance.GetScores();
         var playerDataManager = PlayerDataManager.Instance;
 
-        int highestScore = int.MinValue;
-        ulong winnerClientId = 0;
-
-        Debug.Log("🧾 [ScoreManager] 현재 점수 목록:");
-        foreach (var pair in scores)
+        if (scores.Count == 1)
         {
-            int playerId = playerDataManager.GetNumberFromClientID(pair.Key);
-            Debug.Log($"🟡 ClientID: {pair.Key} → PlayerID: {playerId}, Score: {pair.Value}");
-        }
+            // ✅ 혼자 플레이 중일 때: 승자만 지정하고 패자는 의미 없는 값
+            var onlyPlayer = scores.First();
+            winnerPlayerId = playerDataManager.GetNumberFromClientID(onlyPlayer.Key);
+            loserPlayerId = -1; // 또는 999 등 임시 값
 
-        foreach (var pair in scores)
-        {
-            if (pair.Value > highestScore)
-            {
-                highestScore = pair.Value;
-                winnerClientId = pair.Key;
-            }
+            Debug.Log($"✅ [1인 플레이] Winner: {winnerPlayerId}, Loser: 없음");
+            return;
         }
+        //2인 이하 플레이는 scores.Count 2이하로 해야될듯
+
+        var sorted = scores.OrderByDescending(p => p.Value).ToList();
+        ulong winnerClientId = sorted[0].Key;
+        ulong loserClientId = sorted[1].Key;
 
         winnerPlayerId = playerDataManager.GetNumberFromClientID(winnerClientId);
+        //loserPlayerId = playerDataManager.GetNumberFromClientID(loserClientId);
 
-        Debug.Log($"✅ [결과] 승자 ClientID: {winnerClientId} → PlayerID: {winnerPlayerId}, Score: {highestScore}");
-
-        foreach (var pair in scores)
-        {
-            if (pair.Key != winnerClientId)
-            {
-                int loserPlayerId = playerDataManager.GetNumberFromClientID(pair.Key);
-                loserPlayerIds.Add(loserPlayerId);
-                Debug.Log($"❌ 패자 ClientID: {pair.Key} → PlayerID: {loserPlayerId}");
-            }
-        }
+        Debug.Log($"✅ Winner: {winnerPlayerId}, ❌ Loser: {loserPlayerId}");
     }
 
+    /// 게임 결과 UI 표시 (클라이언트)
     [ClientRpc]
-    private void ShowGameOverScreenClientRpc(int winnerPlayerId, int[] loserPlayerIds)
+    private void ShowGameOverScreenClientRpc(int winnerPlayerId, int loserPlayerId)
     {
         gameOverPanel.SetActive(true);
 
-        int myPlayerId = SQLiteManager.Instance.player.playerId;
+        int myId = SQLiteManager.Instance.player.playerId;
 
-        if (myPlayerId == winnerPlayerId)
+        if (myId == winnerPlayerId)
         {
             resultText.text = "Winner!";
         }
-        else if (System.Array.Exists(loserPlayerIds, id => id == myPlayerId))
+        else if (myId == loserPlayerId)
         {
             resultText.text = "Loser...";
         }
         else
         {
-            resultText.text = "Draw";
+            resultText.text = "Draw?";
         }
     }
 
-
-
-    //이게 지금 되지 않고있는것. ServerRPC는 player 객체 또는 프리펩에서 호출되어야 정상적으로 작동
-    /// 서버에 Match 결과 제출 요청 (클라이언트에서 호출)
-    [ServerRpc(RequireOwnership = false)]
-    private void SubmitMatchResultServerRpc(int winnerPlayerId, int[] loserPlayerIds)
-    {
-
-        if (ClientNetworkManager.Instance == null)
-        {
-            Debug.Log("Client 네트워크매니저가 현재 없습니다");
-        }
-        else
-        {
-            Debug.Log("클라네트워크 매니저 존재하고 작동하고 있음");
-        }
-        ClientNetworkManager.Instance?.AddMatchRecords(winnerPlayerId, 3);
-        SavePlayerDataClientRpc(winnerPlayerId, NetworkManager.Singleton.ConnectedClientsIds.ToArray());
-    }
+    ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
+    ///
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
 
 
 
-    /// 각 클라이언트에게 DB 저장 요청
-    [ClientRpc]
-    private void SavePlayerDataClientRpc(int winnerPlayerId, ulong[] targetClientIds)
-    {
-        ulong myClientId = NetworkManager.Singleton.LocalClientId;
 
-        if (!System.Array.Exists(targetClientIds, id => id == myClientId))
-            return;
-
-        int myPlayerId = SQLiteManager.Instance.player.playerId;
-
-        if (myPlayerId == winnerPlayerId)
-        {
-            SQLiteManager.Instance.player.currency += (100 + UnityEngine.Random.Range(10, 90));
-        }
-
-        SQLiteManager.Instance.SavePlayerData(SQLiteManager.Instance.player);
-        ClientNetworkManager.Instance?.UpdatePlayerData();
-    }
 
     /// 씬 이동 (서버/클라 공통)
     private void GoToLobby()
     {
-        // 서버가 전환하고, 클라이언트도 자동 따라옴
-        if (IsClient)
-        {
             NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
-        }
     }
 }

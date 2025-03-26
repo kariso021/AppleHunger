@@ -327,6 +327,7 @@ public class PlayerController : NetworkBehaviour
     }
 
 
+
     private IEnumerator WaitAndRegisterPlayerId()
     {
         // 최대 5초까지만 기다리도록 설정 (무한루프 방지)
@@ -369,4 +370,6 @@ public class PlayerController : NetworkBehaviour
             Debug.LogError($"❌ RegisterPlayerNumberServerRpc 호출 중 예외 발생: {ex}");
         }
     }
+
+
 }

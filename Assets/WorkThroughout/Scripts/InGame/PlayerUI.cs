@@ -61,6 +61,7 @@ public class PlayerUI : MonoBehaviour
     /// 개별 플레이어 UI 업데이트
     private void SetScoreUI(ulong playerId, int newScore)
     {
+        //playerID 가 아니라 Client ID임 현재
         Debug.Log($"[Client] SetScoreUI - PlayerID: {playerId}, New Score: {newScore}, MyPlayerID: {myPlayerId}");
 
         playerScores[playerId] = newScore;
