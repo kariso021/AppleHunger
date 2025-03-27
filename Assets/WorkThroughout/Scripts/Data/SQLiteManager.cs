@@ -49,13 +49,6 @@ public class SQLiteManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    private void Start()
-    {
-        if(NavManager.previousScene == "InGame" && NavManager.currentScene == "Lobby")
-            LoadAllData();
-    }
-
     private IEnumerator InitializeDatabase()
     {
         string rawDbPath = Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/");

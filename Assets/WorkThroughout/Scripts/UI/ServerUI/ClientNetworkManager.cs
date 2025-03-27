@@ -68,10 +68,6 @@ public class ClientNetworkManager : MonoBehaviour
     public void TargetReceivePlayerDataClientRpc(string jsonData)
     {
         SQLiteManager.Instance.SavePlayerData(JsonUtility.FromJson<PlayerData>(jsonData));
-
-        // ✅ 저장 후 바로 다시 로드하여 확인
-        PlayerData loadedPlayer = SQLiteManager.Instance.LoadPlayerData();
-        Debug.Log($"✅ [Client] SQLite에서 불러온 PlayerData: {loadedPlayer.ToString()}");
     }
 
     // 🔹 플레이어 추가

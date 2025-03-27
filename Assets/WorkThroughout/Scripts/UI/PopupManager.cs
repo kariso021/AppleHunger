@@ -9,9 +9,11 @@ public class PopupManager : MonoBehaviour
     public GameObject creditPopup;
     public GameObject profilePopup;
     public GameObject rankProfilePopup;
+    public GameEnding nicknamePopup;
 
     public GameObject activePopup = null; // 현재 활성화된 팝업 저장
     private Action pendingOnComplete; // 콜백 저장
+    private Action nickNameChangeEvent;
     private void Awake()
     {
         if (Instance == null)

@@ -48,7 +48,7 @@ public class DataSyncManager : MonoBehaviour
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
-        Invoke(nameof(SyncSQLite), 1.0f); // 1초 후 SQLite 갱신
+        //Invoke(nameof(SyncSQLite), 1.0f); // 1초 후 SQLite 갱신
     }
 
     // 🔹 플레이어 아이템이 변경되었을 때 호출 (예: 아이템 구매, 해금)
@@ -68,7 +68,7 @@ public class DataSyncManager : MonoBehaviour
         StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
-        Invoke(nameof(SyncSQLite), 1.0f);
+        //Invoke(nameof(SyncSQLite), 1.0f);
     }
 
     // 🔹 플레이어 스탯이 변경되었을 때 호출 (예: 승/패 증가)
@@ -78,7 +78,7 @@ public class DataSyncManager : MonoBehaviour
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
-        Invoke(nameof(SyncSQLite), 1.0f);
+        //Invoke(nameof(SyncSQLite), 1.0f);
     }
 
     // 🔹 랭킹 정보가 변경되었을 때 호출 (예: 레이팅 변화)

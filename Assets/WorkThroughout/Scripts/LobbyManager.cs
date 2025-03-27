@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class LobbyManager : MonoBehaviour
 {
-    public void Button_start()
+    private void Start()
     {
-        SceneManager.LoadScene("Down");
+        if(SQLiteManager.Instance.player != null)
+            SQLiteManager.Instance.LoadAllData();
     }
 }
