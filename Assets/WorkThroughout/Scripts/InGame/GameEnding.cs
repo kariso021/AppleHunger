@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using Unity.Services.Matchmaker.Models;
 
 public class GameEnding : NetworkBehaviour
 {
@@ -28,7 +29,7 @@ public class GameEnding : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        DetermineWinner(out int winnerId, out int loserId);
+        DetermineWinner(out int winnerId, out int loserId,out int winnerRating, out int loserRating);
 
         // 전역 변수 설정
         LastWinnerId = winnerId;
@@ -39,7 +40,7 @@ public class GameEnding : NetworkBehaviour
 
         //여기에 승자를 제출하는 것을 만들면 됨
 
-        SubmitWinnerToDB(winnerId, loserId);
+        SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
 
         NotifyClientsToFetchDataClientRpc();
 
@@ -47,35 +48,38 @@ public class GameEnding : NetworkBehaviour
         Invoke(nameof(GoToLobby), 5f);
     }
 
-    /// 승자/패자 판단 (2명 전용)
-    private void DetermineWinner(out int winnerPlayerId, out int loserPlayerId)
+    private void DetermineWinner(
+    out int winnerPlayerId, out int loserPlayerId,
+    out int winnerRating, out int loserRating)
     {
         winnerPlayerId = -1;
         loserPlayerId = -1;
+        winnerRating = 0;
+        loserRating = 0;
 
         var scores = ScoreManager.Instance.GetScores();
         var playerDataManager = PlayerDataManager.Instance;
 
         if (scores.Count == 1)
         {
-            // 혼자 플레이 중일 때: 승자만 지정하고 패자는 의미 없는 값
             var onlyPlayer = scores.First();
             winnerPlayerId = playerDataManager.GetNumberFromClientID(onlyPlayer.Key);
-            loserPlayerId = -1; // 또는 999 등 임시 값
-
-            Debug.Log($"✅ [1인 플레이] Winner: {winnerPlayerId}, Loser: 없음");
+            winnerRating = playerDataManager.GetRatingFromClientID(onlyPlayer.Key);
+            loserPlayerId = -1;
+            loserRating = 0;
             return;
         }
-        //2인 이하 플레이는 scores.Count 2이하로 해야될듯
 
         var sorted = scores.OrderByDescending(p => p.Value).ToList();
         ulong winnerClientId = sorted[0].Key;
         ulong loserClientId = sorted[1].Key;
 
         winnerPlayerId = playerDataManager.GetNumberFromClientID(winnerClientId);
-        //loserPlayerId = playerDataManager.GetNumberFromClientID(loserClientId);
+        loserPlayerId = playerDataManager.GetNumberFromClientID(loserClientId);
+        winnerRating = playerDataManager.GetRatingFromClientID(winnerClientId);
+        loserRating = playerDataManager.GetRatingFromClientID(loserClientId);
 
-        Debug.Log($"✅ Winner: {winnerPlayerId}, ❌ Loser: {loserPlayerId}");
+        Debug.Log($"✅ Winner: {winnerPlayerId} (R: {winnerRating}), ❌ Loser: {loserPlayerId} (R: {loserRating})");
     }
 
     /// 게임 결과 UI 표시 (클라이언트)
@@ -102,16 +106,25 @@ public class GameEnding : NetworkBehaviour
 
     ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
 
-    private void SubmitWinnerToDB(int winnerID, int LoserID)
+    private void SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
     {
-        if(Managers == null)
+        if (Managers == null)
         {
-            Debug.Log("참조가 없습니다");
+            Debug.Log("❌ Managers 참조가 없습니다");
+            return;
         }
+
         Debug.Log("서버에 승자 제출");
-        StartCoroutine(Managers.AddMatchResult(winnerID, 3));
-        StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, 100, 10));
-        StartCoroutine(Managers.UpdateCurrencyAndRating(3, 10, -10));
+
+        StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
+
+        int winnerGold = 100 + Random.Range(0, 91);
+        int loserGold = Random.Range(0, 91);
+
+        int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
+
+        StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta));
+        StartCoroutine(Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta));
     }
 
 
@@ -123,9 +136,10 @@ public class GameEnding : NetworkBehaviour
     private void NotifyClientsToFetchDataClientRpc()
     {
         Debug.Log("클라에서 DB로 데이터 업데이트 요청 성공");
-        ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId);
-        ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId);
-        ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false);
+        int playerId = SQLiteManager.Instance.player.playerId;
+        StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(playerId));
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(playerId));
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", playerId.ToString(), false));
 
     }
 
@@ -139,5 +153,20 @@ public class GameEnding : NetworkBehaviour
 
         NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
 
+    }
+
+    //-----------------------------------------------점수처리함수 목록------------------------------------------------------------------
+
+    int CalculateRatingDelta(int winnerRating, int loserRating)
+    {
+        int ratingGap = winnerRating - loserRating;
+        
+
+        //임시 레이팅으로 만든 부분
+        if (ratingGap >= 200) return 10;
+        if (ratingGap >= 100) return 15;
+        if (ratingGap >= 0) return 20;
+        if (ratingGap >= -100) return 25;
+        return 30;
     }
 }

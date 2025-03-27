@@ -90,7 +90,10 @@ public class MatchMakerClient : MonoBehaviour
                 PlayerID(),
                 new MatchmakingPlayerData
                 {
-                    Skill = 100,
+                    //이부분이 레이팅이 되어야 하고 그에 맞는 매칭을 잡아줘야함
+                    //Rating=SQLiteManager.Instance.player.rating,
+                    Rating = 100,
+    
                 }
             )
             };
@@ -151,6 +154,6 @@ public class MatchMakerClient : MonoBehaviour
     [Serializable]
     public class MatchmakingPlayerData
     {
-        public int Skill;
+        public int Rating;
     }
 }

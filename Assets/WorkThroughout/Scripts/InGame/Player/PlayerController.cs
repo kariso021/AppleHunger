@@ -104,7 +104,7 @@ public class PlayerController : NetworkBehaviour
 
         if (!IsOwner) return;
 
-        StartCoroutine(WaitAndRegisterPlayerId());
+        StartCoroutine(WaitAndRegisterPlayerIdandRating());
 
         OnPlayerInitialized?.Invoke(OwnerClientId);
         if (localDragBox != null)
@@ -328,7 +328,7 @@ public class PlayerController : NetworkBehaviour
 
 
 
-    private IEnumerator WaitAndRegisterPlayerId()
+    private IEnumerator WaitAndRegisterPlayerIdandRating()
     {
         // 최대 5초까지만 기다리도록 설정 (무한루프 방지)
         float timeout = 5f;
@@ -350,9 +350,12 @@ public class PlayerController : NetworkBehaviour
 
         // SQLiteManager 체크
         int playerId = 1;
+        int rating = 1000; // 기본값
+
         if (SQLiteManager.Instance?.player != null)
         {
             playerId = SQLiteManager.Instance.player.playerId;
+            rating = SQLiteManager.Instance.player.rating;
         }
         else
         {
@@ -363,11 +366,13 @@ public class PlayerController : NetworkBehaviour
         try
         {
             PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
-            Debug.Log($"✅ playerId {playerId} 등록 성공!");
+            PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
+
+            Debug.Log($"✅ playerId {playerId}, rating {rating} 등록 성공!");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ RegisterPlayerNumberServerRpc 호출 중 예외 발생: {ex}");
+            Debug.LogError($"❌ ServerRpc 호출 중 예외 발생: {ex}");
         }
     }
 
