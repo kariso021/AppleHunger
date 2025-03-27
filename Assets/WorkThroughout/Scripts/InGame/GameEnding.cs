@@ -8,6 +8,7 @@ public class GameEnding : NetworkBehaviour
 {
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TMPro.TextMeshProUGUI resultText;
+    public Managers Managers;
 
     public static int LastWinnerId { get; private set; }
     public static int LastLoserId { get; private set; }
@@ -36,8 +37,14 @@ public class GameEnding : NetworkBehaviour
         // 클라이언트에 결과 전달
         ShowGameOverScreenClientRpc(winnerId, loserId);
 
+        //여기에 승자를 제출하는 것을 만들면 됨
+
+        SubmitWinnerToDB(winnerId, loserId);
+
+        NotifyClientsToFetchDataClientRpc();
+
         // 5초 후 로비 이동
-        //Invoke(nameof(GoToLobby), 5f);
+        Invoke(nameof(GoToLobby), 5f);
     }
 
     /// 승자/패자 판단 (2명 전용)
@@ -51,7 +58,7 @@ public class GameEnding : NetworkBehaviour
 
         if (scores.Count == 1)
         {
-            // ✅ 혼자 플레이 중일 때: 승자만 지정하고 패자는 의미 없는 값
+            // 혼자 플레이 중일 때: 승자만 지정하고 패자는 의미 없는 값
             var onlyPlayer = scores.First();
             winnerPlayerId = playerDataManager.GetNumberFromClientID(onlyPlayer.Key);
             loserPlayerId = -1; // 또는 999 등 임시 값
@@ -94,23 +101,33 @@ public class GameEnding : NetworkBehaviour
     }
 
     ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
-    ///
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
+
+    private void SubmitWinnerToDB(int winnerID, int LoserID)
+    {
+        if(Managers == null)
+        {
+            Debug.Log("참조가 없습니다");
+        }
+        Debug.Log("서버에 승자 제출");
+        StartCoroutine(Managers.AddMatchResult(winnerID, 3));
+        StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, 100, 10));
+        StartCoroutine(Managers.UpdateCurrencyAndRating(3, 10, -10));
+    }
 
 
+
+
+
+    ///-----------------------------------------------------------------클라로 전송부분----------------------------------------------------------
+    [ClientRpc]
+    private void NotifyClientsToFetchDataClientRpc()
+    {
+        Debug.Log("클라에서 DB로 데이터 업데이트 요청 성공");
+        ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId);
+        ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId);
+        ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false);
+
+    }
 
 
 

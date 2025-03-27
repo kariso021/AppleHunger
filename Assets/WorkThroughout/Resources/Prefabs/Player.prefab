@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6389339877600097721}
   - component: {fileID: 6013044092741452021}
-  - component: {fileID: 7873293513557480464}
-  - component: {fileID: 2932961827747487477}
   - component: {fileID: 6587644144917731227}
+  - component: {fileID: 2185043832979475786}
+  - component: {fileID: 538772400157037283}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 207088439
+  GlobalObjectIdHash: 4276158129
   InScenePlacedSourceGlobalObjectIdHash: 3819938011
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -59,33 +59,6 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &7873293513557480464
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 314647617582520290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4be1a308048dccc4b872b68a1b554356, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  localDragBox: {fileID: 6615129503576426566}
-  flashImage: {fileID: 1534753133390118796}
---- !u!114 &2932961827747487477
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 314647617582520290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c9382a85aa0926478c1dabbc83f4694, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  networkDragBox: {fileID: 1213112706186900572}
 --- !u!114 &6587644144917731227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117,6 +90,33 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &2185043832979475786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314647617582520290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4591a9c1a13b11c42906ce3a4f5211f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localDragBox: {fileID: 6615129503576426566}
+  flashImage: {fileID: 1534753133390118796}
+--- !u!114 &538772400157037283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314647617582520290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9103dcbafbe2a5f46b6952925e0aa2de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkDragBox: {fileID: 1213112706186900572}
 --- !u!1 &1213112706186900572
 GameObject:
   m_ObjectHideFlags: 0
