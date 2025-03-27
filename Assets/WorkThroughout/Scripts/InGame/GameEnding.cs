@@ -118,7 +118,7 @@ public class GameEnding : NetworkBehaviour
 
 
 
-    ///-----------------------------------------------------------------클라로 전송부분----------------------------------------------------------
+    ///-----------------------------------------------------------------클라로 전송부분---------------------------------------------------------- 
     [ClientRpc]
     private void NotifyClientsToFetchDataClientRpc()
     {
@@ -129,11 +129,15 @@ public class GameEnding : NetworkBehaviour
 
     }
 
+    ///--------------------------------------추후에 로딩씬으로 넘기고 나중에 바꾸기<로딩씬으로>--------------------------------------------------------
 
 
-    /// 씬 이동 (서버/클라 공통)
+
+    /// 
     private void GoToLobby()
     {
-            NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
+
+        NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
+
     }
 }
