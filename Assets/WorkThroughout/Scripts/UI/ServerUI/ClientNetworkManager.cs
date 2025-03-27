@@ -87,6 +87,11 @@ public class ClientNetworkManager : MonoBehaviour
     {
         yield return StartCoroutine(ServerToAPIManager.Instance.UpdatePlayerData(SQLiteManager.Instance.player));
     }
+
+    public IEnumerator UpdatePlayerNickname(string nickname)
+    {
+        yield return StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(nickname));
+    }
     #endregion
     #region Player Items
     // 🔹 플레이어 아이템 요청

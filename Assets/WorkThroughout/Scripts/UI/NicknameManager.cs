@@ -1,33 +1,45 @@
+using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class NicknameManager : MonoBehaviour
 {
-    [Header("UI References")]
-    public TMP_InputField nicknameInputField;  // ÀÎÇ² ÇÊµå ¿¬°á
-    public Button confirmButton;               // ¹öÆ°
-    public TMP_Text resultText;                // °á°ú Ãâ·Â ÅØ½ºÆ®
+    [SerializeField] private TMP_InputField nicknameInputField;
+    [SerializeField] private Button confirmButton;
+    [SerializeField] private TMP_Text resultText;
 
     private void Start()
     {
-        confirmButton.onClick.AddListener(OnConfirmNickname); // ¹öÆ°¿¡ ÀÌº¥Æ® ¿¬°á
+        confirmButton.onClick.AddListener(() => OnClick_ChangeNickname());
     }
 
-    private void OnConfirmNickname()
+    public void OnClick_ChangeNickname()
     {
-        string newNickname = nicknameInputField.text.Trim();  // °ø¹é Á¦°Å
+        string newNickname = nicknameInputField.text.Trim();
 
-        if (string.IsNullOrEmpty(newNickname))
+        if (!IsValidNickname(newNickname))
         {
-            resultText.text = "´Ğ³×ÀÓÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä!";
+            resultText.text = "´Ğ³×ÀÓÀº ÇÑ±Û 1~7ÀÚ ¶Ç´Â ¿µ¾î 1~11ÀÚ¸¸ °¡´ÉÇØ¿ä.";
+            Debug.Log("¹üÀ§ÃÊ°ú");
             return;
         }
 
-        // ´Ğ³×ÀÓ º¯°æ Ã³¸® (¼­¹ö¿¡ º¸³»±â ¶Ç´Â ·ÎÄÃ ÀúÀå)
-        Debug.Log($"´Ğ³×ÀÓ º¯°æ: {newNickname}");
-        resultText.text = $"´Ğ³×ÀÓÀÌ '{newNickname}'(À¸)·Î º¯°æµÇ¾ú½À´Ï´Ù!";
-
-        // TODO: API ¼­¹ö¿¡ º¯°æ ¿äÃ» º¸³»±â (¿¹: ServerToAPIManager.Instance.UpdateNickname(newNickname))
+        int playerId = SQLiteManager.Instance.player.playerId;
+        StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(newNickname));
     }
+
+    private bool IsValidNickname(string nickname)
+    {
+        if (string.IsNullOrEmpty(nickname)) return false;
+
+        // ÇÑ±Û¸¸, ÃÖ´ë 7ÀÚ or ¿µ¹®/¼ıÀÚ, ÃÖ´ë 11ÀÚ Çã¿ë
+        string koreanPattern = @"^[°¡-ÆR]{1,7}$";
+        string englishPattern = @"^[a-zA-Z0-9]{1,11}$";
+
+        return System.Text.RegularExpressions.Regex.IsMatch(nickname, koreanPattern) ||
+               System.Text.RegularExpressions.Regex.IsMatch(nickname, englishPattern);
+    }
+
 }

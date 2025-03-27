@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 public class ServerToAPIManager : MonoBehaviour
@@ -145,6 +146,36 @@ public class ServerToAPIManager : MonoBehaviour
                 if(isFirstTime)
                     yield return StartCoroutine(AddPlayer());
             }
+        }
+    }
+
+    public IEnumerator UpdateNicknameOnServer(string nickname)
+    {
+        string url = $"{apiBaseUrl}/players/updateNickname";
+        string jsonData = JsonUtility.ToJson(new NicknameUpdateRequest(SQLiteManager.Instance.player.playerId, nickname));
+
+        UnityWebRequest request = new UnityWebRequest(url, "PUT");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        Debug.Log($"닉네임 json : {jsonData}");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("✅ 닉네임 서버 업데이트 성공!");
+            DataSyncManager.Instance.PlayerDataUpdated();
+
+            // 팝업 닫기
+            PopupManager popupManager = FindAnyObjectByType<PopupManager>();
+            popupManager?.ClosePopup();
+        }
+        else
+        {
+            Debug.LogError("❌ 닉네임 서버 업데이트 실패");
         }
     }
 
@@ -541,5 +572,18 @@ public class ServerToAPIManager : MonoBehaviour
     public class RankingShouldUpdateResponse
     {
         public bool shouldUpdate;
+    }
+
+    [System.Serializable]
+    public class NicknameUpdateRequest
+    {
+        public int playerId;
+        public string newNickname;
+
+        public NicknameUpdateRequest(int id, string nickname)
+        {
+            playerId = id;
+            newNickname = nickname;
+        }
     }
 }
