@@ -26,7 +26,6 @@ public class NicknameManager : MonoBehaviour
             return;
         }
 
-        int playerId = SQLiteManager.Instance.player.playerId;
         StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(newNickname));
     }
 

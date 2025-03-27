@@ -95,7 +95,7 @@ public class ServerToAPIManager : MonoBehaviour
     // 플레이어 정보 수정 , 클라이언트에 저장된 데이터를 그대로 json으로 api서버에 넘김
     public IEnumerator UpdatePlayerData(PlayerData updatedData)
     {
-        string url = $"{apiBaseUrl}/players/{updatedData.playerId}";
+        string url = $"{apiBaseUrl}/players/updatePlayer/{updatedData.playerId}";
 
         string jsonData = JsonUtility.ToJson(updatedData);
         using (UnityWebRequest request = new UnityWebRequest(url, "PUT")) // PUT 사용
@@ -149,10 +149,11 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
-    public IEnumerator UpdateNicknameOnServer(string nickname)
+    public IEnumerator UpdateNicknameOnServer(string playerName)
     {
         string url = $"{apiBaseUrl}/players/updateNickname";
-        string jsonData = JsonUtility.ToJson(new NicknameUpdateRequest(SQLiteManager.Instance.player.playerId, nickname));
+        int playerId = SQLiteManager.Instance.player.playerId;
+        string jsonData = JsonUtility.ToJson(new NicknameUpdateRequest(playerId, playerName));
 
         UnityWebRequest request = new UnityWebRequest(url, "PUT");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
@@ -172,10 +173,14 @@ public class ServerToAPIManager : MonoBehaviour
             // 팝업 닫기
             PopupManager popupManager = FindAnyObjectByType<PopupManager>();
             popupManager?.ClosePopup();
+
+            yield return new WaitForSeconds(1f);
+
+            SQLiteManager.Instance.LoadAllData();
         }
         else
         {
-            Debug.LogError("❌ 닉네임 서버 업데이트 실패");
+            Debug.LogError($"❌ 닉네임 서버 업데이트 실패 {request.error}");
         }
     }
 
@@ -578,12 +583,12 @@ public class ServerToAPIManager : MonoBehaviour
     public class NicknameUpdateRequest
     {
         public int playerId;
-        public string newNickname;
+        public string playerName;
 
         public NicknameUpdateRequest(int id, string nickname)
         {
             playerId = id;
-            newNickname = nickname;
+            playerName = nickname;
         }
     }
 }
