@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
@@ -45,7 +46,7 @@ public class GameEnding : NetworkBehaviour
         NotifyClientsToFetchDataClientRpc();
 
         // 5초 후 로비 이동
-        Invoke(nameof(GoToLobby), 5f);
+        Invoke(nameof(GoToLobbyClientRpc), 5f);
     }
 
     private void DetermineWinner(
@@ -118,8 +119,8 @@ public class GameEnding : NetworkBehaviour
 
         StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
 
-        int winnerGold = 100 + Random.Range(0, 91);
-        int loserGold = Random.Range(0, 91);
+        int winnerGold = 100 + UnityEngine.Random.Range(0, 91);
+        int loserGold = UnityEngine.Random.Range(0, 91);
 
         int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
 
@@ -145,12 +146,15 @@ public class GameEnding : NetworkBehaviour
     ///--------------------------------------추후에 로딩씬으로 넘기고 나중에 바꾸기<로딩씬으로>--------------------------------------------------------
 
 
-
-    /// 
-    private void GoToLobby()
+    //New version
+    [ClientRpc]
+    private void GoToLobbyClientRpc()
     {
+        
+        NetworkManager.Singleton.Shutdown();
+        Destroy(NetworkManager.Singleton.gameObject);
 
-        NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
+        SceneManager.LoadScene("Lobby");
 
     }
 
@@ -158,14 +162,13 @@ public class GameEnding : NetworkBehaviour
 
     int CalculateRatingDelta(int winnerRating, int loserRating)
     {
-        int ratingGap = winnerRating - loserRating;
-        
+        int ratingGap = Math.Abs(winnerRating - loserRating);
 
-        //임시 레이팅으로 만든 부분
+        // 절대값 기준 레이팅 델타
         if (ratingGap >= 200) return 10;
         if (ratingGap >= 100) return 15;
         if (ratingGap >= 0) return 20;
-        if (ratingGap >= -100) return 25;
+
         return 30;
     }
 }
