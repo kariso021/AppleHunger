@@ -6,9 +6,17 @@ using UnityEngine.SceneManagement;
 
 public class LobbyManager : MonoBehaviour
 {
+
+    static bool isFirstEnter = true;
+
     private void Start()
     {
-        if(SQLiteManager.Instance.player != null)
+        if (isFirstEnter)
+            isFirstEnter = false;
+        else
+        {
+            Debug.Log("로비 매니저 데이터 있음");
             SQLiteManager.Instance.LoadAllData();
+        }
     }
 }

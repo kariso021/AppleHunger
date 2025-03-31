@@ -259,7 +259,7 @@ public class SQLiteManager : MonoBehaviour
             Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
 
             // ✅ 먼저 플레이어 데이터를 받아옴
-            yield return StartCoroutine(ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? player.deviceId : player.googleId,true));
+            yield return ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? player.deviceId : player.googleId,true);
 
 
             // ✅ 플레이어 ID가 `0`이 아닐 때까지 기다림

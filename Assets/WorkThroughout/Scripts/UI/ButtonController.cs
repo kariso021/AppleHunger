@@ -34,6 +34,11 @@ public class ButtonController : MonoBehaviour
     public Button profileCloseButton;
     public Button rankProfileCloseButton;
     public Button creditCloseButton;
+
+    [Header("Popup Buttons")]
+    public Button nameChangeButton;
+
+
     [Header("Debug Buttons")]
     public Button playerAdd;
     public Button playerGet;
@@ -136,10 +141,13 @@ public class ButtonController : MonoBehaviour
         creditCloseButton.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
 
+        // Popup Buttons
+        nameChangeButton.onClick.AddListener(() =>
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.nicknamePopup));
 
 
         // Debug Buttons
-            // 테스트 기능
+        // 테스트 기능
         playerAdd.onClick.AddListener(() =>
         SceneManager.LoadScene("Down"));
 

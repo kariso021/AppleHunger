@@ -19,6 +19,9 @@ public class NavManager : MonoBehaviour
 
     public void NavigateTo(string panelName)
     {
+        if (PopupManager.Instance.activePopup != null)
+            PopupManager.Instance.ClosePopup();
+
         PanelManager.Instance.ShowPanel(panelName);
     }
 

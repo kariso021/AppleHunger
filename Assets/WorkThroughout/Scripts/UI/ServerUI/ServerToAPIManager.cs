@@ -26,10 +26,6 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-    }
-
     #region Players Data Region
 
     /// <summary>

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class RankingManager : MonoBehaviour
 {
-    private float interval = 10f; //60f * 60f * 3; // 테스트용 70초 마다 주기 //60f * 10f; // 10분
+    private float interval = 30f;//60f * 5; // 테스트용 70초 마다 주기 //60f * 10f; // 10분
     private Coroutine updateRoutine;
 
     private void OnEnable()
@@ -24,7 +24,7 @@ public class RankingManager : MonoBehaviour
         // ✅ ServerToAPIManager가 준비될 때까지 대기
         while (ServerToAPIManager.Instance == null || SQLiteManager.Instance == null || SQLiteManager.Instance.player == null)
         {
-            Debug.Log("[RankingManager] ServerToAPIManager 초기화 대기 중...");
+            //Debug.Log("[RankingManager] ServerToAPIManager 초기화 대기 중...");
             yield return null;
         }
 

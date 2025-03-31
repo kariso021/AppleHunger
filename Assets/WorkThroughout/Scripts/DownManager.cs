@@ -23,10 +23,6 @@ public class DownManager : MonoBehaviour
     private long patchSize;
     private Dictionary<string,int> patchMap = new Dictionary<string,int>();
     // Start is called before the first frame update
-    void Start()
-    {
-    }
-
     IEnumerator InitAddresaable()
     {
         var init = Addressables.InitializeAsync();
