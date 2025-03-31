@@ -136,10 +136,9 @@ public class GameEnding : NetworkBehaviour
     private void NotifyClientsToFetchDataClientRpc()
     {
         Debug.Log("클라에서 DB로 데이터 업데이트 요청 성공");
-        int playerId = SQLiteManager.Instance.player.playerId;
-        StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(playerId));
-        StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(playerId));
-        StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", playerId.ToString(), false));
+        StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId));
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId));
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
 
     }
 

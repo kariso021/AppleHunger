@@ -1,10 +1,12 @@
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 /*
-ÀÚ ³»°¡ Áö±İ ¿©±â¼­ ÇØ¾ßÇÒ ÀÏ
+ì ë‚´ê°€ ì§€ê¸ˆ ì—¬ê¸°ì„œ í•´ì•¼í•  ì¼
 1. 
  */
 public class AddressableManager : MonoBehaviour
@@ -19,34 +21,93 @@ public class AddressableManager : MonoBehaviour
 
     // Binding
     [SerializeField]
-    public Image profileIcon; // HomeÀÇ ÇÁ·ÎÇÊ
-    public Image profilePopupIcon; // HomeÀÇ ÇÁ·ÎÇÊ Å¬¸¯½Ã ³ª¿À´Â ÆË¾÷Ã¢ ÇÁ·ÎÇÊ
-    public Image rankProfilePopupIcon; // ·©Å· ÅÇ¿¡¼­ ÇÁ·ÎÇÊ Å¬¸¯½Ã ³ª¿À´Â ÆË¾÷Ã¢
-    public Image myRankProfileIcon; // ·©Å· ÅÇ¿¡¼­ ³» ·©Å© ÇÁ·ÎÇÊ ÀÌ¹ÌÁö
-    public List<GameObject> rankingIconObj; // ·©Å· ÅÇ¿¡¼­ ·©Ä¿µéÀÇ ¾ÆÀÌÄÜ ÀÌ¹ÌÁö
-    public List<GameObject> itemIconObj; // collection ¿¡¼­ÀÇ ¾ÆÀÌÄÜ ÀÌ¹ÌÁö
-    public List<GameObject> itemBoardObj; // collection ¿¡¼­ÀÇ º¸µå ÀÌ¹ÌÁö
-    public List<GameObject> matchIconObj; // MatchHistory ¿¡¼­ÀÇ ¾ÆÀÌÄÜ ÀÌ¹ÌÁö
+    public Image profileIcon; // Homeì˜ í”„ë¡œí•„
+    public Image profilePopupIcon; // Homeì˜ í”„ë¡œí•„ í´ë¦­ì‹œ ë‚˜ì˜¤ëŠ” íŒì—…ì°½ í”„ë¡œí•„
+    public Image rankProfilePopupIcon; // ë­í‚¹ íƒ­ì—ì„œ í”„ë¡œí•„ í´ë¦­ì‹œ ë‚˜ì˜¤ëŠ” íŒì—…ì°½
+    public Image myRankProfileIcon; // ë­í‚¹ íƒ­ì—ì„œ ë‚´ ë­í¬ í”„ë¡œí•„ ì´ë¯¸ì§€
+    public List<GameObject> rankingIconObj; // ë­í‚¹ íƒ­ì—ì„œ ë­ì»¤ë“¤ì˜ ì•„ì´ì½˜ ì´ë¯¸ì§€
+    public List<GameObject> itemIconObj; // collection ì—ì„œì˜ ì•„ì´ì½˜ ì´ë¯¸ì§€
+    public List<GameObject> itemBoardObj; // collection ì—ì„œì˜ ë³´ë“œ ì´ë¯¸ì§€
+    public List<GameObject> matchIconObj; // MatchHistory ì—ì„œì˜ ì•„ì´ì½˜ ì´ë¯¸ì§€
 
     // Release
-    // ±âÁ¸ spritesList ´ë½Å Dictionary »ç¿ë (key -> sprite ÀúÀå)
+    // ê¸°ì¡´ spritesList ëŒ€ì‹  Dictionary ì‚¬ìš© (key -> sprite ì €ì¥)
     private Dictionary<string, Sprite> loadedSprites = new Dictionary<string, Sprite>();
+
+    // UI ë°”ì¸ë”© ê´€ë ¨
+    private bool isUIReady = false;
+    private List<Action> pendingProfileUpdateActions = new List<Action>();
 
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject); // °ÔÀÓÀÌ ÁøÇàÇÏ´Â µ¿¾È¿£ »èÁ¦°¡ ÀÏ¾î³ª¸é ¾ÈµÇ¹Ç·Î
+            DontDestroyOnLoad(gameObject); // ê²Œì„ì´ ì§„í–‰í•˜ëŠ” ë™ì•ˆì—” ì‚­ì œê°€ ì¼ì–´ë‚˜ë©´ ì•ˆë˜ë¯€ë¡œ
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
     }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        isUIReady = false; // ë‹¤ìŒ ì”¬ì—ì„œ ìƒˆ UIë¥¼ ë°”ì¸ë”©í•˜ê¸° ì „ê¹Œì§€ëŠ” ì¤€ë¹„ ì•ˆ ë¨
+        StartCoroutine(DelayedAssignUIReferences());
+    }
+
+
+    private IEnumerator DelayedAssignUIReferences()
+    {
+        yield return new WaitForSeconds(0.1f); // 1 í”„ë ˆì„ ëŒ€ê¸°
+
+        // ë¹„í™œì„±í™” í¬í•¨í•´ì„œ Image ì»´í¬ë„ŒíŠ¸ ì „ë¶€ íƒìƒ‰
+        var allImages = Resources.FindObjectsOfTypeAll<Image>();
+
+        foreach (var img in allImages)
+        {
+            if (img.gameObject.name == "ProfileIconButtonGameObject")
+                profileIcon = img;
+            else if (img.gameObject.name == "ProfilePopupIconGameObject")
+                profilePopupIcon = img;
+            else if (img.gameObject.name == "RankProfilePopupIconGameObject")
+                rankProfilePopupIcon = img;
+            else if (img.gameObject.name == "MyRankProfileIconGameObject")
+                myRankProfileIcon = img;
+        }
+
+        isUIReady = true;
+
+        // ğŸ”¥ ëŒ€ê¸° ì¤‘ì´ë˜ ì•¡ì…˜ ì‹¤í–‰
+        foreach (var action in pendingProfileUpdateActions)
+        {
+            action?.Invoke();
+        }
+        pendingProfileUpdateActions.Clear();
+
+        Debug.Log("âœ… ë¹„í™œì„± í¬í•¨í•œ UI ë°”ì¸ë”© ì™„ë£Œ!");
+    }
+
+    void OnSceneUnLoaded(Scene scene)
+    {
+        rankingIconObj?.Clear();
+        itemIconObj?.Clear();
+        itemBoardObj?.Clear();
+        matchIconObj?.Clear();
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneUnloaded -= OnSceneUnLoaded;
+    }
+
     void Start()
     {
-        // 20250318 ¼öÁ¤
+        // 20250318 ìˆ˜ì •
         //StartCoroutine(initAddressable());
         DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadProfileIconFromGroup();
         DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadMyRankingIconFromGroup();
@@ -60,13 +121,21 @@ public class AddressableManager : MonoBehaviour
     }
 
     /// <summary>
-    /// itemUniqueId·Î itemData¿¡¼­ ÂüÁ¶ÇÏ¿© »ç¿ë. ¸Å°³º¯¼ö´Â string ÇüÅÂÀÌ¹Ç·Î .ToString() ¸Ş¼­µå¸¦ ÀÌ¿ëÇØ º¯È¯ ÇÊ¿ä
-    /// ¸Å°³º¯¼ö°ªÀº ÇÔ¼ö ³»ºÎ¿¡¼­ "icon_ + ¸Å°³º¯¼ö" °ªÀÇ ÇüÅÂ·Î º¯ÇüµÇ¾î µ¿ÀÛ
+    /// itemUniqueIdë¡œ itemDataì—ì„œ ì°¸ì¡°í•˜ì—¬ ì‚¬ìš©. ë§¤ê°œë³€ìˆ˜ëŠ” string í˜•íƒœì´ë¯€ë¡œ .ToString() ë©”ì„œë“œë¥¼ ì´ìš©í•´ ë³€í™˜ í•„ìš”
+    /// ë§¤ê°œë³€ìˆ˜ê°’ì€ í•¨ìˆ˜ ë‚´ë¶€ì—ì„œ "icon_ + ë§¤ê°œë³€ìˆ˜" ê°’ì˜ í˜•íƒœë¡œ ë³€í˜•ë˜ì–´ ë™ì‘
     /// </summary>
     /// <param name="itemUniqueId"></param>
     public void LoadProfileIconFromGroup()
     {
-        Debug.Log("ÇÁ·ÎÇÊ ¾ÆÀÌÄÜ ¾÷µ¥ÀÌÆ®");
+        Debug.Log("í”„ë¡œí•„ ì•„ì´ì½˜ ì—…ë°ì´íŠ¸ ìš”ì²­");
+
+        if (!isUIReady)
+        {
+            Debug.Log(" UI ì¤€ë¹„ ì „ì´ë¯€ë¡œ LoadProfileIconFromGroup ë³´ë¥˜");
+            pendingProfileUpdateActions.Add(() => LoadProfileIconFromGroup());
+            return;
+        }
+
         string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
         string key = "icon_" + itemUniqueId;
 
@@ -75,17 +144,40 @@ public class AddressableManager : MonoBehaviour
             if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
             {
                 profileIcon.sprite = handle.Result;
-                // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+
                 if (!loadedSprites.ContainsKey(itemUniqueId))
                 {
                     loadedSprites.Add(itemUniqueId, handle.Result);
                 }
+
+                Debug.Log("í”„ë¡œí•„ ì•„ì´ì½˜ ë¡œë“œ ì™„ë£Œ");
+            }
+            else
+            {
+                Debug.LogWarning($"Addressables ë¡œë“œ ì‹¤íŒ¨: {key}");
             }
         };
+
+        //Debug.Log("í”„ë¡œí•„ ì•„ì´ì½˜ ì—…ë°ì´íŠ¸");
+        //string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
+        //string key = "icon_" + itemUniqueId;
+
+        //Addressables.LoadAssetAsync<Sprite>(key).Completed += (handle) =>
+        //{
+        //    if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+        //    {
+        //        profileIcon.sprite = handle.Result;
+        //        // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
+        //        if (!loadedSprites.ContainsKey(itemUniqueId))
+        //        {
+        //            loadedSprites.Add(itemUniqueId, handle.Result);
+        //        }
+        //    }
+        //};
     }
     public void LoadProfilePopupIconFromGroup()
     {
-        Debug.Log("ÇÁ·ÎÇÊ ¾ÆÀÌÄÜ ¾÷µ¥ÀÌÆ®");
+        Debug.Log("í”„ë¡œí•„ ì•„ì´ì½˜ ì—…ë°ì´íŠ¸");
 
         string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
         string key = "icon_" + itemUniqueId;
@@ -95,7 +187,7 @@ public class AddressableManager : MonoBehaviour
             if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
             {
                 profilePopupIcon.sprite = handle.Result;
-                // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+                // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
                 if (!loadedSprites.ContainsKey(itemUniqueId))
                 {
                     loadedSprites.Add(itemUniqueId, handle.Result);
@@ -105,7 +197,7 @@ public class AddressableManager : MonoBehaviour
     }
     public void LoadRankProfilePopupIconFromGroup()
     {
-        Debug.Log("ÇÁ·ÎÇÊ ·©Å· ¾ÆÀÌÄÜ ¾÷µ¥ÀÌÆ®");
+        Debug.Log("í”„ë¡œí•„ ë­í‚¹ ì•„ì´ì½˜ ì—…ë°ì´íŠ¸");
 
         string itemUniqueId = SQLiteManager.Instance.playerDetails.profileIcon;
         string key = "icon_" + itemUniqueId;
@@ -115,7 +207,7 @@ public class AddressableManager : MonoBehaviour
             if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
             {
                 rankProfilePopupIcon.sprite = handle.Result;
-                // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+                // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
                 if (!loadedSprites.ContainsKey(itemUniqueId))
                 {
                     loadedSprites.Add(itemUniqueId, handle.Result);
@@ -136,7 +228,7 @@ public class AddressableManager : MonoBehaviour
                 if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
                     image.sprite = handle.Result;
-                    // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+                    // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
                     if (!loadedSprites.ContainsKey(itemUniqueId))
                     {
                         loadedSprites.Add(itemUniqueId, handle.Result);
@@ -147,6 +239,15 @@ public class AddressableManager : MonoBehaviour
     }
     public void LoadMyRankingIconFromGroup()
     {
+        Debug.Log("ë‚´ ë­í‚¹ ì•„ì´ì½˜ ì—…ë°ì´íŠ¸ ìš”ì²­");
+
+        if (!isUIReady)
+        {
+            Debug.Log("UI ì¤€ë¹„ ì „ì´ë¯€ë¡œ LoadMyRankingIconFromGroup ë³´ë¥˜");
+            pendingProfileUpdateActions.Add(() => LoadMyRankingIconFromGroup());
+            return;
+        }
+
         string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
         string key = "icon_" + itemUniqueId;
 
@@ -155,13 +256,34 @@ public class AddressableManager : MonoBehaviour
             if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
             {
                 myRankProfileIcon.sprite = handle.Result;
-                // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+
                 if (!loadedSprites.ContainsKey(itemUniqueId))
                 {
                     loadedSprites.Add(itemUniqueId, handle.Result);
                 }
+
+                Debug.Log(" ë‚´ ë­í‚¹ ì•„ì´ì½˜ ë¡œë“œ ì™„ë£Œ");
+            }
+            else
+            {
+                Debug.LogWarning($"Addressables ë¡œë“œ ì‹¤íŒ¨: {key}");
             }
         };
+        //string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
+        //string key = "icon_" + itemUniqueId;
+
+        //Addressables.LoadAssetAsync<Sprite>(key).Completed += (handle) =>
+        //{
+        //    if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+        //    {
+        //        myRankProfileIcon.sprite = handle.Result;
+        //        // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
+        //        if (!loadedSprites.ContainsKey(itemUniqueId))
+        //        {
+        //            loadedSprites.Add(itemUniqueId, handle.Result);
+        //        }
+        //    }
+        //};
 
     }
     public void LoadItemIconFromGroup()
@@ -177,7 +299,7 @@ public class AddressableManager : MonoBehaviour
                 if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
                     image.sprite = handle.Result;
-                    // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+                    // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
                     if (!loadedSprites.ContainsKey(itemUniqueId))
                     {
                         loadedSprites.Add(itemUniqueId, handle.Result);
@@ -199,7 +321,7 @@ public class AddressableManager : MonoBehaviour
                 if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
                     image.sprite = handle.Result;
-                    // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+                    // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
                     if (!loadedSprites.ContainsKey(itemUniqueId))
                     {
                         loadedSprites.Add(itemUniqueId, handle.Result);
@@ -221,7 +343,7 @@ public class AddressableManager : MonoBehaviour
                 if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
                     image.sprite = handle.Result;
-                    // ·ÎµåµÈ Sprite¸¦ Dictionary¿¡ ÀúÀåÇÏ¿© ³ªÁß¿¡ ÇØÁ¦ °¡´ÉÇÏµµ·Ï °ü¸®
+                    // ë¡œë“œëœ Spriteë¥¼ Dictionaryì— ì €ì¥í•˜ì—¬ ë‚˜ì¤‘ì— í•´ì œ ê°€ëŠ¥í•˜ë„ë¡ ê´€ë¦¬
                     if (!loadedSprites.ContainsKey(itemUniqueId))
                     {
                         loadedSprites.Add(itemUniqueId, handle.Result);
@@ -236,8 +358,8 @@ public class AddressableManager : MonoBehaviour
 
         if (loadedSprites.ContainsKey(key))
         {
-            Addressables.Release(loadedSprites[key]); // ·ÎµåµÈ Sprite ÇØÁ¦
-            loadedSprites.Remove(key); // Dictionary¿¡¼­ »èÁ¦
+            Addressables.Release(loadedSprites[key]); // ë¡œë“œëœ Sprite í•´ì œ
+            loadedSprites.Remove(key); // Dictionaryì—ì„œ ì‚­ì œ
         }
     }
 }

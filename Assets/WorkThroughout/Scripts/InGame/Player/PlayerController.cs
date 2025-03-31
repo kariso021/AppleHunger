@@ -121,7 +121,7 @@ public class PlayerController : NetworkBehaviour
     private void OnFingerDown(Finger finger)
     {
         if (!IsOwner || isDragRestricted || isCooldownActive) return;
-        dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
+        dragStartPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
         isDragging = false;
     }
 
@@ -136,7 +136,7 @@ public class PlayerController : NetworkBehaviour
         if (!isDragging)
         {
             float dragThreshold = 0.1f;
-            if (Vector2.Distance(dragStartPos, mainCamera.ScreenToWorldPoint(finger.screenPosition)) > dragThreshold)
+            if (Vector2.Distance(dragStartPos, Camera.main.ScreenToWorldPoint(finger.screenPosition)) > dragThreshold)
             {
                 isDragging = true;
                 localDragBoxRenderer.enabled = true;
@@ -149,7 +149,7 @@ public class PlayerController : NetworkBehaviour
 
         if (isDragging)
         {
-            dragEndPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
+            dragEndPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
             UpdateLocalDragBox();
             DetectAppleUnderCursor();
 

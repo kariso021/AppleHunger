@@ -141,7 +141,7 @@ public class ButtonController : MonoBehaviour
         // Debug Buttons
             // 테스트 기능
         playerAdd.onClick.AddListener(() =>
-        clientNetworkManager.AddPlayer());
+        SceneManager.LoadScene("Down"));
 
         playerGet.onClick.AddListener(() =>
         StartCoroutine(clientNetworkManager.GetPlayerData("deviceId",SQLiteManager.Instance.player.deviceId, false)));

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class RankingManager : MonoBehaviour
 {
-    private float interval = 60f * 60f * 3; // 테스트용 70초 마다 주기 //60f * 10f; // 10분
+    private float interval = 10f; //60f * 60f * 3; // 테스트용 70초 마다 주기 //60f * 10f; // 10분
     private Coroutine updateRoutine;
 
     private void OnEnable()

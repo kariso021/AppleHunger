@@ -1,10 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MatchRecordsManager : MonoBehaviour
 {
     public GameObject matchDataListHolder; // 🔹 캔버스에서 생성할 목록의 부모 객체
     private List<GameObject> activeMatchRecords = new List<GameObject>(); // 🔹 활성화된 매치 UI 오브젝트 저장 리스트
+
+    //private void Awake()
+    //{
+    //    SceneManager.sceneLoaded += OnSceneLoaded;
+    //}
+    //void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    //{
+    //    StartCoroutine(DelayedAssignUIReferences());
+    //}
+
+    //private IEnumerator DelayedAssignUIReferences()
+    //{
+    //    yield return new WaitForSeconds(0.1f); // 1프레임 대기 (혹은 WaitForSeconds(0.1f))
+
+    //    // 새 씬에 있는 오브젝트 재할당
+    //    matchDataListHolder = GameObject.Find("MatchDataListHolderGameObject");
+
+    //    Debug.Log("MATCH MANGER UI 요소 재할당 완료!");
+    //}
+
 
     private void Start()
     {
@@ -15,6 +37,7 @@ public class MatchRecordsManager : MonoBehaviour
     {
         // ✅ 이벤트 구독 해제 (메모리 누수 방지)
         DataSyncManager.Instance.OnMatchHistoryChanged -= UpdateMatchRecords;
+        //SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     // ✅ 전적 기록 UI 업데이트

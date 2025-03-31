@@ -360,6 +360,7 @@ public class SQLiteManager : MonoBehaviour
         Debug.Log($"✅ 랭킹 인원 수 : {rankings.Count}");
 
         // 모든 데이터가 로드되면 그 떄 UI 업데이트를 실행
+        // 
         OnSQLiteDataLoaded?.Invoke();
     }
 

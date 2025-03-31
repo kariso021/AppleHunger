@@ -25,9 +25,4 @@ public class CurrencyManager : MonoBehaviour
     {
         currencyText.text = SQLiteManager.Instance.player.currency.ToString();
     }
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

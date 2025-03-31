@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ItemManager : MonoBehaviour
@@ -13,7 +14,35 @@ public class ItemManager : MonoBehaviour
     public GameObject currentItemIcon;
     public GameObject currentItemBoard;
 
+    //private void Awake()
+    //{
+    //    SceneManager.sceneLoaded += OnSceneLoaded;
+    //}
+    //void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    //{
+    //    StartCoroutine(DelayedAssignUIReferences());
+    //}
 
+    //private IEnumerator DelayedAssignUIReferences()
+    //{
+    //    yield return new WaitForSeconds(0.1f); // 1프레임 대기 (혹은 WaitForSeconds(0.1f))
+
+    //    itemDataIconListHolder =
+    //           GameObject.Find("ItemDataIconListHolderGameObject");
+    //    itemDataBoardListHolder =
+    //        GameObject.Find("ItemDataBoardListHolderGameObject");
+    //    currentItemIcon =
+    //        GameObject.Find("CurrentIconGameObject");
+    //    currentItemBoard =
+    //        GameObject.Find("CurrentBoardGameObject");
+
+    //    Debug.Log("ITEM MANAGER UI 요소 재할당 완료!");
+    //}
+
+    //private void OnDestroy()
+    //{
+    //    SceneManager.sceneLoaded -= OnSceneLoaded;
+    //}
     private void OnEnable()
     {
         StartCoroutine(SubscribeAfterFrame());
@@ -117,45 +146,40 @@ public class ItemManager : MonoBehaviour
 
     void AutoAdjustGridByResolution(GridLayoutGroup grid, RectTransform content, int columns)
     {
-        // 기준 해상도: 1080x1920 에서 Cell 300, Spacing 0
-        //             1440x2560 에서 Cell 400, Spacing -100
+        // 🔹 부모 뷰포트 또는 스크롤뷰의 width 기준
+        float parentWidth = ((RectTransform)content.parent).rect.width;
 
-        float referenceWidth = 1080f;
-        float referenceHeight = 1920f;
-
-        float currentWidth = Screen.width;
-        float currentHeight = Screen.height;
-
-        // 해상도 비율 계산
-        float widthRatio = currentWidth / referenceWidth;
-        float heightRatio = currentHeight / referenceHeight;
-        float resolutionScale = (widthRatio + heightRatio) / 2f;
-
-        // 🔹 Cell 사이즈 조정
-        float baseCellSize = 300f; // 1080x1920 기준
-        float cellSize = baseCellSize * resolutionScale;
-
-        // 🔹 Spacing 계산
-        float baseSpacing = 0f;
-        float spacing = -100f * (resolutionScale - 1f); // 해상도가 커질수록 spacing 음수
-
-        // 🔹 적용
-        grid.cellSize = new Vector2(cellSize, cellSize);
+        // 🔹 spacing 설정
+        float spacing = 20f; // 원하는 여백 값
         grid.spacing = new Vector2(spacing, spacing);
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         grid.constraintCount = columns;
 
+        // 🔹 셀 크기 계산 (spacing 고려해서 너비 3등분)
+        float totalSpacing = spacing * (columns - 1);
+        float cellWidth = (parentWidth - totalSpacing) / columns;
+
+        grid.cellSize = new Vector2(cellWidth, cellWidth); // 정사각형 셀
+
+        // 🔹 총 아이템 수와 행 계산
+        int totalItems = content.childCount;
+        int rows = Mathf.CeilToInt((float)totalItems / columns);
+
+        // 🔹 콘텐츠 높이 계산
+        float totalHeight = rows * cellWidth + (rows - 1) * spacing;
+
         // 🔹 Pivot / Anchor 고정
         content.pivot = new Vector2(0f, 1f);
         content.anchorMin = new Vector2(0f, 1f);
-        content.anchorMax = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f); // 부모 너비 따라감
 
-        // 🔹 Content 너비 설정
-        float totalWidth = columns * cellSize + (columns - 1) * spacing;
-        content.sizeDelta = new Vector2(totalWidth, content.sizeDelta.y);
+        // 🔹 콘텐츠 사이즈 설정
+        content.sizeDelta = new Vector2(0, totalHeight); // width는 자동, height만 설정
 
-        Debug.Log($"📱 해상도 자동 적용됨: {currentWidth}x{currentHeight} → 셀 {cellSize}, spacing {spacing}");
+        Debug.Log($"📱 최적 해상도 적용됨: parentWidth={parentWidth}, cell={cellWidth}, spacing={spacing}, rows={rows}, height={totalHeight}");
     }
+
+
 
 
 

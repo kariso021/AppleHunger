@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class ObjectPoolManager : MonoBehaviour
@@ -10,20 +10,19 @@ public class ObjectPoolManager : MonoBehaviour
     {
         public string poolName;
         public GameObject prefab;
-        public int size;             // ÃÊ±â »ı¼º °³¼ö (ÃÖ´ë °³¼ö)
-        public bool hasLimit;        // ?? °³¼ö Á¦ÇÑ ¿©ºÎ
+        public int size;             // ì´ˆê¸° ìƒì„± ê°œìˆ˜ (ìµœëŒ€ ê°œìˆ˜)
+        public bool hasLimit;        // ?? ê°œìˆ˜ ì œí•œ ì—¬ë¶€
     }
 
     public List<Pool> pools;
     private Dictionary<string, Queue<GameObject>> poolDictionary;
-    private Dictionary<string, int> maxPoolSize; // ?? °³¼ö Á¦ÇÑÀ» À§ÇÑ Dictionary
+    private Dictionary<string, int> maxPoolSize; // ?? ê°œìˆ˜ ì œí•œì„ ìœ„í•œ Dictionary
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -46,16 +45,16 @@ public class ObjectPoolManager : MonoBehaviour
             }
 
             poolDictionary.Add(pool.poolName, objectPool);
-            maxPoolSize.Add(pool.poolName, pool.hasLimit ? pool.size : int.MaxValue); // Á¦ÇÑ ¿©ºÎ¿¡ µû¶ó ¼³Á¤
+            maxPoolSize.Add(pool.poolName, pool.hasLimit ? pool.size : int.MaxValue); // ì œí•œ ì—¬ë¶€ì— ë”°ë¼ ì„¤ì •
         }
     }
 
-    // ? ¿ÀºêÁ§Æ® ¿äÃ» (ÃÖ´ë °³¼ö Á¦ÇÑ Æ÷ÇÔ)
+    // ? ì˜¤ë¸Œì íŠ¸ ìš”ì²­ (ìµœëŒ€ ê°œìˆ˜ ì œí•œ í¬í•¨)
     public GameObject GetFromPool(string poolName, Vector3 position, Quaternion rotation, Transform parent = null)
     {
         if (!poolDictionary.ContainsKey(poolName))
         {
-            Debug.LogWarning($"? Object Pool¿¡ {poolName}ÀÌ(°¡) Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+            Debug.LogWarning($"? Object Poolì— {poolName}ì´(ê°€) ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
             return null;
         }
 
@@ -63,40 +62,46 @@ public class ObjectPoolManager : MonoBehaviour
 
         if (objectPool.Count == 0)
         {
-            // ÃÖ´ë °³¼ö Á¦ÇÑÀÌ ÀÖ´Â °æ¿ì
+            // ìµœëŒ€ ê°œìˆ˜ ì œí•œì´ ìˆëŠ” ê²½ìš°
             if (poolDictionary[poolName].Count >= maxPoolSize[poolName])
             {
                 GameObject oldestObject = poolDictionary[poolName].Dequeue();
-                oldestObject.SetActive(false); // °¡Àå ¿À·¡µÈ °´Ã¼ ºñÈ°¼ºÈ­ ÈÄ Àç»ç¿ë
+                oldestObject.SetActive(false); // ê°€ì¥ ì˜¤ë˜ëœ ê°ì²´ ë¹„í™œì„±í™” í›„ ì¬ì‚¬ìš©
                 poolDictionary[poolName].Enqueue(oldestObject);
             }
             else
             {
-                Debug.LogWarning($"? {poolName} PoolÀÌ °¡µæ Âü (ÃÖ´ë {maxPoolSize[poolName]}°³).");
+                Debug.LogWarning($"? {poolName} Poolì´ ê°€ë“ ì°¸ (ìµœëŒ€ {maxPoolSize[poolName]}ê°œ).");
                 return null;
             }
         }
 
         GameObject obj = objectPool.Dequeue();
+
+        //ë¨¼ì € ë¶€ëª¨ì— ë¶™ì¸ë‹¤ (false â†’ ë¡œì»¬ ìœ„ì¹˜ ìœ ì§€ X)
+        if (parent != null)
+            obj.transform.SetParent(parent, false);
+
+        //ê·¸ ë‹¤ìŒ í™œì„±í™”í•œë‹¤!
         obj.SetActive(true);
-        //obj.transform.position = position;
-        //obj.transform.rotation = rotation;
-        if (parent != null) obj.transform.SetParent(parent);
 
         return obj;
     }
 
-    // ? ¿ÀºêÁ§Æ® ¹İÈ¯
+    // ? ì˜¤ë¸Œì íŠ¸ ë°˜í™˜
     public void ReturnToPool(string poolName, GameObject obj)
     {
         if (!poolDictionary.ContainsKey(poolName))
         {
-            Debug.LogWarning($"? Object Pool¿¡ {poolName}ÀÌ(°¡) Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+            Debug.LogWarning($"? Object Poolì— {poolName}ì´(ê°€) ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
             return;
         }
 
         obj.SetActive(false);
         obj.transform.SetParent(null);
+        //í˜¹ì‹œ scale ê°’ì´ ë‚¨ì•„ ìˆì„ ê²½ìš° ëŒ€ë¹„
+        obj.transform.localScale = Vector3.one;
+
         poolDictionary[poolName].Enqueue(obj);
     }
 }
