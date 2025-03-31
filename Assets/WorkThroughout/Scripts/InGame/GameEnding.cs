@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using Unity.Services.Matchmaker.Models;
+using Unity.Services.Multiplay;
 
 public class GameEnding : NetworkBehaviour
 {
@@ -47,6 +48,11 @@ public class GameEnding : NetworkBehaviour
 
         // 5초 후 로비 이동
         Invoke(nameof(GoToLobbyClientRpc), 5f);
+
+        // 서버 종료
+        Invoke(nameof(ShutdownServer), 7f);
+
+
     }
 
     private void DetermineWinner(
@@ -171,4 +177,16 @@ public class GameEnding : NetworkBehaviour
 
         return 30;
     }
-}
+
+    //-------------------------------------------------------ServerShutDown---------------------------------------------------------------
+
+    private void ShutdownServer()
+    {
+        Debug.Log("서버 종료");
+
+#if UNITY_SERVER
+        NetworkManager.Singleton.Shutdown();
+        Application.Quit();
+#endif
+    }
+    }

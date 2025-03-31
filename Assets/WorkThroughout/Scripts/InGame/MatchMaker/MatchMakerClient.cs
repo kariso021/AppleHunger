@@ -18,6 +18,7 @@ using ParrelSync;
 public class MatchMakerClient : MonoBehaviour
 {
 
+
     private string _ticketId;
 
     private void OnEnable()
@@ -35,6 +36,11 @@ public class MatchMakerClient : MonoBehaviour
         await ClientSignIn(serviceProfileName:"AppleHungerPlayer");
         //데이터베이스에서 가져온 정보로 가공된 뭔가...
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+        //여기에 클라시작
+        StartClient();
+
+
     }
 
     private async Task ClientSignIn(string serviceProfileName = null)
@@ -77,6 +83,7 @@ public class MatchMakerClient : MonoBehaviour
 
     public void StartClient() 
     {
+
         CreateATicket();
     }
 
@@ -156,4 +163,17 @@ public class MatchMakerClient : MonoBehaviour
     {
         public int Rating;
     }
+
+
+    private bool IsDedicatedServerMode()
+    {
+        var args = Environment.GetCommandLineArgs();
+        foreach (var arg in args)
+        {
+            if (arg == "-dedicatedServer")
+                return true;
+        }
+        return false;
+    }
+
 }
