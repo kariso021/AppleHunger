@@ -20,6 +20,8 @@ public class MatchMakerClient : MonoBehaviour
 
 
     private string _ticketId;
+    [SerializeField] private GameObject waitingCanvas;
+
 
     private void OnEnable()
     {
@@ -83,6 +85,10 @@ public class MatchMakerClient : MonoBehaviour
 
     public void StartClient() 
     {
+        //매칭 캔버스 활성화
+        if (waitingCanvas != null)
+            waitingCanvas.SetActive(true);
+
 
         CreateATicket();
     }
@@ -154,6 +160,11 @@ public class MatchMakerClient : MonoBehaviour
     {
         Debug.Log(message: $"[클라이언트] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
         Debug.Log(message: $"Ticket Assigned : {assignment.Ip} : {assignment.Port}");
+
+        // 매칭 완료되면 대기 캔버스 숨기기
+        if (waitingCanvas != null)
+            waitingCanvas.SetActive(false);
+
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(assignment.Ip, (ushort)assignment.Port);
         NetworkManager.Singleton.StartClient();
     }

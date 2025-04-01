@@ -109,6 +109,90 @@ public class AppleManager : NetworkBehaviour
             spawnedApples.Remove(apple);
             apple.GetComponent<NetworkObject>().Despawn();
             NetworkObjectPool.Singleton.ReturnNetworkObject(apple.GetComponent<NetworkObject>(), applePrefab);
+
+            // 모든 사과 제거 후 새로운 조합이 가능한지 검사
+            if (!CanAnyAppleBeRemoved())
+            {
+                Debug.Log("🔁 가능한 조합이 없음 → 사과 리셋");
+                ResetAppleGrid();
+            }
         }
+    }
+
+    private void ResetAppleGrid()
+    {
+        // 1. 기존 사과 전부 제거
+        foreach (var apple in spawnedApples)
+        {
+            if (apple != null)
+            {
+                apple.GetComponent<NetworkObject>().Despawn();
+                NetworkObjectPool.Singleton.ReturnNetworkObject(apple.GetComponent<NetworkObject>(), applePrefab);
+            }
+        }
+        spawnedApples.Clear();
+
+        // 2. 새로 사과 생성
+        SpawnApplesInGrid();
+    }
+
+    private bool CheckSubRectWithSum10(int[,] grid)
+    {
+        int rows = grid.GetLength(0);
+        int cols = grid.GetLength(1);
+        int[,] prefixSum = new int[rows, cols];
+
+        // PrefixSum 계산
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                prefixSum[r, c] = grid[r, c];
+                if (r > 0) prefixSum[r, c] += prefixSum[r - 1, c];
+                if (c > 0) prefixSum[r, c] += prefixSum[r, c - 1];
+                if (r > 0 && c > 0) prefixSum[r, c] -= prefixSum[r - 1, c - 1];
+            }
+        }
+
+        // 모든 사각형 구간 검사
+        for (int r1 = 0; r1 < rows; r1++)
+        {
+            for (int c1 = 0; c1 < cols; c1++)
+            {
+                for (int r2 = r1; r2 < rows; r2++)
+                {
+                    for (int c2 = c1; c2 < cols; c2++)
+                    {
+                        int sum = prefixSum[r2, c2];
+                        if (r1 > 0) sum -= prefixSum[r1 - 1, c2];
+                        if (c1 > 0) sum -= prefixSum[r2, c1 - 1];
+                        if (r1 > 0 && c1 > 0) sum += prefixSum[r1 - 1, c1 - 1];
+
+                        if (sum == 10)
+                            return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private bool CanAnyAppleBeRemoved()
+    {
+        int[,] grid = new int[gridHeight, gridWidth];
+
+        foreach (var apple in spawnedApples)
+        {
+            Vector3 pos = apple.transform.position;
+
+            int x = Mathf.RoundToInt((pos.x + (gridWidth - 1) * spacing / 2) / spacing);
+            int y = Mathf.RoundToInt(((gridHeight - 1) * spacing / 2 - pos.y) / spacing);
+
+            if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+                grid[y, x] = apple.Value;
+        }
+
+        return CheckSubRectWithSum10(grid);
     }
 }
