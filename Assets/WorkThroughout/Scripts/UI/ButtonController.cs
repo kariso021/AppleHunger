@@ -14,8 +14,6 @@ public class ButtonController : MonoBehaviour
 
     public Button myRankProfileButton;
     [Header("Setting Panel Buttons")]
-    public Button bgmOnOffButton; // 배경음
-    public Button vfxOnOffButton; // 효과음
     public Button loginButton; // 일단 구글 로그인? or guest?
     public Button creditButton;
 
@@ -85,12 +83,12 @@ public class ButtonController : MonoBehaviour
         // 여는 식으로 해야할듯?
 
         // Setting Panel Buttons
-        // bgm,vfx 는 후에 SoundManager에서 함수를 가져와 바인딩
         // login 도 구글 로그인 기능을 가져와 바인딩
         creditButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
 
-        // Collection Panel Buttons
+
+     // Collection Panel Buttons
         customIconButton.onClick.AddListener(() =>
         NavManager.Instance.NavigateTo("Collection/Icon"));
         customBoadrButton.onClick.AddListener(() =>
