@@ -10,6 +10,8 @@ public class LoginManager : MonoBehaviour
     [Header("Login Buttons")]
     public Button guestLoginButton;
     public Button googleLoginButton;
+    public GameObject downCheck;
+    public GameObject loginPanel;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,14 +30,14 @@ public class LoginManager : MonoBehaviour
     public void OnGuestLoginButtonClick()
     {
         TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
-        NavManager.LoadScene("Lobby");
+        loginPanel.SetActive(false);
+        downCheck.SetActive(true);
+        StartCoroutine(downManager.CheckUpdateFiles());      
     }
 
     public void OnGoogleLoginButtonClick()
     {
         TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier; // 구글로 로그인해도 디바이스 아이디는 항상 저장이 이루어져야 함
         //TransDataClass.googleIdToApply = 구글아이디?
-
-        NavManager.LoadScene("Lobby");
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+using appleHunger;
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
@@ -49,7 +50,6 @@ public class AudioManager : MonoBehaviour
         addListnerInit();
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-
         LoadSettings();
         ApplyVolumes();
         ApplyUI();
@@ -71,15 +71,52 @@ public class AudioManager : MonoBehaviour
         if (scene.name == "Lobby")
         {
             isInGameScene = false;
-            PlayBGM(0, 0); // 로비 BGM
+            PlayBGM(0, 0);     // BGM도 안전하게 재생 가능
+            StartCoroutine(LobbySetupCoroutine());
         }
         else if (scene.name == "InGame")
         {
             isInGameScene = true;
             PlayBGM(0, 1); // 게임 씬 BGM
         }
-
     }
+    private IEnumerator LobbySetupCoroutine()
+    {
+        yield return StartCoroutine(delayFindReference());
+
+        addListnerInit(); // 이제 null 걱정 없음
+        ApplyUI();
+        //PlayBGM(0, 0);     // BGM도 안전하게 재생 가능
+    }
+
+
+    private IEnumerator delayFindReference()
+    {
+        Slider[] allSliders = Resources.FindObjectsOfTypeAll<Slider>();
+        Toggle[] allToggles = Resources.FindObjectsOfTypeAll<Toggle>();
+
+        while (true)
+        {
+            bgmSlider = AppleHungerTools.FindByName(allSliders, "BgmSliderbar");
+            vfxSlider = AppleHungerTools.FindByName(allSliders, "VfxSliderbar");
+            bgmToggle = AppleHungerTools.FindByName(allToggles, "BgmIcon");
+            vfxToggle = AppleHungerTools.FindByName(allToggles, "VfxIcon");
+
+            if (bgmSlider != null) Debug.Log("브금 슬라이더 찾음");
+            if (vfxSlider != null) Debug.Log("효과 슬라이더 찾음");
+            if (bgmToggle != null) Debug.Log("브금 토글 찾음");
+            if (vfxToggle != null) Debug.Log("효과 토글 찾음");
+
+            if (bgmSlider != null && vfxSlider != null && bgmToggle != null && vfxToggle != null)
+                break;
+
+            yield return null;
+        }
+
+        Debug.Log("audio UI 바인딩 완료!");
+    }
+
+
 
     private void ApplyVolumes()
     {

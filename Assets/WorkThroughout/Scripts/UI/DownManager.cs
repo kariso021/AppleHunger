@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -23,13 +24,18 @@ public class DownManager : MonoBehaviour
     private long patchSize;
     private Dictionary<string,int> patchMap = new Dictionary<string,int>();
     // Start is called before the first frame update
+    private void Start()
+    {
+        StartCoroutine(InitAddresaable());
+    }
+
     IEnumerator InitAddresaable()
     {
         var init = Addressables.InitializeAsync();
         yield return init;
     }
     #region Check Update
-    IEnumerator CheckUpdateFiles()
+    public IEnumerator CheckUpdateFiles()
     {
         var labels = new List<string>() { iconLabel.labelString, boardLabel.labelString };
         patchSize = 0L;
@@ -72,7 +78,7 @@ public class DownManager : MonoBehaviour
             downValText.text = " 100%";
             downSlider.value = 1f;
             yield return new WaitForSeconds(2f);
-            NavManager.LoadScene("MainScene");
+            NavManager.LoadScene("Lobby");
         }
     }
 
@@ -182,7 +188,7 @@ public class DownManager : MonoBehaviour
             {
                 downValText.text = "100%";
                 downSlider.value = 1f;
-                SceneManager.LoadScene("Lobby");
+                NavManager.LoadScene("Lobby");
                 break;
             }
 
