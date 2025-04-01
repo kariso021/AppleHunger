@@ -1,11 +1,15 @@
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
-
+    [Header("Sound Clips")]
+    public List<AudioClip> bgmClipList;
+    public List<AudioClip> vfxClipList;
     [Header("Audio Sources")]
     public List<AudioSource> bgmSources;
     public List<AudioSource> vfxSources;
@@ -16,7 +20,7 @@ public class AudioManager : MonoBehaviour
 
     private bool isBGMMuted = false;
     private bool isVFXMuted = false;
-
+    private bool isInGameScene = false;
     [Header("UI Components")]
     public Slider bgmSlider;
     public Slider vfxSlider;
@@ -31,20 +35,49 @@ public class AudioManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
         else
             Destroy(gameObject);
     }
 
     private void Start()
     {
+        addListnerInit();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+
+        LoadSettings();
+        ApplyVolumes();
+        ApplyUI();
+
+
+    }
+
+    private void addListnerInit()
+    {
         bgmSlider.onValueChanged.AddListener(OnBGMVolumeChanged);
         vfxSlider.onValueChanged.AddListener(OnVFXVolumeChanged);
         bgmToggle.onValueChanged.AddListener(ToggleBGMMute);
         vfxToggle.onValueChanged.AddListener(ToggleVFXMute);
-        LoadSettings();
-        ApplyVolumes();
-        ApplyUI();
+    }
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Debug.Log($"ì”¬ ë¡œë“œë¨: {scene.name}");
+
+        if (scene.name == "Lobby")
+        {
+            isInGameScene = false;
+            PlayBGM(0, 0); // ë¡œë¹„ BGM
+        }
+        else if (scene.name == "InGame")
+        {
+            isInGameScene = true;
+            PlayBGM(0, 1); // ê²Œìž„ ì”¬ BGM
+        }
 
     }
 
@@ -74,7 +107,7 @@ public class AudioManager : MonoBehaviour
 
     public void ToggleBGMMute(bool isOn)
     {
-        isBGMMuted = !isOn; // Åä±ÛÀÌ ÄÑÁ®ÀÖÀ¸¸é À½¼Ò°Å false
+        isBGMMuted = !isOn; // í† ê¸€ì´ ì¼œì ¸ìžˆìœ¼ë©´ ìŒì†Œê±° false
         ApplyVolumes();
         PlayerPrefs.SetInt(BGM_MUTE_KEY, isBGMMuted ? 1 : 0);
     }
@@ -114,16 +147,16 @@ public class AudioManager : MonoBehaviour
         PlayerPrefs.SetFloat(VFX_VOLUME_KEY, vfxVolume);
     }
 
-    public void PlayVFX(int index)
+    public void PlayVFX(int index, int clipIndex)
     {
         if (index >= 0 && index < vfxSources.Count && vfxSources[index] != null)
         {
-            Debug.Log("È¿°úÀ½ Àç»ý");
-            vfxSources[index].Play();
+            vfxSources[index].PlayOneShot(vfxClipList[clipIndex]);
         }
     }
 
-    public void PlayBGM(int index)
+
+    public void PlayBGM(int index, int clipIndex)
     {
         for (int i = 0; i < bgmSources.Count; i++)
         {
@@ -131,14 +164,12 @@ public class AudioManager : MonoBehaviour
             {
                 if (i == index)
                 {
-                    if (!bgmSources[i].isPlaying)
-                    {
-                        Debug.Log("¹è°æÀ½ Àç»ý");
-                        bgmSources[i].loop = true;
-                        bgmSources[i].Play();
-                    }
+                    bgmSources[i].Stop(); // ê¸°ì¡´ ìž¬ìƒ ì¤‘ì§€
+                    bgmSources[i].clip = bgmClipList[clipIndex];
+                    bgmSources[i].loop = true;
+                    bgmSources[i].Play();
+                    Debug.Log($"BGM ìž¬ìƒ: {bgmClipList[clipIndex].name}");
                 }
-
                 else
                 {
                     bgmSources[i].Stop();

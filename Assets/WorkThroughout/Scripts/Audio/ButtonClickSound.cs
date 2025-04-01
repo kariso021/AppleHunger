@@ -8,6 +8,6 @@ public class ButtonClickSound : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        AudioManager.Instance.PlayVFX(clickSoundIndex);
+        AudioManager.Instance.PlayVFX(clickSoundIndex,0);
     }
 }
