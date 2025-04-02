@@ -12,6 +12,9 @@ public class Apple : NetworkBehaviour
 
     [SerializeField] private TextMeshPro numberText;
 
+    public int GridX { get; private set; }
+    public int GridY { get; private set; }
+
     public int Value => value.Value; // Getter
     public int ScoreValue => scoreValue.Value; // Getter
 
@@ -21,7 +24,7 @@ public class Apple : NetworkBehaviour
 
         if (IsServer)
         {
-            value.Value = Random.Range(1, 10); // ? 서버에서만 랜덤 값 설정
+            value.Value= Random.Range(1, 10);
             scoreValue.Value = 10;
         }
 
@@ -39,6 +42,12 @@ public class Apple : NetworkBehaviour
         {
             value.Value = someValue;
         }
+    }
+
+    public void SetGridPosition(int y, int x)
+    {
+        GridX = x;
+        GridY = y;
     }
 
     private void UpdateText()

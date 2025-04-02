@@ -277,7 +277,9 @@ public class PlayerController : NetworkBehaviour
                     if (appleObj.TryGetComponent(out Apple appleComponent))
                     {
                         AppleScoreValue = appleComponent.ScoreValue;
-                        appleObj.Despawn();
+                        //appleObj.Despawn();
+
+                        AppleManager.Instance?.DespawnApple(appleComponent);
                     }
                 }
             }
