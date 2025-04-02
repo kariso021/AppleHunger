@@ -10,6 +10,7 @@ public class NicknameManager : MonoBehaviour
     [SerializeField] private Button confirmButton;
     [SerializeField] private TMP_Text resultText;
 
+    private bool isChangingNickname = false;
     private void Start()
     {
         confirmButton.onClick.AddListener(() => OnClick_ChangeNickname());

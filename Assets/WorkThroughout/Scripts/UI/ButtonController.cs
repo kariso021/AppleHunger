@@ -35,7 +35,7 @@ public class ButtonController : MonoBehaviour
 
     [Header("Popup Buttons")]
     public Button nameChangeButton;
-
+    public Button nameChangeCancelButton;
 
     [Header("Debug Buttons")]
     public Button playerAdd;
@@ -142,7 +142,8 @@ public class ButtonController : MonoBehaviour
         // Popup Buttons
         nameChangeButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.nicknamePopup));
-
+        nameChangeCancelButton.onClick.AddListener(() =>
+        PopupManager.Instance.ClosePopup());
 
         // Debug Buttons
         // 테스트 기능

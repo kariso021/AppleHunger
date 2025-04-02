@@ -63,7 +63,7 @@ public class ClientNetworkManager : MonoBehaviour
     // 🔹 플레이어 데이터 요청
     public IEnumerator GetPlayerData(string idType, string idValue,bool isFirstTime)
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.GetPlayer(idType, idValue,isFirstTime));
+        yield return ServerToAPIManager.Instance.GetPlayer(idType, idValue,isFirstTime);
     }
 
     public void TargetReceivePlayerDataClientRpc(string jsonData)
@@ -74,31 +74,31 @@ public class ClientNetworkManager : MonoBehaviour
     // 🔹 플레이어 추가
     public IEnumerator AddPlayer()
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.AddPlayer());
+        yield return ServerToAPIManager.Instance.AddPlayer();
     }
 
     // 🔹 플레이어 삭제
     public IEnumerator DeletePlayer(int playerId)
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.DeletePlayer(playerId));
+        yield return ServerToAPIManager.Instance.DeletePlayer(playerId);
     }
 
     // 🔹 플레이어 정보 업데이트
     public IEnumerator UpdatePlayerData()
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.UpdatePlayerData(SQLiteManager.Instance.player));
+        yield return ServerToAPIManager.Instance.UpdatePlayerData(SQLiteManager.Instance.player);
     }
 
     public IEnumerator UpdatePlayerNickname(string nickname)
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(nickname));
+        yield return ServerToAPIManager.Instance.UpdateNicknameOnServer(nickname);
     }
     #endregion
     #region Player Items
     // 🔹 플레이어 아이템 요청
     public IEnumerator GetPlayerItems(int playerId)
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.GetPlayerItems(playerId));
+        yield return ServerToAPIManager.Instance.GetPlayerItems(playerId);
     }
 
     public void TargetReceivePlayerItemsClientRpc(string jsonData)
@@ -107,17 +107,17 @@ public class ClientNetworkManager : MonoBehaviour
     }
 
     // 플레이어 아이템 구매 요청
-    public IEnumerator PurchasePlayerItem(Button itemButton,int playerId, int itemUniqueId)
+    public IEnumerator PurchasePlayerItem(int playerId, int itemUniqueId)
     {
         if (ServerToAPIManager.Instance != null)
-            yield return StartCoroutine(ServerToAPIManager.Instance.PurchaseAndHandleResult(itemButton,playerId, itemUniqueId));
+            yield return ServerToAPIManager.Instance.PurchaseItem(playerId, itemUniqueId);
     }
     #endregion
     #region Player Stats
     // 🔹 플레이어 스탯 요청
     public IEnumerator GetPlayerStats(int playerId)
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.GetPlayerStat(playerId));
+        yield return ServerToAPIManager.Instance.GetPlayerStat(playerId);
     }
 
     public void TargetReceivePlayerStatsClientRpc(string jsonData)
@@ -133,14 +133,14 @@ public class ClientNetworkManager : MonoBehaviour
     {
         if (ServerToAPIManager.Instance != null)
         {
-            yield return StartCoroutine(ServerToAPIManager.Instance.AddMatchResult(winnerId, loserId));
+            yield return ServerToAPIManager.Instance.AddMatchResult(winnerId, loserId);
         }
     }
 
     public IEnumerator GetMatchRecords(int playerId)
     {
         if (ServerToAPIManager.Instance != null)
-            yield return StartCoroutine(ServerToAPIManager.Instance.GetMatchResult(playerId));
+            yield return ServerToAPIManager.Instance.GetMatchResult(playerId);
     }
 
     public void TargetReceiveMatchRecordsClientRpc(MatchHistoryData matchHistoryData)
@@ -154,12 +154,12 @@ public class ClientNetworkManager : MonoBehaviour
     {
 
         if (ServerToAPIManager.Instance != null)
-            yield return StartCoroutine(ServerToAPIManager.Instance.UpdateLoginTime(playerId, "::1"));
+            yield return ServerToAPIManager.Instance.UpdateLoginTime(playerId, "::1");
     }
     // 🔹 로그인 요청
     public IEnumerator GetLogin(int playerId)
     {
-        yield return StartCoroutine(ServerToAPIManager.Instance.GetLoginRecords(playerId));
+        yield return ServerToAPIManager.Instance.GetLoginRecords(playerId);
     }
 
     public void TargetReceiveLoginDataClientRpc(string jsonData)
@@ -230,7 +230,7 @@ public class ClientNetworkManager : MonoBehaviour
     {
         if (ServerToAPIManager.Instance != null)
         {
-            yield return StartCoroutine(ServerToAPIManager.Instance.GetPlayerDetails(playerId));
+            yield return ServerToAPIManager.Instance.GetPlayerDetails(playerId);
         }
     }
     #endregion

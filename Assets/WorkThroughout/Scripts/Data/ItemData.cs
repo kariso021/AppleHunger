@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,8 @@ public class ItemData : MonoBehaviour
     public TMP_Text itemPriceText;
     private Button itemButton;
 
+    public bool isPurchasing = false;
+
     private void Awake()
     {
         itemButton = GetComponent<Button>();
@@ -34,26 +37,33 @@ public class ItemData : MonoBehaviour
         // UI 업데이트
         itemPriceText.text = price.ToString();
         itemLockedImage.gameObject.SetActive(!isUnlocked);
-        
-        // 기존 버튼 이벤트 제거 후 새로운 이벤트 추가
+
         itemButton.onClick.RemoveAllListeners();
         if (!isUnlocked)
         {
             itemButton.onClick.AddListener(() =>
             {
-                if (!itemButton.interactable) return; // 혹시 모르니 이중 방지
-                itemButton.interactable = false;      // 🔹 클릭하자마자 비활성화
+                if (isPurchasing) return;       // ✅ 이미 구매 중이면 무시
+                isPurchasing = true;            // ✅ 구매 시작
 
                 Debug.Log($"🔓 아이템 구매 시도: {itemUniqueId}");
 
-                StartCoroutine(ClientNetworkManager.Instance.PurchasePlayerItem(itemButton, SQLiteManager.Instance.player.playerId, itemUniqueId));
+                StartCoroutine(PurchaseItemCoroutine());
             });
         }
         else
         {
             itemButton.onClick.AddListener(() => applySelectItemDataToCurrentItemData(itemType));
         }
-
+    }
+    private IEnumerator PurchaseItemCoroutine()
+    {
+        yield return ClientNetworkManager.Instance.PurchasePlayerItem(
+           SQLiteManager.Instance.player.playerId, itemUniqueId
+        );
+        Debug.Log("구매완료");
+        yield return new WaitForSeconds(1f);
+        isPurchasing = false; // ✅ 완료 후 다시 클릭 가능
     }
     /// <summary>
     /// Collection 에서 현재 내가 사용하고 있는 아이콘,보드 이미지를 보여주기 위한 데이터만을 저장하는 함수
