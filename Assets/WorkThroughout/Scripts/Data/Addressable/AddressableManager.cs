@@ -119,7 +119,36 @@ public class AddressableManager : MonoBehaviour
         var init = Addressables.InitializeAsync();
         yield return init;
     }
+    public void LoadImageFromGroup(string itemUniqueId,Image image)
+    {
+        Debug.Log("이미지 업데이트 요청");
 
+        string key = null;
+
+        if (itemUniqueId[0] == '1')
+            key = "icon_" + itemUniqueId;
+        else if (itemUniqueId[0] == '2')
+            key = "board_" + itemUniqueId;
+
+        Addressables.LoadAssetAsync<Sprite>(key).Completed += (handle) =>
+        {
+            if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+            {
+                image.sprite = handle.Result;
+
+                if (!loadedSprites.ContainsKey(itemUniqueId))
+                {
+                    loadedSprites.Add(itemUniqueId, handle.Result);
+                }
+
+                Debug.Log("프로필 아이콘 로드 완료");
+            }
+            else
+            {
+                Debug.LogWarning($"Addressables 로드 실패: {key}");
+            }
+        };
+    }
     /// <summary>
     /// itemUniqueId로 itemData에서 참조하여 사용. 매개변수는 string 형태이므로 .ToString() 메서드를 이용해 변환 필요
     /// 매개변수값은 함수 내부에서 "icon_ + 매개변수" 값의 형태로 변형되어 동작

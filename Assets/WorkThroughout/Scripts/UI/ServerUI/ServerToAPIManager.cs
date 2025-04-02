@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 public class ServerToAPIManager : MonoBehaviour
 {
     private string apiBaseUrl = "https://applehunger.site";
@@ -318,8 +319,37 @@ public class ServerToAPIManager : MonoBehaviour
     }
 
     // 🔹 아이템 구매 요청
-    public IEnumerator PurchaseItem(int playerId, int itemUniqueId)
+    //public IEnumerator PurchaseItem(int playerId, int itemUniqueId)
+    //{
+    //    string url = $"{apiBaseUrl}/playerItems/purchase";
+    //    string jsonData = $"{{\"playerId\":{playerId}, \"itemUniqueId\":{itemUniqueId}}}";
+
+    //    using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+    //    {
+    //        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+    //        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+    //        request.downloadHandler = new DownloadHandlerBuffer();
+    //        request.SetRequestHeader("Content-Type", "application/json");
+
+    //        yield return request.SendWebRequest();
+
+    //        if (request.result == UnityWebRequest.Result.Success)
+    //        {
+    //            Debug.Log($"✅ 아이템 구매 성공! playerId: {playerId}, itemUniqueId: {itemUniqueId}");
+    //            // 🔹 자동 동기화 트리거
+    //            DataSyncManager.Instance.PlayerDataUpdated();  // 재화(currency) 업데이트
+    //            DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
+    //        }
+    //        else
+    //        {
+    //            Debug.LogError($"❌ 아이템 구매 실패: {request.error}");
+    //        }
+    //    }
+    //}
+    public IEnumerator PurchaseAndHandleResult(Button button,int playerId, int itemUniqueId)
     {
+        button.interactable = false;
+
         string url = $"{apiBaseUrl}/playerItems/purchase";
         string jsonData = $"{{\"playerId\":{playerId}, \"itemUniqueId\":{itemUniqueId}}}";
 
@@ -335,16 +365,24 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log($"✅ 아이템 구매 성공! playerId: {playerId}, itemUniqueId: {itemUniqueId}");
-                // 🔹 자동 동기화 트리거
-                DataSyncManager.Instance.PlayerDataUpdated();  // 재화(currency) 업데이트
-                DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
+
+                // 🔄 동기화 요청 → UI도 자연히 갱신됨
+                DataSyncManager.Instance.PlayerDataUpdated();   // 재화(currency) 갱신
+                DataSyncManager.Instance.PlayerItemsUpdated();  // 아이템 리스트 갱신
+
+                button.interactable = true;
             }
             else
             {
                 Debug.LogError($"❌ 아이템 구매 실패: {request.error}");
+
+                // ❗ 실패했으므로 다시 버튼 활성화
+                button.interactable = true;
             }
         }
     }
+
+
 
     #endregion
 

@@ -161,8 +161,8 @@ public class ButtonController : MonoBehaviour
         playerItemsGet.onClick.AddListener(() =>
         clientNetworkManager.GetPlayerItems(SQLiteManager.Instance.player.playerId));
 
-        playerItemsPurchase.onClick.AddListener(() =>
-        clientNetworkManager.PurchasePlayerItem(SQLiteManager.Instance.player.playerId,102));
+        //playerItemsPurchase.onClick.AddListener(() =>
+        //clientNetworkManager.PurchasePlayerItem(SQLiteManager.Instance.player.playerId,102));
 
         matchAdd.onClick.AddListener(() =>
         StartCoroutine(clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,

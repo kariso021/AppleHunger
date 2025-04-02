@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ClientNetworkManager : MonoBehaviour
 {
@@ -106,10 +107,10 @@ public class ClientNetworkManager : MonoBehaviour
     }
 
     // 플레이어 아이템 구매 요청
-    public IEnumerator PurchasePlayerItem(int playerId, int itemUniqueId)
+    public IEnumerator PurchasePlayerItem(Button itemButton,int playerId, int itemUniqueId)
     {
         if (ServerToAPIManager.Instance != null)
-            yield return StartCoroutine(ServerToAPIManager.Instance.PurchaseItem(playerId, itemUniqueId));
+            yield return StartCoroutine(ServerToAPIManager.Instance.PurchaseAndHandleResult(itemButton,playerId, itemUniqueId));
     }
     #endregion
     #region Player Stats

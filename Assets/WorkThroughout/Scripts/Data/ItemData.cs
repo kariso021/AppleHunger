@@ -34,21 +34,26 @@ public class ItemData : MonoBehaviour
         // UI 업데이트
         itemPriceText.text = price.ToString();
         itemLockedImage.gameObject.SetActive(!isUnlocked);
-
+        
         // 기존 버튼 이벤트 제거 후 새로운 이벤트 추가
         itemButton.onClick.RemoveAllListeners();
         if (!isUnlocked)
         {
             itemButton.onClick.AddListener(() =>
             {
+                if (!itemButton.interactable) return; // 혹시 모르니 이중 방지
+                itemButton.interactable = false;      // 🔹 클릭하자마자 비활성화
+
                 Debug.Log($"🔓 아이템 구매 시도: {itemUniqueId}");
-                StartCoroutine(ClientNetworkManager.Instance.PurchasePlayerItem(SQLiteManager.Instance.player.playerId, itemUniqueId));
+
+                StartCoroutine(ClientNetworkManager.Instance.PurchasePlayerItem(itemButton, SQLiteManager.Instance.player.playerId, itemUniqueId));
             });
         }
         else
         {
             itemButton.onClick.AddListener(() => applySelectItemDataToCurrentItemData(itemType));
         }
+
     }
     /// <summary>
     /// Collection 에서 현재 내가 사용하고 있는 아이콘,보드 이미지를 보여주기 위한 데이터만을 저장하는 함수
