@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 
 public class PopupManager : MonoBehaviour
@@ -10,6 +11,7 @@ public class PopupManager : MonoBehaviour
     public GameObject profilePopup;
     public GameObject rankProfilePopup;
     public GameObject nicknamePopup;
+    public GameObject loadingPopup;
 
     public GameObject activePopup = null; // 현재 활성화된 팝업 저장
     private Action pendingOnComplete; // 콜백 저장
@@ -68,7 +70,12 @@ public class PopupManager : MonoBehaviour
 
         if (popup.tag == "Profile")
         {
-            pendingOnComplete = () => OnPlayerDetailsLoaded();
+            ShowLoading("로딩");
+            pendingOnComplete = () =>
+            {
+                OnPlayerDetailsLoaded();
+                HideLoading();
+            };
             StartCoroutine(ClientNetworkManager.Instance.GetPlayerDetalis(playerId));
         }
 
@@ -122,6 +129,22 @@ public class PopupManager : MonoBehaviour
         activePopup = null;
     }
 
+    public void ShowLoading(string text)
+    {
+        string output = text + "중입니다......";
+
+        if (loadingPopup != null && !loadingPopup.activeSelf)
+        {
+            loadingPopup.SetActive(true);
+            loadingPopup.GetComponentInChildren<TMP_Text>().text = output;
+        }
+    }
+
+    public void HideLoading()
+    {
+        if (loadingPopup != null && loadingPopup.activeSelf)
+            loadingPopup.SetActive(false);
+    }
     // 🔹 클라이언트에서 데이터를 받은 후 실행
     public void OnDataReceived()
     {

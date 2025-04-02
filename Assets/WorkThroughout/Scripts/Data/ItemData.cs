@@ -47,7 +47,7 @@ public class ItemData : MonoBehaviour
                 isPurchasing = true;            // ✅ 구매 시작
 
                 Debug.Log($"🔓 아이템 구매 시도: {itemUniqueId}");
-
+                PopupManager.Instance.ShowLoading("구매");
                 StartCoroutine(PurchaseItemCoroutine());
             });
         }
@@ -63,6 +63,7 @@ public class ItemData : MonoBehaviour
         );
         Debug.Log("구매완료");
         yield return new WaitForSeconds(1f);
+        PopupManager.Instance.HideLoading();
         isPurchasing = false; // ✅ 완료 후 다시 클릭 가능
     }
     /// <summary>
