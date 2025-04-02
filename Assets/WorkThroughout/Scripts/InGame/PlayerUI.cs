@@ -10,6 +10,10 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI myScoreText;
     [SerializeField] private TextMeshProUGUI opponentScoreText;
 
+    [Header("Image UI")]
+    [SerializeField] private Image Myprofileimage;
+    [SerializeField] private Image Opponentprofileimage;
+
     [Header("Timer UI")]
     [SerializeField] private Slider timerSlider;
 //  타이머 슬라
@@ -45,8 +49,11 @@ public class PlayerUI : MonoBehaviour
     ///  `PlayerController`에서 받은 ID를 설정
     private void SetPlayerId(ulong clientId)
     {
+        //유저 이미지 프로필 업로드
+        UploadProfileImage();
+        //상대방 이미지 프로필 업로드
+        UploadOpponentProfileImage();
         myPlayerId = clientId;
-        Debug.Log($"[Client] My Player ID Set by PlayerController: {myPlayerId}");
     }
 
     /// 서버에서 전달된 점수를 받아 UI 업데이트 (ClientRpc로 호출됨)
@@ -94,4 +101,32 @@ public class PlayerUI : MonoBehaviour
             timerSlider.value = remainingTime / 60f; // 60초 기준으로 슬라이더 값 조정
         }
     }
+
+    // Self 프로필 이미지 동기화
+    private void UploadProfileImage()
+    {
+        Debug.Log("프로필 이미지 업로드");
+        string ImagePath = SQLiteManager.Instance.player.profileIcon;
+        Debug.Log("프로필 이미지 경로 : " + ImagePath);
+        AddressableManager.Instance.LoadImageFromGroup(ImagePath, Myprofileimage);
+    }
+
+    // Opponent 프로필 이미지 동기화
+    private void UploadOpponentProfileImage()
+    {
+        foreach (var kvp in PlayerDataManager.Instance.GetAllMappings())
+        {
+            ulong clientId = kvp.Key;
+            if (clientId != myPlayerId) // 상대방 찾기
+            {
+                string opponentIconNumber = PlayerDataManager.Instance.GetIconNumberFromClientID(clientId);
+                Debug.Log($"상대방 아이콘 번호: {opponentIconNumber}");
+
+                AddressableManager.Instance.LoadImageFromGroup(opponentIconNumber, Opponentprofileimage);
+                break;
+            }
+        }
+    }
+
+
 }

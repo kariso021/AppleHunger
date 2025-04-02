@@ -104,7 +104,7 @@ public class PlayerController : NetworkBehaviour
 
         if (!IsOwner) return;
 
-        StartCoroutine(WaitAndRegisterPlayerIdandRating());
+        StartCoroutine(WaitAndRegisterPlayer());
 
         OnPlayerInitialized?.Invoke(OwnerClientId);
         if (localDragBox != null)
@@ -163,6 +163,7 @@ public class PlayerController : NetworkBehaviour
 
         if (currentSum == 10)
         {
+
             List<ulong> appleIds = new List<ulong>();
             foreach (GameObject apple in selectedApples)
             {
@@ -171,8 +172,8 @@ public class PlayerController : NetworkBehaviour
                     appleIds.Add(netObj.NetworkObjectId);
                 }
             }
-
             RequestAppleRemovalServerRpc(appleIds.ToArray(), currentSum, OwnerClientId);
+            ResetAppleColors();
         }
         else
         {
@@ -330,7 +331,7 @@ public class PlayerController : NetworkBehaviour
 
 
 
-    private IEnumerator WaitAndRegisterPlayerIdandRating()
+    private IEnumerator WaitAndRegisterPlayer()
     {
         // 최대 5초까지만 기다리도록 설정 (무한루프 방지)
         float timeout = 5f;
@@ -353,28 +354,31 @@ public class PlayerController : NetworkBehaviour
         // SQLiteManager 체크
         int playerId = 1;
         int rating = 1000; // 기본값
+        string playerIcon = "101"; // 기본값
 
         if (SQLiteManager.Instance?.player != null)
         {
             playerId = SQLiteManager.Instance.player.playerId;
             rating = SQLiteManager.Instance.player.rating;
+            playerIcon = SQLiteManager.Instance.player.profileIcon; 
         }
         else
         {
-            Debug.LogWarning("⚠️ SQLiteManager가 null이거나 player 정보가 없어 기본값으로 등록함.");
+            Debug.LogWarning("SQL lite Null -> 기본값 등록");
         }
 
-        // ✅ 최종 체크 후 ServerRpc 호출
+        // 최종 체크 후 ServerRpc 호출
         try
         {
             PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
+            PlayerDataManager.Instance.RegisterPlayerIconServerRpc(playerIcon);
 
-            Debug.Log($"✅ playerId {playerId}, rating {rating} 등록 성공!");
+            Debug.Log($"playerId {playerId}, rating {rating} 등록 성공!");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ ServerRpc 호출 중 예외 발생: {ex}");
+            Debug.LogError($"ServerRpc 호출 중 예외 발생: {ex}");
         }
     }
 

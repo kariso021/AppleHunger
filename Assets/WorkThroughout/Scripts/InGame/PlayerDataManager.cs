@@ -10,6 +10,7 @@ public class PlayerDataManager : NetworkBehaviour
 
     private Dictionary<ulong, int> clientIdToNumber = new Dictionary<ulong, int>();
     private Dictionary<ulong, int> clientIdToRating = new Dictionary<ulong, int>();
+    private Dictionary<ulong, string> clientIdToProfile = new Dictionary<ulong, string>();
 
     public Dictionary<ulong, int> GetAllMappings()
     {
@@ -82,6 +83,27 @@ public class PlayerDataManager : NetworkBehaviour
     {
         return clientIdToRating.TryGetValue(clientId, out var rating) ? rating : -1;
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterPlayerIconServerRpc(string IconNumber, ServerRpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        RegisterPlayerIcon(clientId, IconNumber);
+    }
+
+    public string GetIconNumberFromClientID(ulong clientId)
+    {
+        return clientIdToProfile.TryGetValue(clientId, out var IconNumber) ? IconNumber : "0";
+    }
+
+
+    public void RegisterPlayerIcon(ulong clientId, string IconNumber)
+    {
+        if (!IsServer) return;
+        clientIdToProfile[clientId] = IconNumber;
+    }
+
+
 
 }
 
