@@ -94,30 +94,38 @@ public class ButtonController : MonoBehaviour
         customBoadrButton.onClick.AddListener(() =>
         NavManager.Instance.NavigateTo("Collection/Board"));
 
-        customIconConfrimButton.onClick.AddListener(() =>
-        NavManager.Instance.NavigateTo("Collection"));
+        customIconConfrimButton.onClick.AddListener(() => {
+            // Nav
+            NavManager.Instance.NavigateTo("Collection");
+            // Popup
+            PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
+            //PopupManager.Instance.Invoke(nameof(PopupManager.Instance.HideLoading), 1f);
+            // Local Data Change
+            SQLiteManager.Instance.player.profileIcon =
+            FindAnyObjectByType<ItemManager>().currentItemIcon.
+            GetComponent<ItemData>().itemUniqueId.ToString();
+            // Update
+            FindAnyObjectByType<RankingRecordsManager>().UpdateMyRankingRecords();
+            // Server Data Change
+            StartCoroutine(clientNetworkManager.UpdatePlayerData());
 
-        customIconConfrimButton.onClick.AddListener(() =>
-        SQLiteManager.Instance.player.profileIcon = 
-        FindAnyObjectByType<ItemManager>().currentItemIcon.
-        GetComponent<ItemData>().itemUniqueId.ToString());
-
-        customIconConfrimButton.onClick.AddListener(() =>
-        FindAnyObjectByType<RankingRecordsManager>().UpdateMyRankingRecords());
-
-        customIconConfrimButton.onClick.AddListener(() =>
-        clientNetworkManager.UpdatePlayerData());
-
-        customBoardConfrimButton.onClick.AddListener(() =>
-        NavManager.Instance.NavigateTo("Collection"));
-
-        customBoardConfrimButton.onClick.AddListener(() =>
-        SQLiteManager.Instance.player.boardImage =
-        FindAnyObjectByType<ItemManager>().currentItemBoard.
-        GetComponent<ItemData>().itemUniqueId.ToString());
+            });
 
         customBoardConfrimButton.onClick.AddListener(() =>
-        clientNetworkManager.UpdatePlayerData());
+        {
+            // Nav
+            NavManager.Instance.NavigateTo("Collection");
+            // Popup
+            PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
+            //Invoke(nameof(PopupManager.Instance.HideLoading), 1.0f);
+            // Local Data Change
+            SQLiteManager.Instance.player.boardImage =
+            FindAnyObjectByType<ItemManager>().currentItemBoard.
+            GetComponent<ItemData>().itemUniqueId.ToString();
+
+            // Server Data Change
+            StartCoroutine(clientNetworkManager.UpdatePlayerData());
+        });
 
         // NavBar Buttons
         // Button ¹ÙÀÎµù

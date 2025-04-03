@@ -20,26 +20,53 @@ public class NicknameManager : MonoBehaviour
     {
         string newNickname = nicknameInputField.text.Trim();
 
-        if (!IsValidNickname(newNickname))
+        if (!IsValidNickname(newNickname,out string message))
         {
-            resultText.text = "´Ğ³×ÀÓÀº ÇÑ±Û 1~7ÀÚ ¶Ç´Â ¿µ¾î 1~11ÀÚ¸¸ °¡´ÉÇØ¿ä.";
-            Debug.Log("¹üÀ§ÃÊ°ú");
+            resultText.text = message;
             return;
         }
 
         StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(newNickname));
     }
 
-    private bool IsValidNickname(string nickname)
+    private bool IsValidNickname(string nickname, out string message)
     {
-        if (string.IsNullOrEmpty(nickname)) return false;
+        message = "";
 
-        // ÇÑ±Û¸¸, ÃÖ´ë 7ÀÚ or ¿µ¹®/¼ıÀÚ, ÃÖ´ë 11ÀÚ Çã¿ë
-        string koreanPattern = @"^[°¡-ÆR]{1,7}$";
-        string englishPattern = @"^[a-zA-Z0-9]{1,11}$";
+        if (string.IsNullOrEmpty(nickname))
+        {
+            message = "´Ğ³×ÀÓÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä.";
+            return false;
+        }
 
-        return System.Text.RegularExpressions.Regex.IsMatch(nickname, koreanPattern) ||
-               System.Text.RegularExpressions.Regex.IsMatch(nickname, englishPattern);
+        string allowedPattern = @"^[°¡-ÆRa-zA-Z0-9]+$";
+        if (!System.Text.RegularExpressions.Regex.IsMatch(nickname, allowedPattern))
+        {
+            message = "´Ğ³×ÀÓÀº ÇÑ±Û, ¿µ¾î, ¼ıÀÚ¸¸ »ç¿ëÇÒ ¼ö ÀÖ¾î¿ä.";
+            return false;
+        }
+
+        bool containsKorean = System.Text.RegularExpressions.Regex.IsMatch(nickname, @"[°¡-ÆR]");
+
+        if (containsKorean)
+        {
+            if (nickname.Length > 7)
+            {
+                message = "ÇÑ±ÛÀÌ Æ÷ÇÔµÈ ´Ğ³×ÀÓÀº 7ÀÚ±îÁö »ç¿ëÇÒ ¼ö ÀÖ¾î¿ä.";
+                return false;
+            }
+        }
+        else
+        {
+            if (nickname.Length > 11)
+            {
+                message = "¿µ¾î/¼ıÀÚ ´Ğ³×ÀÓÀº 11ÀÚ±îÁö »ç¿ëÇÒ ¼ö ÀÖ¾î¿ä.";
+                return false;
+            }
+        }
+
+        return true;
     }
+
 
 }

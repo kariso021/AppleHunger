@@ -1,6 +1,7 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering.UI;
 
 public class PopupManager : MonoBehaviour
 {
@@ -70,7 +71,6 @@ public class PopupManager : MonoBehaviour
 
         if (popup.tag == "Profile")
         {
-            ShowLoading("로딩");
             pendingOnComplete = () =>
             {
                 OnPlayerDetailsLoaded();
@@ -139,9 +139,18 @@ public class PopupManager : MonoBehaviour
             loadingPopup.GetComponentInChildren<TMP_Text>().text = output;
         }
     }
-
+    public void ChangeLoadingText(string text)
+    {
+        string output = text + "실패!" +
+            "";
+        if (loadingPopup != null && loadingPopup.activeSelf)
+        {
+            loadingPopup.GetComponentInChildren<TMP_Text>().text = output;
+        }
+    }
     public void HideLoading()
     {
+        Debug.LogWarning("됨");
         if (loadingPopup != null && loadingPopup.activeSelf)
             loadingPopup.SetActive(false);
     }

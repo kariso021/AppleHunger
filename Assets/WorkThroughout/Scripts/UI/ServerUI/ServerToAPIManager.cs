@@ -146,6 +146,28 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
+    //public IEnumerator GetPlayerCurrency()
+    //{
+    //    string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
+    //    using (UnityWebRequest request = UnityWebRequest.Get(url))
+    //    {
+    //        yield return request.SendWebRequest();
+
+    //        if (request.result == UnityWebRequest.Result.Success)
+    //        {
+    //            string jsonData = request.downloadHandler.text;
+    //            TargetReceivePlayerDataClientRpc(jsonData);
+    //        }
+    //        else
+    //        {
+    //            Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
+    //            Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
+    //            if (isFirstTime)
+    //                yield return StartCoroutine(AddPlayer());
+    //        }
+    //    }
+    //}
+
     public IEnumerator UpdateNicknameOnServer(string playerName)
     {
         string url = $"{apiBaseUrl}/players/updateNickname";
@@ -167,13 +189,13 @@ public class ServerToAPIManager : MonoBehaviour
             Debug.Log("✅ 닉네임 서버 업데이트 성공!");
             DataSyncManager.Instance.PlayerDataUpdated();
 
-            // 팝업 닫기
-            PopupManager popupManager = FindAnyObjectByType<PopupManager>();
-            popupManager?.ClosePopup();
+            //// 팝업 닫기
+            //PopupManager popupManager = FindAnyObjectByType<PopupManager>();
+            //popupManager?.ClosePopup();
 
-            yield return new WaitForSeconds(1f);
+            //yield return new WaitForSeconds(1f);
 
-            SQLiteManager.Instance.LoadAllData();
+            //SQLiteManager.Instance.LoadAllData();
         }
         else
         {

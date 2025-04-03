@@ -66,6 +66,12 @@ public class ClientNetworkManager : MonoBehaviour
         yield return ServerToAPIManager.Instance.GetPlayer(idType, idValue,isFirstTime);
     }
 
+    // 0403 임시
+    //public IEnumerator GetPlayerCurrency()
+    //{
+    //    yield return ServerToAPIManager.Instance.GetPlayerCurrency();
+    //}
+
     public void TargetReceivePlayerDataClientRpc(string jsonData)
     {
         SQLiteManager.Instance.SavePlayerData(JsonUtility.FromJson<PlayerData>(jsonData));
@@ -87,6 +93,9 @@ public class ClientNetworkManager : MonoBehaviour
     public IEnumerator UpdatePlayerData()
     {
         yield return ServerToAPIManager.Instance.UpdatePlayerData(SQLiteManager.Instance.player);
+        AddressableManager.Instance.LoadProfileIconFromGroup();
+        AddressableManager.Instance.LoadMyRankingIconFromGroup();
+        Invoke(nameof(PopupManager.Instance.HideLoading),0.5f);
     }
 
     public IEnumerator UpdatePlayerNickname(string nickname)

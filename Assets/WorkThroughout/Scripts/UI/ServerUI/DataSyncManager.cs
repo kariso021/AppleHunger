@@ -48,14 +48,15 @@ public class DataSyncManager : MonoBehaviour
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
-        //Invoke(nameof(SyncSQLite), 1.0f); // 1초 후 SQLite 갱신
+        PopupManager.Instance.Invoke(nameof(PopupManager.Instance.ClosePopup), 1.0f);
+        Invoke(nameof(SyncSQLite), 1.0f); // 1초 후 SQLite 갱신
     }
 
     // 🔹 플레이어 아이템이 변경되었을 때 호출 (예: 아이템 구매, 해금)
     public void PlayerItemsUpdated()
     {
         Debug.Log("🔄 플레이어 아이템 변경 감지 → MySQL에서 최신 데이터 가져오기");
-        StartCoroutine(ClientNetworkManager.Instance.GetPlayerItems(SQLiteManager.Instance.player.playerId));
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerItems(SQLiteManager.Instance.player.playerId)); 
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
         Invoke(nameof(SyncSQLite), 1.0f);

@@ -60,6 +60,7 @@ public class SQLiteManager : MonoBehaviour
         {
             Debug.Log("✅ SQLite DB가 이미 존재합니다. 서버 요청 없이 로컬 DB 사용.");
 
+            // 여기서 재화를 서버에서 받아오는 부분이 추가되어야 할 것 같음. 재화같은 경우엔 이벤트 등으로 넣어주는게 되니까
             // ✅ Step 2: DB가 존재하면 서버에서 데이터를 받을 필요 없이 로드 후 종료
             LoadAllData();
             yield return DataSyncManager.Instance.PlayerRankingUpdated();

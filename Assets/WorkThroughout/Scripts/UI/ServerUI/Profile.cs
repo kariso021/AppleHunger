@@ -28,7 +28,7 @@ public class Profile : MonoBehaviour
     {
         DataSyncManager.Instance.OnPlayerProfileChanged += profileUIupdate;
 
-        profileUIupdate();
+        //profileUIupdate();
     }
 
     private void profileUIupdate()
