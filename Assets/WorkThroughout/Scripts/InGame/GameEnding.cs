@@ -31,32 +31,7 @@ public class GameEnding : NetworkBehaviour
     /// 서버에서 게임 종료 처리
     private void HandleGameEnd()
     {
-        if (!IsServer) return;
-
-        DetermineWinner(out int winnerId, out int loserId,out int winnerRating, out int loserRating);
-
-        // 전역 변수 설정
-        LastWinnerId = winnerId;
-        LastLoserId = loserId;
-
-        // 클라이언트에 결과 전달
-        ShowGameOverScreenClientRpc(winnerId, loserId);
-
-        //여기에 승자를 제출하는 것을 만들면 됨
-
-        // 서버에서 싱행되는거
-        SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
-
-        // 이게 나중에 실행해둬야함
-        NotifyClientsToFetchDataClientRpc();
-
-        // 5초 후 로비 이동
-        Invoke(nameof(GoToLobbyClientRpc), 5f);
-
-        // 서버 종료
-        Invoke(nameof(ShutdownServer), 7f);
-
-
+       StartCoroutine(HandleGameEndRoutine());
     }
 
 
@@ -208,11 +183,12 @@ public class GameEnding : NetworkBehaviour
 
         yield return StartCoroutine(SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating));
 
-        yield return new WaitForSeconds(5f);
+        NotifyClientsToFetchDataClientRpc();
+
+        yield return new WaitForSeconds(4f);
         SceneManager.LoadScene("Lobby");
 
-
-        yield return new WaitForSeconds(7f);
+        yield return new WaitForSeconds(1f);
         ShutdownServer();
     }
 

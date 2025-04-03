@@ -98,14 +98,9 @@ public class PlayerDataManager : NetworkBehaviour
 
 
     //--------------------------------------------------------------------------------UI 관리하기 위한 아이디 식별자
-    [ClientRpc]
-    public void SendopponentUIStringNumberClientRpc()
-    {
-        ulong ClientId = NetworkManager.Singleton.LocalClientId;
-    }
-
-
     
-    }
+
+
+}
 
 
