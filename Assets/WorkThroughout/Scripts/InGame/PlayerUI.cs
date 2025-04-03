@@ -52,7 +52,6 @@ public class PlayerUI : MonoBehaviour
         //유저 이미지 프로필 업로드
         UploadProfileImage();
         //상대방 이미지 프로필 업로드
-        UploadOpponentProfileImage();
         myPlayerId = clientId;
     }
 
@@ -111,22 +110,13 @@ public class PlayerUI : MonoBehaviour
         AddressableManager.Instance.LoadImageFromGroup(ImagePath, Myprofileimage);
     }
 
-    // Opponent 프로필 이미지 동기화
-    private void UploadOpponentProfileImage()
+   
+
+
+
+    public void SetOpponentProfileImage(string iconKey)
     {
-        foreach (var kvp in PlayerDataManager.Instance.GetAllMappings())
-        {
-            ulong clientId = kvp.Key;
-            if (clientId != myPlayerId) // 상대방 찾기
-            {
-                string opponentIconNumber = PlayerDataManager.Instance.GetIconNumberFromClientID(clientId);
-                Debug.Log($"상대방 아이콘 번호: {opponentIconNumber}");
-
-                AddressableManager.Instance.LoadImageFromGroup(opponentIconNumber, Opponentprofileimage);
-                break;
-            }
-        }
+        Debug.Log($"[PlayerUI] 상대방 아이콘 로딩: {iconKey}");
+        AddressableManager.Instance.LoadImageFromGroup(iconKey, Opponentprofileimage);
     }
-
-
 }

@@ -37,7 +37,16 @@ public class MatchMakerClient : MonoBehaviour
     {
         await ClientSignIn(serviceProfileName:"AppleHungerPlayer");
         //데이터베이스에서 가져온 정보로 가공된 뭔가...
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+        if(!AuthenticationService.Instance.IsSignedIn)//로그인 안되어있으면 로그인 시키기(테스트용으로 익명로그인 사용중임. 나중에 바꿔야함.)
+        {
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        }
+        else {
+            Debug.Log($"Already Signed In as {PlayerID()}");
+            }
+
+        
 
         //여기에 클라시작
         StartClient();

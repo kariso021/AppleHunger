@@ -117,7 +117,7 @@ public class AppleManager : NetworkBehaviour
 
     private bool CanAnyAppleBeRemoved()
     {
-        Debug.Log("📊 Apple Grid 상태 (Top → Bottom):");
+        Debug.Log(" Apple Grid 상태 (Top → Bottom):");
         for (int y = gridHeight - 1; y >= 0; y--) // 👈 y를 역순으로 출력
         {
             string line = "";

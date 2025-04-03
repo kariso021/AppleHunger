@@ -372,7 +372,9 @@ public class PlayerController : NetworkBehaviour
         {
             PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
-            PlayerDataManager.Instance.RegisterPlayerIconServerRpc(playerIcon);
+           
+
+
 
             Debug.Log($"playerId {playerId}, rating {rating} 등록 성공!");
         }

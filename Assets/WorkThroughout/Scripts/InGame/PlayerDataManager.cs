@@ -32,6 +32,7 @@ public class PlayerDataManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+
         Debug.Log("[PlayerDataManager] OnNetworkSpawn() 호출됨. 네트워크에 스폰 완료!");
     }
 
@@ -84,12 +85,7 @@ public class PlayerDataManager : NetworkBehaviour
         return clientIdToRating.TryGetValue(clientId, out var rating) ? rating : -1;
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void RegisterPlayerIconServerRpc(string IconNumber, ServerRpcParams rpcParams = default)
-    {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        RegisterPlayerIcon(clientId, IconNumber);
-    }
+
 
     public string GetIconNumberFromClientID(ulong clientId)
     {
@@ -97,13 +93,19 @@ public class PlayerDataManager : NetworkBehaviour
     }
 
 
-    public void RegisterPlayerIcon(ulong clientId, string IconNumber)
+
+
+
+
+    //--------------------------------------------------------------------------------UI 관리하기 위한 아이디 식별자
+    [ClientRpc]
+    public void SendopponentUIStringNumberClientRpc()
     {
-        if (!IsServer) return;
-        clientIdToProfile[clientId] = IconNumber;
+        ulong ClientId = NetworkManager.Singleton.LocalClientId;
     }
 
 
+    
+    }
 
-}
 

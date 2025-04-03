@@ -140,12 +140,6 @@ public class AddressableManager : MonoBehaviour
                 {
                     loadedSprites.Add(itemUniqueId, handle.Result);
                 }
-
-                Debug.Log("프로필 아이콘 로드 완료");
-            }
-            else
-            {
-                Debug.LogWarning($"Addressables 로드 실패: {key}");
             }
         };
     }
@@ -156,11 +150,8 @@ public class AddressableManager : MonoBehaviour
     /// <param name="itemUniqueId"></param>
     public void LoadProfileIconFromGroup()
     {
-        Debug.Log("프로필 아이콘 업데이트 요청");
-
         if (!isUIReady)
         {
-            Debug.Log(" UI 준비 전이므로 LoadProfileIconFromGroup 보류");
             pendingProfileUpdateActions.Add(() => LoadProfileIconFromGroup());
             return;
         }
@@ -179,34 +170,12 @@ public class AddressableManager : MonoBehaviour
                     loadedSprites.Add(itemUniqueId, handle.Result);
                 }
 
-                Debug.Log("프로필 아이콘 로드 완료");
-            }
-            else
-            {
-                Debug.LogWarning($"Addressables 로드 실패: {key}");
             }
         };
 
-        //Debug.Log("프로필 아이콘 업데이트");
-        //string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
-        //string key = "icon_" + itemUniqueId;
-
-        //Addressables.LoadAssetAsync<Sprite>(key).Completed += (handle) =>
-        //{
-        //    if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
-        //    {
-        //        profileIcon.sprite = handle.Result;
-        //        // 로드된 Sprite를 Dictionary에 저장하여 나중에 해제 가능하도록 관리
-        //        if (!loadedSprites.ContainsKey(itemUniqueId))
-        //        {
-        //            loadedSprites.Add(itemUniqueId, handle.Result);
-        //        }
-        //    }
-        //};
     }
     public void LoadProfilePopupIconFromGroup()
     {
-        Debug.Log("프로필 아이콘 업데이트");
 
         string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
         string key = "icon_" + itemUniqueId;
@@ -226,8 +195,6 @@ public class AddressableManager : MonoBehaviour
     }
     public void LoadRankProfilePopupIconFromGroup()
     {
-        Debug.Log("프로필 랭킹 아이콘 업데이트");
-
         string itemUniqueId = SQLiteManager.Instance.playerDetails.profileIcon;
         string key = "icon_" + itemUniqueId;
 
@@ -268,7 +235,6 @@ public class AddressableManager : MonoBehaviour
     }
     public void LoadMyRankingIconFromGroup()
     {
-        Debug.Log("내 랭킹 아이콘 업데이트 요청");
 
         if (!isUIReady)
         {
@@ -293,26 +259,7 @@ public class AddressableManager : MonoBehaviour
 
                 Debug.Log(" 내 랭킹 아이콘 로드 완료");
             }
-            else
-            {
-                Debug.LogWarning($"Addressables 로드 실패: {key}");
-            }
         };
-        //string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
-        //string key = "icon_" + itemUniqueId;
-
-        //Addressables.LoadAssetAsync<Sprite>(key).Completed += (handle) =>
-        //{
-        //    if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
-        //    {
-        //        myRankProfileIcon.sprite = handle.Result;
-        //        // 로드된 Sprite를 Dictionary에 저장하여 나중에 해제 가능하도록 관리
-        //        if (!loadedSprites.ContainsKey(itemUniqueId))
-        //        {
-        //            loadedSprites.Add(itemUniqueId, handle.Result);
-        //        }
-        //    }
-        //};
 
     }
     public void LoadItemIconFromGroup()

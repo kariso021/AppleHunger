@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using Unity.Services.Matchmaker.Models;
 using Unity.Services.Multiplay;
+using Unity.Services.Authentication;
+using System.Collections;
 
 public class GameEnding : NetworkBehaviour
 {
@@ -42,8 +44,10 @@ public class GameEnding : NetworkBehaviour
 
         //여기에 승자를 제출하는 것을 만들면 됨
 
+        // 서버에서 싱행되는거
         SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
 
+        // 이게 나중에 실행해둬야함
         NotifyClientsToFetchDataClientRpc();
 
         // 5초 후 로비 이동
@@ -54,6 +58,7 @@ public class GameEnding : NetworkBehaviour
 
 
     }
+
 
     private void DetermineWinner(
     out int winnerPlayerId, out int loserPlayerId,
@@ -86,7 +91,7 @@ public class GameEnding : NetworkBehaviour
         winnerRating = playerDataManager.GetRatingFromClientID(winnerClientId);
         loserRating = playerDataManager.GetRatingFromClientID(loserClientId);
 
-        Debug.Log($"✅ Winner: {winnerPlayerId} (R: {winnerRating}), ❌ Loser: {loserPlayerId} (R: {loserRating})");
+        Debug.Log($"Winner: {winnerPlayerId} (R: {winnerRating}), ❌ Loser: {loserPlayerId} (R: {loserRating})");
     }
 
     /// 게임 결과 UI 표시 (클라이언트)
@@ -113,25 +118,25 @@ public class GameEnding : NetworkBehaviour
 
     ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
 
-    private void SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
+    private IEnumerator SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
     {
         if (Managers == null)
         {
             Debug.Log("❌ Managers 참조가 없습니다");
-            return;
+            yield break;
         }
 
         Debug.Log("서버에 승자 제출");
 
-        StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
+        yield return Managers.AddMatchResult(winnerID, loserID);
 
         int winnerGold = 100 + UnityEngine.Random.Range(0, 91);
         int loserGold = UnityEngine.Random.Range(0, 91);
 
         int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
 
-        StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta));
-        StartCoroutine(Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta));
+        yield return Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta);
+        yield return Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta);
     }
 
 
@@ -189,4 +194,34 @@ public class GameEnding : NetworkBehaviour
         Application.Quit();
 #endif
     }
+
+    //------------------------------------------------------------------------------------ DB로 결과 조정 순차적 진행을 위해 코루틴.
+
+    private IEnumerator HandleGameEndRoutine()
+    {
+        DetermineWinner(out int winnerId, out int loserId, out int winnerRating, out int loserRating);
+
+        LastWinnerId = winnerId;
+        LastLoserId = loserId;
+
+        ShowGameOverScreenClientRpc(winnerId, loserId);
+
+        yield return StartCoroutine(SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating));
+
+        yield return new WaitForSeconds(5f);
+        SceneManager.LoadScene("Lobby");
+
+
+        yield return new WaitForSeconds(7f);
+        ShutdownServer();
     }
+
+
+
+
+
+
+
+
+
+}
