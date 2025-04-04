@@ -14,9 +14,7 @@ public class ButtonController : MonoBehaviour
 
     public Button myRankProfileButton;
     [Header("Setting Panel Buttons")]
-    public Button loginButton; // 일단 구글 로그인? or guest?
-    public Button creditButton;
-
+    public Button settingButton;
     [Header("Collection Panel Buttons")]
     public Button customIconButton;
     public Button customBoadrButton;
@@ -32,11 +30,10 @@ public class ButtonController : MonoBehaviour
     public Button profileCloseButton;
     public Button rankProfileCloseButton;
     public Button creditCloseButton;
-
+    public Button settingCloseButton;
+    public Button nameChangeCloseButton;
     [Header("Popup Buttons")]
     public Button nameChangeButton;
-    public Button nameChangeCancelButton;
-
     [Header("Debug Buttons")]
     public Button playerAdd;
     public Button playerGet;
@@ -82,10 +79,6 @@ public class ButtonController : MonoBehaviour
         // 접근해야 하므로, 클라이언트에서 알아서 그 정보의 텍스트들을 기반으로 
         // 여는 식으로 해야할듯?
 
-        // Setting Panel Buttons
-        // login 도 구글 로그인 기능을 가져와 바인딩
-        creditButton.onClick.AddListener(() =>
-        PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
 
 
      // Collection Panel Buttons
@@ -146,13 +139,16 @@ public class ButtonController : MonoBehaviour
         PopupManager.Instance.ClosePopup());
         creditCloseButton.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
+        settingCloseButton.onClick.AddListener(() =>
+        PopupManager.Instance.ClosePopup());
+        nameChangeCloseButton.onClick.AddListener(() =>
+        PopupManager.Instance.ClosePopup());
 
         // Popup Buttons
         nameChangeButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.nicknamePopup));
-        nameChangeCancelButton.onClick.AddListener(() =>
-        PopupManager.Instance.ClosePopup());
-
+        settingButton.onClick.AddListener(() =>
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.settingPopup));
         // Debug Buttons
         // 테스트 기능
         playerAdd.onClick.AddListener(() =>

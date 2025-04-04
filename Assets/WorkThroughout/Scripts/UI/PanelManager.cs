@@ -9,7 +9,6 @@ public class PanelManager : MonoBehaviour
     [Header("Main Panels")]
     public GameObject homePanel;
     public GameObject rankingPanel;
-    public GameObject settingsPanel;
     public GameObject collectionPanel;
 
     [Header("Collecion Panels")]
@@ -28,7 +27,6 @@ public class PanelManager : MonoBehaviour
         {
             { "Home", homePanel },
             { "Ranking", rankingPanel },
-            { "Settings", settingsPanel },
             { "Collection", collectionPanel },
             { "Collection/Icon", chooseIconPanel },
             { "Collection/Board",chooseBoardPanel },

@@ -13,6 +13,7 @@ public class PopupManager : MonoBehaviour
     public GameObject rankProfilePopup;
     public GameObject nicknamePopup;
     public GameObject loadingPopup;
+    public GameObject settingPopup;
 
     public GameObject activePopup = null; // 현재 활성화된 팝업 저장
     private Action pendingOnComplete; // 콜백 저장
@@ -90,7 +91,7 @@ public class PopupManager : MonoBehaviour
         {
             if (activePopup.tag == "Profile") // 현재 활성화 된 팝업이 프로필 관련일때만
             {
-                activePopup.GetComponent<ProfilePopup>().SetProfile(
+                activePopup.GetComponentInChildren<ProfilePopup>().SetProfile(
                 SQLiteManager.Instance.playerDetails.playerName,
                 SQLiteManager.Instance.playerDetails.totalGames,
                 SQLiteManager.Instance.playerDetails.wins,

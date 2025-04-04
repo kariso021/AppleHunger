@@ -1,4 +1,7 @@
+ï»¿using System.Collections;
+using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -9,64 +12,89 @@ public class NicknameManager : MonoBehaviour
     [SerializeField] private TMP_InputField nicknameInputField;
     [SerializeField] private Button confirmButton;
     [SerializeField] private TMP_Text resultText;
+    [SerializeField] private TMP_Text placeHolderText;
+    [SerializeField] private TMP_Text warningText;
 
+    private HashSet<string> forbiddenWords;
     private bool isChangingNickname = false;
     private void Start()
     {
-        confirmButton.onClick.AddListener(() => OnClick_ChangeNickname());
+        confirmButton.onClick.AddListener(OnClick_ChangeNickname);
+        placeHolderText.text = SQLiteManager.Instance.player.playerName;
+        forbiddenWords = ForbiddenWordsLoader.LoadForbiddenWords();
     }
+
+    
 
     public void OnClick_ChangeNickname()
     {
+        if (isChangingNickname) return;
+        StartCoroutine(ChangeNicknameCoroutine());
+    }
+
+    private IEnumerator ChangeNicknameCoroutine()
+    {
         string newNickname = nicknameInputField.text.Trim();
 
-        if (!IsValidNickname(newNickname,out string message))
+        if (!IsValidNickname(newNickname, out string message))
         {
-            resultText.text = message;
-            return;
+            warningText.text = message;
+            yield break;
         }
 
-        StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(newNickname));
+        isChangingNickname = true;
+        confirmButton.interactable = false;
+
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
+
+        yield return StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(newNickname));
+        yield return new WaitForSeconds(0.5f);
+
+        PopupManager.Instance.ClosePopup();
+
+        isChangingNickname = false;
+        confirmButton.interactable = true;
     }
 
     private bool IsValidNickname(string nickname, out string message)
     {
         message = "";
 
-        if (string.IsNullOrEmpty(nickname))
+        if (string.IsNullOrWhiteSpace(nickname))
         {
-            message = "´Ğ³×ÀÓÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä.";
+            message = "ë‹‰ë„¤ì„ì„ ì…ë ¥í•´ì£¼ì„¸ìš”.";
             return false;
         }
 
-        string allowedPattern = @"^[°¡-ÆRa-zA-Z0-9]+$";
-        if (!System.Text.RegularExpressions.Regex.IsMatch(nickname, allowedPattern))
+        //  í•œê¸€, ì˜ì–´, ìˆ«ìë§Œ í—ˆìš©
+        string allowedPattern = @"^[ê°€-í£a-zA-Z0-9]+$";
+        if (!Regex.IsMatch(nickname, allowedPattern))
         {
-            message = "´Ğ³×ÀÓÀº ÇÑ±Û, ¿µ¾î, ¼ıÀÚ¸¸ »ç¿ëÇÒ ¼ö ÀÖ¾î¿ä.";
+            message = "ë‹‰ë„¤ì„ì€ í•œê¸€, ì˜ì–´, ìˆ«ìë§Œ ì‚¬ìš©í•  ìˆ˜ ìˆì–´ìš”.";
             return false;
         }
 
-        bool containsKorean = System.Text.RegularExpressions.Regex.IsMatch(nickname, @"[°¡-ÆR]");
-
-        if (containsKorean)
+        //  ìµœì†Œ 1ì, ìµœëŒ€ 7ì
+        if (nickname.Length < 1 || nickname.Length > 7)
         {
-            if (nickname.Length > 7)
-            {
-                message = "ÇÑ±ÛÀÌ Æ÷ÇÔµÈ ´Ğ³×ÀÓÀº 7ÀÚ±îÁö »ç¿ëÇÒ ¼ö ÀÖ¾î¿ä.";
-                return false;
-            }
+            message = "ë‹‰ë„¤ì„ì€ 1ì ì´ìƒ 7ì ì´í•˜ë¡œ ì…ë ¥í•´ì£¼ì„¸ìš”.";
+            return false;
         }
-        else
+
+        // ê¸ˆì¹™ì–´ í¬í•¨ í™•ì¸ (ì†Œë¬¸ìë¡œ ë¹„êµ)
+        string lowerNickname = nickname.ToLower();
+        foreach (string word in forbiddenWords)
         {
-            if (nickname.Length > 11)
+            if (lowerNickname.Contains(word))
             {
-                message = "¿µ¾î/¼ıÀÚ ´Ğ³×ÀÓÀº 11ÀÚ±îÁö »ç¿ëÇÒ ¼ö ÀÖ¾î¿ä.";
+                message = "ë¶€ì ì ˆí•œ ë‹¨ì–´ê°€ í¬í•¨ë˜ì–´ ìˆìŠµë‹ˆë‹¤.";
                 return false;
             }
         }
 
         return true;
     }
+
 
 
 }
