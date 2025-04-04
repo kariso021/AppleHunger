@@ -21,6 +21,7 @@ public class MatchMakerClient : MonoBehaviour
 
     private string _ticketId;
     [SerializeField] private GameObject waitingCanvas;
+    [SerializeField] private TMPro.TextMeshProUGUI matchResultText;
 
 
     private void OnEnable()
@@ -169,6 +170,9 @@ public class MatchMakerClient : MonoBehaviour
     {
         Debug.Log(message: $"[클라이언트] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
         Debug.Log(message: $"Ticket Assigned : {assignment.Ip} : {assignment.Port}");
+
+        //매칭잡히고 표기하는 부분
+        matchResultText.text = "매칭이 잡혔습니다!";
 
         // 매칭 완료되면 대기 캔버스 숨기기
         if (waitingCanvas != null)

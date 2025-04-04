@@ -284,8 +284,6 @@ public class PlayerController : NetworkBehaviour
                     }
                 }
             }
-
-            // ✅ 서버의 ScoreManager에게 점수 추가 요청
             ScoreManager.Instance?.AddScore(clientId, appleCount, AppleScoreValue);
         }
     }
@@ -372,6 +370,7 @@ public class PlayerController : NetworkBehaviour
         {
             PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
+            //PlayerDataManager.Instance.RegisterPlayerProfileServerRpc(playerIcon);
            
 
 

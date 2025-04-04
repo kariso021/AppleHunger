@@ -18,7 +18,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private Slider timerSlider;
 //  타이머 슬라
     private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
-    private ulong myPlayerId;
+    private ulong myClientId;
 
     public static PlayerUI Instance { get; private set; }
 
@@ -49,18 +49,18 @@ public class PlayerUI : MonoBehaviour
     ///  `PlayerController`에서 받은 ID를 설정
     private void SetPlayerId(ulong clientId)
     {
+        myClientId = NetworkManager.Singleton.LocalClientId;
         //유저 이미지 프로필 업로드
         UploadProfileImage();
         //상대방 이미지 프로필 업로드
-        myPlayerId = clientId;
     }
 
     /// 서버에서 전달된 점수를 받아 UI 업데이트 (ClientRpc로 호출됨)
-    public static void UpdateScoreUI(ulong playerId, int newScore)
+    public void UpdateScoreUI(ulong clientId, int newScore)
     {
         if (Instance != null)
         {
-            Instance.SetScoreUI(playerId, newScore);
+            Instance.SetScoreUI(clientId, newScore);
         }
     }
 
@@ -68,7 +68,7 @@ public class PlayerUI : MonoBehaviour
     private void SetScoreUI(ulong playerId, int newScore)
     {
         //playerID 가 아니라 Client ID임 현재
-        Debug.Log($"[Client] SetScoreUI - PlayerID: {playerId}, New Score: {newScore}, MyPlayerID: {myPlayerId}");
+        Debug.Log($"[Client] SetScoreUI - PlayerID: {playerId}, New Score: {newScore}, MyClientID: {myClientId}");
 
         playerScores[playerId] = newScore;
         RefreshUI();
@@ -77,14 +77,14 @@ public class PlayerUI : MonoBehaviour
     // UI 갱신 (내 점수와 상대 점수 구분)
     private void RefreshUI()
     {
-        if (playerScores.ContainsKey(myPlayerId))
+        if (playerScores.ContainsKey(myClientId))
         {
-            myScoreText.text = $"My Score: {playerScores[myPlayerId]}";
+            myScoreText.text = $"My Score: {playerScores[myClientId]}";
         }
 
         foreach (var kvp in playerScores)
         {
-            if (kvp.Key != myPlayerId)
+            if (kvp.Key != myClientId)
             {
                 opponentScoreText.text = $"Opponent Score: {kvp.Value}";
                 break; // 상대방 점수 하나만 표시 (멀티플레이어일 경우 리스트화 가능)
@@ -109,6 +109,7 @@ public class PlayerUI : MonoBehaviour
         Debug.Log("프로필 이미지 경로 : " + ImagePath);
         AddressableManager.Instance.LoadImageFromGroup(ImagePath, Myprofileimage);
     }
+
 
    
 

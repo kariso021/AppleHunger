@@ -97,10 +97,53 @@ public class PlayerDataManager : NetworkBehaviour
 
 
 
-    //--------------------------------------------------------------------------------UI 관리하기 위한 아이디 식별자
-    
+    //--------------------------------------------------------------------------------UI 관리하기 위한 아이디 식별자public
+    [ServerRpc]
+    public void RegisterPlayerProfileServerRpc(string profileIcon, ServerRpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        if (clientId != NetworkManager.Singleton.LocalClientId)
+        {
+            PlayerUI.Instance.SetOpponentProfileImage(profileIcon);
+        }
 
+    }
 
+    public void RegisterPlayerProfile(ulong clientId, string profileIcon)
+    {
+        if (!IsServer) return;
+
+        clientIdToProfile[clientId] = profileIcon;
+        Debug.Log($"[Server] Registered ClientID {clientId} -> Profile {profileIcon}");
+    }
+
+    [ClientRpc]
+    public void SendOpponentProfileClientRpc(string profileIcon, ulong clientId)
+    {
+        Debug.Log($"📩 [ClientRpc] SendOpponentProfileClientRpc 호출됨");
+        Debug.Log($"    - 받은 profileIcon: {profileIcon}");
+        Debug.Log($"    - 전달된 clientId (이미지 주인): {clientId}");
+        Debug.Log($"    - LocalClientId (나 자신): {NetworkManager.Singleton.LocalClientId}");
+
+        if (NetworkManager.Singleton.LocalClientId != clientId) // 자신이면 무시
+        {
+            Debug.Log("✅ 내 이미지가 아니므로 상대방 이미지로 표시");
+            if (PlayerUI.Instance != null)
+            {
+                PlayerUI.Instance.SetOpponentProfileImage(profileIcon);
+            }
+            else
+            {
+                Debug.LogError("❌ PlayerUI.Instance가 null입니다. UI가 아직 생성되지 않았거나 등록이 안됐습니다.");
+            }
+        }
+        else
+        {
+            Debug.Log("❌ 내 이미지라서 무시");
+        }
+    }
 }
+
+
 
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class ScoreManager : NetworkBehaviour
@@ -14,6 +15,7 @@ public class ScoreManager : NetworkBehaviour
     [SerializeField] private float comboDuration = 2f; // 콤보 지속 시간
     [SerializeField] private float comboScoreMultiplier = 0.2f; // 콤보 점수 배율
     [SerializeField] private Dictionary<ulong , int> comboCounts= new Dictionary<ulong, int>(); // 콤보 점수 저장
+    [SerializeField] private int maxCombo = 5; // 최대 콤보 수
 
 
     private void Awake()
@@ -51,7 +53,7 @@ public class ScoreManager : NetworkBehaviour
         AddScore(clientId, appleCount, appleScoreValue);
     }
 
-    /// 점수 추가 (서버에서 실행)
+    /// 점수 추가 (서버에서 실행) -> 콤보점수 계산해서 추가한 버전
     public void AddScore(ulong ClientID, int appleCount, int appleScoreValue)
     {
         if (!IsServer) return;
@@ -63,9 +65,23 @@ public class ScoreManager : NetworkBehaviour
             playerScores[ClientID] = 0;
         }
 
+        if(!lastCollectTime.ContainsKey(ClientID) || now - lastCollectTime[ClientID] > comboDuration)
+    {
+            comboCounts[ClientID] = 1;
+        }
+    else
+        {
+            comboCounts[ClientID] = Mathf.Min(comboCounts.GetValueOrDefault(ClientID, 0) + 1, maxCombo);
+        }
+
+        lastCollectTime[ClientID] = now;
+
+
+
         int baseScore = appleCount * appleScoreValue;
         float multiplier = 1f + (comboCounts[ClientID] - 1) * comboScoreMultiplier;
         int finalScore = Mathf.FloorToInt(baseScore * multiplier);
+
 
         playerScores[ClientID] += finalScore;
 
@@ -74,12 +90,11 @@ public class ScoreManager : NetworkBehaviour
         UpdateScoreClientRpc(ClientID, playerScores[ClientID]);
     }
 
-    /// ✅ 점수를 클라이언트 UI에 반영 (ClientRpc)
     [ClientRpc]
     private void UpdateScoreClientRpc(ulong ClientID, int newScore)
     {
         Debug.Log($"[ClientRpc] UpdateScoreClientRpc - ClientID: {ClientID}, Score: {newScore}");
-        PlayerUI.UpdateScoreUI(ClientID, newScore);
+        PlayerUI.Instance.UpdateScoreUI(ClientID, newScore);
     }
 
     public Dictionary<ulong, int> GetScores()
