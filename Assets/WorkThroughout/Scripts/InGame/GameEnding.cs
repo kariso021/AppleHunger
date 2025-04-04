@@ -31,7 +31,21 @@ public class GameEnding : NetworkBehaviour
     /// 서버에서 게임 종료 처리
     private void HandleGameEnd()
     {
-       StartCoroutine(HandleGameEndRoutine());
+        DetermineWinner(out int winnerId, out int loserId, out int winnerRating, out int loserRating);
+
+        LastWinnerId = winnerId;
+        LastLoserId = loserId;
+
+        ShowGameOverScreenClientRpc(winnerId, loserId);
+
+        SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
+
+        NotifyClientsToFetchDataClientRpc();
+
+       
+        SceneManager.LoadScene("Lobby");
+
+        ShutdownServer();
     }
 
 
@@ -46,6 +60,12 @@ public class GameEnding : NetworkBehaviour
 
         var scores = ScoreManager.Instance.GetScores();
         var playerDataManager = PlayerDataManager.Instance;
+
+        if (scores.Count == 0)
+        {
+            Debug.LogWarning("❌ 플레이어가 없습니다.");
+            return;
+        }
 
         if (scores.Count == 1)
         {
@@ -93,25 +113,24 @@ public class GameEnding : NetworkBehaviour
 
     ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
 
-    private IEnumerator SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
+    private void SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
     {
         if (Managers == null)
         {
             Debug.Log("❌ Managers 참조가 없습니다");
-            yield break;
         }
 
         Debug.Log("서버에 승자 제출");
 
-        yield return Managers.AddMatchResult(winnerID, loserID);
+        Managers.AddMatchResult(winnerID, loserID);
 
         int winnerGold = 100 + UnityEngine.Random.Range(0, 91);
         int loserGold = UnityEngine.Random.Range(0, 91);
 
         int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
 
-        yield return Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta);
-        yield return Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta);
+        Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta);
+        Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta);
     }
 
 
@@ -171,27 +190,6 @@ public class GameEnding : NetworkBehaviour
     }
 
     //------------------------------------------------------------------------------------ DB로 결과 조정 순차적 진행을 위해 코루틴.
-
-    private IEnumerator HandleGameEndRoutine()
-    {
-        DetermineWinner(out int winnerId, out int loserId, out int winnerRating, out int loserRating);
-
-        LastWinnerId = winnerId;
-        LastLoserId = loserId;
-
-        ShowGameOverScreenClientRpc(winnerId, loserId);
-
-        yield return StartCoroutine(SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating));
-
-        NotifyClientsToFetchDataClientRpc();
-
-        yield return new WaitForSeconds(4f);
-        SceneManager.LoadScene("Lobby");
-
-        yield return new WaitForSeconds(1f);
-        ShutdownServer();
-    }
-
 
 
 
