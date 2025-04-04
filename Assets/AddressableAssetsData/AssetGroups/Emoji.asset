@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Emoji
+  m_EditorClassIdentifier: 
+  m_GroupName: Emoji
+  m_GUID: a718610dddc9a0d4ba3cd4b87647fb91
+  m_SerializeEntries:
+  - m_GUID: 174ab59ed96b058499b86ee745d892b9
+    m_Address: Emoji_302
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46cbd8cfc5b4c37448a7df8d17c93922
+    m_Address: Emoji_303
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86b16ecd4210fe74d88b7716b30645a4
+    m_Address: Emoji_301
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d3cff27e79db9342a31703d9aed82a3
+    m_Address: Emoji_304
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da3acdbdebc0a6240a88b0dac09135c7
+    m_Address: Emoji_305
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 8748890fc42df714e895a89db8fffd9e, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 949ebe2089a7a1b4f98fe2f3b5f8c46c, type: 2}
+    - {fileID: 11400000, guid: 9b5d8482b814607479e4598eb5a3d057, type: 2}

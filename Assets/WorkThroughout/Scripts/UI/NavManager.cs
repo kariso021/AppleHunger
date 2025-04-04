@@ -24,11 +24,4 @@ public class NavManager : MonoBehaviour
 
         PanelManager.Instance.ShowPanel(panelName);
     }
-
-    public static void LoadScene(string sceneName)
-    {
-        previousScene = SceneManager.GetActiveScene().name;
-        LoadingScene.nextScene = sceneName;
-        SceneManager.LoadScene("Loading");
-    }
 }

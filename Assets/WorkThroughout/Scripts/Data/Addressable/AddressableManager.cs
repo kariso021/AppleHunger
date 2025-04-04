@@ -18,6 +18,8 @@ public class AddressableManager : MonoBehaviour
     private AssetReferenceSprite[] iconSprites;
     [SerializeField]
     private AssetReferenceSprite[] boardsSprites;
+    [SerializeField]
+    private AssetReferenceSprite[] emojiSprites;
 
     // Binding
     [SerializeField]
@@ -129,6 +131,8 @@ public class AddressableManager : MonoBehaviour
             key = "icon_" + itemUniqueId;
         else if (itemUniqueId[0] == '2')
             key = "board_" + itemUniqueId;
+        else if (itemUniqueId[0] == '3')
+            key = "emoji_" + itemUniqueId;
 
         Addressables.LoadAssetAsync<Sprite>(key).Completed += (handle) =>
         {

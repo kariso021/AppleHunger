@@ -26755,6 +26755,7 @@ MonoBehaviour:
       Culture=neutral, PublicKeyToken=null
     m_SubObjectGUID: 
     m_EditorAssetChanged: 1
+  emojiSprites: []
   profileIcon: {fileID: 1936231110}
   profilePopupIcon: {fileID: 1808185866}
   rankProfilePopupIcon: {fileID: 1456708324}
@@ -27106,6 +27107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 643e4ab8d06ca04479dc117c62cdfe6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isDummy: 0
   player:
     playerId: 0
     deviceId: 

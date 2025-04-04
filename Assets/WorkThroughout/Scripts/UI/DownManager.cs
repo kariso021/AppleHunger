@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -17,55 +16,52 @@ public class DownManager : MonoBehaviour
     public TMP_Text sizeInfoText;
     public Slider downSlider;
     public TMP_Text downValText;
+
     [Header("Label")]
     public AssetLabelReference iconLabel;
     public AssetLabelReference boardLabel;
+    public AssetLabelReference emojiLabel;
 
     private long patchSize;
-    private Dictionary<string,int> patchMap = new Dictionary<string,int>();
-    // Start is called before the first frame update
+    private Dictionary<string, int> patchMap = new Dictionary<string, int>();
+
     private void Start()
     {
-        StartCoroutine(InitAddresaable());
+        StartCoroutine(InitAddressable());
     }
 
-    IEnumerator InitAddresaable()
+    IEnumerator InitAddressable()
     {
         var init = Addressables.InitializeAsync();
         yield return init;
     }
+
     #region Check Update
     public IEnumerator CheckUpdateFiles()
     {
-        var labels = new List<string>() { iconLabel.labelString, boardLabel.labelString };
-        patchSize = 0L;
+        var labels = new List<string>
+        {
+            iconLabel.labelString,
+            boardLabel.labelString,
+            emojiLabel.labelString
+        };
 
-        Debug.Log($"[Addressables] Current BuildTarget: {Application.platform}");
-        Debug.Log($"[Addressables] RemoteLoadPath: {Addressables.RuntimePath}");
+        patchSize = 0L;
 
         foreach (var label in labels)
         {
-            if (string.IsNullOrEmpty(label))
+            if (string.IsNullOrEmpty(label)) continue;
+
+            var handle = Addressables.GetDownloadSizeAsync(label);
+            yield return handle;
+
+            if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result > 0)
             {
-                Debug.LogError($"[Addressables] 라벨이 존재하지 않음: {label}");
-                continue;
+                patchSize += handle.Result;
             }
 
-            var handel = Addressables.GetDownloadSizeAsync(label);
-            yield return handel;
-
-            if (handel.Status == AsyncOperationStatus.Failed)
-            {
-                Debug.LogError($"[Addressables] 다운로드 크기 확인 실패: {label}");
-                continue;
-            }
-
-            Debug.Log($"[Addressables] {label} 다운로드 크기: {handel.Result} bytes");
-
-            patchSize += handel.Result;
+            Addressables.Release(handle);
         }
-
-        Debug.Log($"[Addressables] 최종 패치 크기: {patchSize} bytes");
 
         if (patchSize > 0)
         {
@@ -75,91 +71,97 @@ public class DownManager : MonoBehaviour
         }
         else
         {
-            downValText.text = " 100%";
             downSlider.value = 1f;
+            downValText.text = "100%";
             yield return new WaitForSeconds(2f);
-            NavManager.LoadScene("Lobby");
+            SceneManager.LoadScene("Lobby");
         }
     }
 
-
-    private string GetFileSize(long byteCnt)
+    private string GetFileSize(long byteCount)
     {
-        string size = "0 Bytes";
-
-        if(byteCnt >= 1073741824.0 )
-        {
-            size = string.Format("{0:##.##}", byteCnt / 1073741824.0) + " GB";
-        }
-        else if (byteCnt >= 1048576.0)
-        {
-            size = string.Format("{0:##.##}", byteCnt / 1048576.0) + " MB";
-        }
-        else if (byteCnt >= 1024.0)
-        {
-            size = string.Format("{0:##.##}", byteCnt / 1024.0) + " KB";
-        }
-        else if(byteCnt > 0 && byteCnt < 1024.0)
-        {
-            size = byteCnt.ToString() + " Bytes";
-        }
-        return size;
+        if (byteCount >= 1073741824) return $"{byteCount / 1073741824.0:0.##} GB";
+        if (byteCount >= 1048576) return $"{byteCount / 1048576.0:0.##} MB";
+        if (byteCount >= 1024) return $"{byteCount / 1024.0:0.##} KB";
+        return $"{byteCount} Bytes";
     }
     #endregion
-    #region Down
-    public void Button_DownLoad()
+
+    #region Download
+    public void Button_Download()
     {
         StartCoroutine(PatchFiles());
     }
 
     IEnumerator PatchFiles()
     {
-        var labels = new List<string>() { iconLabel.labelString, boardLabel.labelString };
-
+        var labels = new List<string> { iconLabel.labelString, boardLabel.labelString };
 
         foreach (var label in labels)
         {
-            var handel = Addressables.GetDownloadSizeAsync(label);
+            var sizeHandle = Addressables.GetDownloadSizeAsync(label);
+            yield return sizeHandle;
 
-            yield return handel;
-
-            if(handel.Result != decimal.Zero)
+            if (sizeHandle.Status == AsyncOperationStatus.Succeeded && sizeHandle.Result > 0)
             {
-                StartCoroutine(DownLoadLabel(label));
+                yield return StartCoroutine(DownloadLabel(label));
             }
 
+            Addressables.Release(sizeHandle);
         }
-
-        Debug.Log($"PATCHSIZE : {patchSize}");
 
         yield return CheckDownload();
     }
 
-    IEnumerator DownLoadLabel(string label)
+    IEnumerator DownloadLabel(string label)
     {
-        patchMap.Add(label, 0);
+        patchMap[label] = 0;
 
-        var handle = Addressables.DownloadDependenciesAsync(label, true);
+        int retryCount = 0;
+        int maxRetryCount = 3;
 
-        while (!handle.IsDone)
+        while (retryCount < maxRetryCount)
         {
-            patchMap[label] = (int)handle.GetDownloadStatus().DownloadedBytes;
-            yield return new WaitForEndOfFrame();
+            var handle = Addressables.DownloadDependenciesAsync(label, true);
+
+            while (!handle.IsDone)
+            {
+                if (handle.IsValid())
+                {
+                    var status = handle.GetDownloadStatus();
+                    patchMap[label] = (int)status.DownloadedBytes;
+
+                }
+
+                yield return null;
+            }
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                patchMap[label] = (int)handle.GetDownloadStatus().TotalBytes;
+                Addressables.Release(handle);
+                yield break; // ✅ 다운로드 성공 → 코루틴 종료
+            }
+            else
+            {
+                Debug.LogWarning($"[Addressables] 다운로드 실패 - 재시도 {retryCount + 1}/{maxRetryCount} : {label}");
+                Addressables.Release(handle);
+                retryCount++;
+
+                yield return new WaitForSeconds(1f); // 재시도 대기시간
+            }
         }
 
-        patchMap[label] = (int)handle.GetDownloadStatus().TotalBytes;
-        Addressables.Release(handle);
+        Debug.LogError($"[Addressables] 다운로드 3회 재시도 실패: {label}");
     }
+
 
     IEnumerator CheckDownload()
     {
-        var total = 0f;
         downValText.text = "0 %";
 
-        // 🔹 1️⃣ patchSize == 0 체크하여 division by zero 방지
         if (patchSize <= 0)
         {
-            Debug.LogError("[Addressables] patchSize 값이 0이므로 다운로드 진행 불가");
             downSlider.value = 1f;
             downValText.text = "100%";
             yield break;
@@ -167,32 +169,26 @@ public class DownManager : MonoBehaviour
 
         while (true)
         {
-            total = patchMap.Sum(tmp => tmp.Value);
+            float total = patchMap.Sum(kvp => kvp.Value);
 
-            // 🔹 2️⃣ patchMap 값이 음수인지 확인
             if (patchMap.Any(kvp => kvp.Value < 0))
             {
-                Debug.LogError("[Addressables] patchMap에 음수 값이 포함됨!");
+                Debug.LogError("[Addressables] patchMap에 음수 값 포함!");
                 yield break;
             }
 
-            if (patchSize > 0)
-            {
-                downSlider.value = Mathf.Clamp01(total / (float)patchSize);
-                downValText.text = $"{(int)(downSlider.value * 100)} %";
-            }
+            downSlider.value = Mathf.Clamp01(total / patchSize);
+            downValText.text = $"{(int)(downSlider.value * 100)} %";
 
-            Debug.Log($"[Addressables] 다운로드 진행률: {downSlider.value * 100}% (Total: {total} / PatchSize: {patchSize})");
-
-            if (total >= patchSize) // ✅ >= 조건으로 변경하여 확실하게 체크
+            if (total >= patchSize)
             {
-                downValText.text = "100%";
                 downSlider.value = 1f;
-                NavManager.LoadScene("Lobby");
-                break;
+                downValText.text = "100%";
+                SceneManager.LoadScene("Lobby");
+                yield break;
             }
 
-            yield return new WaitForEndOfFrame();
+            yield return null;
         }
     }
 
@@ -201,7 +197,7 @@ public class DownManager : MonoBehaviour
         waitMessage.SetActive(true);
         downMessage.SetActive(false);
 
-        StartCoroutine(InitAddresaable());
+        StartCoroutine(InitAddressable());
         StartCoroutine(CheckUpdateFiles());
     }
     #endregion

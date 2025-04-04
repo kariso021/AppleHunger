@@ -24,7 +24,7 @@ public class NicknameManager : MonoBehaviour
         forbiddenWords = ForbiddenWordsLoader.LoadForbiddenWords();
     }
 
-    
+
 
     public void OnClick_ChangeNickname()
     {
@@ -45,11 +45,30 @@ public class NicknameManager : MonoBehaviour
         isChangingNickname = true;
         confirmButton.interactable = false;
 
-        PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
+        Debug.Log($"nk 실행은 되고 있는가?");
 
+        // 닉네임 중복 확인
+        bool isDuplicate = false;
+        yield return StartCoroutine(ServerToAPIManager.Instance.CheckNicknameDuplicate(newNickname, (result) => {
+            isDuplicate = result;
+        }));
+
+        Debug.Log($"nk 닉네임은 중복인가? {isDuplicate}");
+
+        if (isDuplicate)
+        {
+            Debug.Log("nk 사용중");
+            warningText.text = "이미 사용 중인 닉네임입니다.";
+            isChangingNickname = false;
+            confirmButton.interactable = true;
+            yield break;
+        }
+
+        Debug.Log("nk 사용 안하는 중");
+        // ✅ 닉네임 변경 요청
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
         yield return StartCoroutine(ServerToAPIManager.Instance.UpdateNicknameOnServer(newNickname));
         yield return new WaitForSeconds(0.5f);
-
         PopupManager.Instance.ClosePopup();
 
         isChangingNickname = false;

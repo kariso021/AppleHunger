@@ -626,6 +626,8 @@ MonoBehaviour:
     m_LabelString: Icons
   boardLabel:
     m_LabelString: Boards
+  emojiLabel:
+    m_LabelString: Emoji
 --- !u!4 &466983181
 Transform:
   m_ObjectHideFlags: 0

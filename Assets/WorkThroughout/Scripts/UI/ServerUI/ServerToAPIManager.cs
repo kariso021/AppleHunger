@@ -73,7 +73,6 @@ public class ServerToAPIManager : MonoBehaviour
         ClientNetworkManager.Instance.TargetReceivePlayerDataClientRpc(jsonData);
     }
 
-
     public IEnumerator DeletePlayer(int playerId)
     {
         string url = $"{apiBaseUrl}/players/{playerId}";
@@ -146,28 +145,6 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
-    //public IEnumerator GetPlayerCurrency()
-    //{
-    //    string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
-    //    using (UnityWebRequest request = UnityWebRequest.Get(url))
-    //    {
-    //        yield return request.SendWebRequest();
-
-    //        if (request.result == UnityWebRequest.Result.Success)
-    //        {
-    //            string jsonData = request.downloadHandler.text;
-    //            TargetReceivePlayerDataClientRpc(jsonData);
-    //        }
-    //        else
-    //        {
-    //            Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
-    //            Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
-    //            if (isFirstTime)
-    //                yield return StartCoroutine(AddPlayer());
-    //        }
-    //    }
-    //}
-
     public IEnumerator UpdateNicknameOnServer(string playerName)
     {
         string url = $"{apiBaseUrl}/players/updateNickname";
@@ -203,6 +180,26 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
+    public IEnumerator CheckNicknameDuplicate(string nickname, Action<bool> callback)
+    {
+        string url = $"{apiBaseUrl}/players/checkNickname?playerName={UnityWebRequest.EscapeURL(nickname)}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                var response = JsonUtility.FromJson<NicknameDuplicateResponse>(request.downloadHandler.text);
+                callback?.Invoke(response.isDuplicate);
+            }
+            else
+            {
+                Debug.LogError($"❌ 닉네임 중복 확인 실패: {request.error}");
+                callback?.Invoke(false); // 실패 시 기본값 false
+            }
+        }
+    }
     #endregion
 
     #region Player MatchRecords Region
@@ -613,5 +610,10 @@ public class ServerToAPIManager : MonoBehaviour
             playerId = id;
             playerName = nickname;
         }
+    }
+    [System.Serializable]
+    public class NicknameDuplicateResponse
+    {
+        public bool isDuplicate;
     }
 }

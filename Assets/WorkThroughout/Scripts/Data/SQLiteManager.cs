@@ -17,6 +17,9 @@ public class SQLiteManager : MonoBehaviour
     private static SQLiteManager instance;
     public static SQLiteManager Instance => instance;
 
+    // =========================== 나중에 꼭 지워야 한다 ===============================/
+    public bool isDummy = false;
+    // =================================================================================
     private string dbName = "game_data.db";
     private string dbPath;
 
@@ -51,7 +54,9 @@ public class SQLiteManager : MonoBehaviour
     }
     private IEnumerator InitializeDatabase()
     {
-        string rawDbPath = Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/");
+        // =========================== 나중에 꼭 지워야 한다 ===============================/
+        string rawDbPath = !isDummy ? Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/") : Path.Combine(Application.persistentDataPath, "game_data_dummy.db").Replace("\\", "/");
+        // =================================================================================
         dbPath = "URI=file:" + rawDbPath;  // SQLite 연결을 위해 여전히 사용
         Debug.Log($"📂 SQLite DB 경로: {dbPath}");
 
