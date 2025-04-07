@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6587644144917731227}
   - component: {fileID: 2185043832979475786}
   - component: {fileID: 538772400157037283}
+  - component: {fileID: 6027587535171583320}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -117,6 +118,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   networkDragBox: {fileID: 1213112706186900572}
+--- !u!114 &6027587535171583320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314647617582520290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 762d4c02b006dc549ab8292446907881, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1213112706186900572
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,7 +251,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1920, y: 1000}
+  m_SizeDelta: {x: 1080, y: 1600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &68019855028080036
 CanvasRenderer:

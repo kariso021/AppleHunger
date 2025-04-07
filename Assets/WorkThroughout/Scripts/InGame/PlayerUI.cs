@@ -120,4 +120,7 @@ public class PlayerUI : MonoBehaviour
         Debug.Log($"[PlayerUI] 상대방 아이콘 로딩: {iconKey}");
         AddressableManager.Instance.LoadImageFromGroup(iconKey, Opponentprofileimage);
     }
+
+
+
 }

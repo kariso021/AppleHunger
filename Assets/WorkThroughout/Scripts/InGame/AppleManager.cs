@@ -26,8 +26,8 @@ public class AppleManager : NetworkBehaviour
 
     [Header("Grid Settings")]
     public GameObject applePrefab;
-    public int gridWidth = 10;
-    public int gridHeight = 10;
+    public int gridWidth = 5;
+    public int gridHeight = 6;
     public float spacing = 1.1f;
 
     private Apple[,] appleGrid;

@@ -104,17 +104,13 @@ public class PlayerController : NetworkBehaviour
 
         if (!IsOwner) return;
 
-        StartCoroutine(WaitAndRegisterPlayer());
-
+        // 등록 로직은 PlayerRegister가 자체적으로 처리
         OnPlayerInitialized?.Invoke(OwnerClientId);
+
         if (localDragBox != null)
         {
             localDragBoxRenderer = localDragBox.GetComponent<SpriteRenderer>();
             localDragBoxRenderer.enabled = true;
-        }
-        else
-        {
-            Debug.LogError("🚨 Local DragBox가 씬에 존재하지 않습니다!");
         }
     }
 
@@ -325,62 +321,6 @@ public class PlayerController : NetworkBehaviour
 
         yield return new WaitForSeconds(1.0f); // 1초간 드래그 제한 유지
         isDragRestricted = false; // 드래그 제한 해제
-    }
-
-
-
-    private IEnumerator WaitAndRegisterPlayer()
-    {
-        // 최대 5초까지만 기다리도록 설정 (무한루프 방지)
-        float timeout = 5f;
-        float timer = 0f;
-
-        while ((PlayerDataManager.Instance == null) && timer < timeout)
-        {
-            Debug.Log("⏳ PlayerDataManager.Instance 로딩 대기 중...");
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        // 타임아웃 발생 시 예외 처리
-        if (PlayerDataManager.Instance == null || !PlayerDataManager.Instance.IsSpawned)
-        {
-            Debug.LogError("❌ PlayerDataManager가 준비되지 않아 등록을 중단합니다.");
-            yield break;
-        }
-
-        // SQLiteManager 체크
-        int playerId = 1;
-        int rating = 1000; // 기본값
-        string playerIcon = "101"; // 기본값
-
-        if (SQLiteManager.Instance?.player != null)
-        {
-            playerId = SQLiteManager.Instance.player.playerId;
-            rating = SQLiteManager.Instance.player.rating;
-            playerIcon = SQLiteManager.Instance.player.profileIcon; 
-        }
-        else
-        {
-            Debug.LogWarning("SQL lite Null -> 기본값 등록");
-        }
-
-        // 최종 체크 후 ServerRpc 호출
-        try
-        {
-            PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
-            PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
-            //PlayerDataManager.Instance.RegisterPlayerProfileServerRpc(playerIcon);
-           
-
-
-
-            Debug.Log($"playerId {playerId}, rating {rating} 등록 성공!");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"ServerRpc 호출 중 예외 발생: {ex}");
-        }
     }
 
 
