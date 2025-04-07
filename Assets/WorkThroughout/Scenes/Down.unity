@@ -2489,7 +2489,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 466983180}
         m_TargetAssemblyTypeName: DownManager, Assembly-CSharp
-        m_MethodName: Button_DownLoad
+        m_MethodName: Button_Download
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

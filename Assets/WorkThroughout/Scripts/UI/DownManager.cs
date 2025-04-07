@@ -23,44 +23,84 @@ public class DownManager : MonoBehaviour
     public AssetLabelReference emojiLabel;
 
     private long patchSize;
-    private Dictionary<string, int> patchMap = new Dictionary<string, int>();
+    private Dictionary<string, long> patchMap = new Dictionary<string, long>();
+    private bool isInitialized = false;
 
-    private void Start()
+    private void Awake()
     {
         StartCoroutine(InitAddressable());
     }
 
     IEnumerator InitAddressable()
     {
-        var init = Addressables.InitializeAsync();
-        yield return init;
-    }
+        bool done = false;
 
-    #region Check Update
-    public IEnumerator CheckUpdateFiles()
-    {
-        var labels = new List<string>
+        Addressables.InitializeAsync().Completed += (handle) =>
         {
-            iconLabel.labelString,
-            boardLabel.labelString,
-            emojiLabel.labelString
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                Debug.Log("✅ Addressables 초기화 성공");
+                isInitialized = true;
+            }
+            else
+            {
+                Debug.LogError("❌ Addressables 초기화 실패");
+                if (handle.OperationException != null)
+                    Debug.LogError($"예외: {handle.OperationException.Message}");
+            }
+
+            Addressables.Release(handle);
+            done = true;
         };
 
-        patchSize = 0L;
+        while (!done)
+            yield return null;
+    }
+
+    public void OnDownloadCheck()
+    {
+        waitMessage.SetActive(true);
+        downMessage.SetActive(false);
+        StartCoroutine(EnsureInitAndCheckUpdate());
+    }
+
+    IEnumerator EnsureInitAndCheckUpdate()
+    {
+        while (!isInitialized)
+        {
+            Debug.Log("⏳ Addressables 초기화 대기 중...");
+            yield return null;
+        }
+
+        yield return CheckUpdateFiles();
+    }
+
+    public IEnumerator CheckUpdateFiles()
+    {
+        var labels = new List<string> { iconLabel.labelString, boardLabel.labelString, emojiLabel.labelString };
+
+        patchSize = 0;
+        patchMap.Clear();
+        bool checkDone = false;
 
         foreach (var label in labels)
         {
             if (string.IsNullOrEmpty(label)) continue;
 
-            var handle = Addressables.GetDownloadSizeAsync(label);
-            yield return handle;
-
-            if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result > 0)
+            checkDone = false;
+            Addressables.GetDownloadSizeAsync(label).Completed += (handle) =>
             {
-                patchSize += handle.Result;
-            }
+                if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result > 0)
+                {
+                    patchSize += handle.Result;
+                }
 
-            Addressables.Release(handle);
+                Addressables.Release(handle);
+                checkDone = true;
+            };
+
+            while (!checkDone)
+                yield return null;
         }
 
         if (patchSize > 0)
@@ -73,8 +113,90 @@ public class DownManager : MonoBehaviour
         {
             downSlider.value = 1f;
             downValText.text = "100%";
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1f);
             SceneManager.LoadScene("Lobby");
+        }
+    }
+
+    public void Button_Download()
+    {
+        StartCoroutine(DownloadAll());
+    }
+
+    IEnumerator DownloadAll()
+    {
+        var labels = new List<string> { iconLabel.labelString, boardLabel.labelString, emojiLabel.labelString };
+        StartCoroutine(UpdateProgress());
+
+        foreach (var label in labels)
+        {
+            yield return DownloadWithRetry(label, 3);
+        }
+
+        SceneManager.LoadScene("Lobby");
+    }
+
+    IEnumerator DownloadWithRetry(string label, int maxRetry)
+    {
+        patchMap[label] = 0;
+        int attempt = 0;
+        bool success = false;
+
+        while (attempt < maxRetry && !success)
+        {
+            bool downloadDone = false;
+
+            Addressables.DownloadDependenciesAsync(label, true).Completed += (handle) =>
+            {
+                if (handle.Status == AsyncOperationStatus.Succeeded)
+                {
+                    patchMap[label] = handle.GetDownloadStatus().TotalBytes;
+                    Debug.Log($"✅ 다운로드 성공: {label}");
+                    success = true;
+                }
+                else
+                {
+                    Debug.LogWarning($"❗ 다운로드 실패: {label} (시도 {attempt + 1}/{maxRetry})");
+                }
+
+                Addressables.Release(handle);
+                downloadDone = true;
+            };
+
+            while (!downloadDone)
+                yield return null;
+
+            if (!success)
+            {
+                attempt++;
+                yield return new WaitForSeconds(1f);
+            }
+        }
+
+        if (!success)
+        {
+            Debug.LogError($"❌ {label} 다운로드 실패 - 최대 재시도 도달");
+        }
+    }
+
+    IEnumerator UpdateProgress()
+    {
+        downValText.text = "0%";
+
+        while (true)
+        {
+            long totalDownloaded = patchMap.Values.Sum();
+            downSlider.value = Mathf.Clamp01(totalDownloaded / (float)patchSize);
+            downValText.text = $"{(int)(downSlider.value * 100)}%";
+
+            if (totalDownloaded >= patchSize)
+            {
+                downSlider.value = 1f;
+                downValText.text = "100%";
+                yield break;
+            }
+
+            yield return null;
         }
     }
 
@@ -85,120 +207,4 @@ public class DownManager : MonoBehaviour
         if (byteCount >= 1024) return $"{byteCount / 1024.0:0.##} KB";
         return $"{byteCount} Bytes";
     }
-    #endregion
-
-    #region Download
-    public void Button_Download()
-    {
-        StartCoroutine(PatchFiles());
-    }
-
-    IEnumerator PatchFiles()
-    {
-        var labels = new List<string> { iconLabel.labelString, boardLabel.labelString };
-
-        foreach (var label in labels)
-        {
-            var sizeHandle = Addressables.GetDownloadSizeAsync(label);
-            yield return sizeHandle;
-
-            if (sizeHandle.Status == AsyncOperationStatus.Succeeded && sizeHandle.Result > 0)
-            {
-                yield return StartCoroutine(DownloadLabel(label));
-            }
-
-            Addressables.Release(sizeHandle);
-        }
-
-        yield return CheckDownload();
-    }
-
-    IEnumerator DownloadLabel(string label)
-    {
-        patchMap[label] = 0;
-
-        int retryCount = 0;
-        int maxRetryCount = 3;
-
-        while (retryCount < maxRetryCount)
-        {
-            var handle = Addressables.DownloadDependenciesAsync(label, true);
-
-            while (!handle.IsDone)
-            {
-                if (handle.IsValid())
-                {
-                    var status = handle.GetDownloadStatus();
-                    patchMap[label] = (int)status.DownloadedBytes;
-
-                }
-
-                yield return null;
-            }
-
-            if (handle.Status == AsyncOperationStatus.Succeeded)
-            {
-                patchMap[label] = (int)handle.GetDownloadStatus().TotalBytes;
-                Addressables.Release(handle);
-                yield break; // ✅ 다운로드 성공 → 코루틴 종료
-            }
-            else
-            {
-                Debug.LogWarning($"[Addressables] 다운로드 실패 - 재시도 {retryCount + 1}/{maxRetryCount} : {label}");
-                Addressables.Release(handle);
-                retryCount++;
-
-                yield return new WaitForSeconds(1f); // 재시도 대기시간
-            }
-        }
-
-        Debug.LogError($"[Addressables] 다운로드 3회 재시도 실패: {label}");
-    }
-
-
-    IEnumerator CheckDownload()
-    {
-        downValText.text = "0 %";
-
-        if (patchSize <= 0)
-        {
-            downSlider.value = 1f;
-            downValText.text = "100%";
-            yield break;
-        }
-
-        while (true)
-        {
-            float total = patchMap.Sum(kvp => kvp.Value);
-
-            if (patchMap.Any(kvp => kvp.Value < 0))
-            {
-                Debug.LogError("[Addressables] patchMap에 음수 값 포함!");
-                yield break;
-            }
-
-            downSlider.value = Mathf.Clamp01(total / patchSize);
-            downValText.text = $"{(int)(downSlider.value * 100)} %";
-
-            if (total >= patchSize)
-            {
-                downSlider.value = 1f;
-                downValText.text = "100%";
-                SceneManager.LoadScene("Lobby");
-                yield break;
-            }
-
-            yield return null;
-        }
-    }
-
-    public void OnDownloadCheck()
-    {
-        waitMessage.SetActive(true);
-        downMessage.SetActive(false);
-
-        StartCoroutine(InitAddressable());
-        StartCoroutine(CheckUpdateFiles());
-    }
-    #endregion
 }
