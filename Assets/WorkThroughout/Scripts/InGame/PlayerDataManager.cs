@@ -39,12 +39,12 @@ public class PlayerDataManager : NetworkBehaviour
 
     private void OnEnable()
     {
-        PlayerDataManager.OnPlayerFullyRegistered += HandlePlayerRegistered;
+        OnPlayerFullyRegistered += HandlePlayerRegistered;
     }
 
     private void OnDisable()
     {
-        PlayerDataManager.OnPlayerFullyRegistered -= HandlePlayerRegistered;
+        OnPlayerFullyRegistered -= HandlePlayerRegistered;
     }
 
 
@@ -116,10 +116,12 @@ public class PlayerDataManager : NetworkBehaviour
 
 
     //--------------------------------------------------------------------------------UI 관리하기 위한 아이디 식별자public
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void RegisterPlayerProfileServerRpc(string profileIcon, ServerRpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
+        Debug.Log("프로필 등록부분 서버부분에서 작동");
+        RegisterPlayerProfile(clientId, profileIcon);
         if (clientId != NetworkManager.Singleton.LocalClientId)
         {
             PlayerUI.Instance.SetOpponentProfileImage(profileIcon);
@@ -138,7 +140,7 @@ public class PlayerDataManager : NetworkBehaviour
    
 
 
-    //--------------------------------------------------------------------------------- 새로운 시도
+    //--------------------------------------------------------------------------------- notifyplayer Ready 부분
 
     [ServerRpc(RequireOwnership = false)]
     public void NotifyPlayerReadyServerRpc(ServerRpcParams rpcParams = default)
@@ -160,13 +162,17 @@ public class PlayerDataManager : NetworkBehaviour
         }
     }
 
-
+    //여기서 보내는 id 
     private void HandlePlayerRegistered(ulong clientId)
     {
         Debug.Log($"🎯 서버 이벤트 발생 - 등록된 클라이언트: {clientId}");
 
-        // 예시: 특정 조건이 되면 ClientRpc 호출
-        SendOpponentProfileClientRpc("102", clientId);
+
+        string icon = clientIdToProfile[clientId];
+        Debug.Log($"{icon}");
+
+
+        SendOpponentProfileClientRpc(icon, clientId);
     }
 
 

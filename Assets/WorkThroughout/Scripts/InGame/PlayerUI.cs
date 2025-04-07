@@ -121,6 +121,11 @@ public class PlayerUI : MonoBehaviour
         AddressableManager.Instance.LoadImageFromGroup(iconKey, Opponentprofileimage);
     }
 
+    public void SetOpponentNickname(string nickname)
+    {
+        string TempNickname = SQLiteManager.Instance.player.playerName;
+    }
+
 
 
 }
