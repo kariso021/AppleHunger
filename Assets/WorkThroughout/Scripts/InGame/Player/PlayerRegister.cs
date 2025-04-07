@@ -35,12 +35,15 @@ public class PlayerRegister : NetworkBehaviour
         int playerId = 1;
         int rating = 1000;
         string profileIcon = "101";
+        string nickName = "Player";
 
         if (SQLiteManager.Instance?.player != null)
         {
             playerId = SQLiteManager.Instance.player.playerId;
             rating = SQLiteManager.Instance.player.rating;
             profileIcon = SQLiteManager.Instance.player.profileIcon;
+            nickName = SQLiteManager.Instance.player.playerName;
+
         }
         else
         {
@@ -51,7 +54,9 @@ public class PlayerRegister : NetworkBehaviour
         {
             PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
+            PlayerDataManager.Instance.RegisterPlayerNickNameServerRpc(nickName);
             PlayerDataManager.Instance.RegisterPlayerProfileServerRpc(profileIcon);
+
 
             Debug.Log($"✅ Player 등록 완료 - ID: {playerId}, Rating: {rating}, Icon: {profileIcon}");
 

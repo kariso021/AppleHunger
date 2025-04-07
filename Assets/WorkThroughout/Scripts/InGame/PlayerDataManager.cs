@@ -11,12 +11,12 @@ public class PlayerDataManager : NetworkBehaviour
 
     private Dictionary<ulong, int> clientIdToNumber = new Dictionary<ulong, int>();
     private Dictionary<ulong, int> clientIdToRating = new Dictionary<ulong, int>();
-    private Dictionary<ulong, string> clientIdToProfile = new Dictionary<ulong, string>();
+    private Dictionary<ulong, string> clientIdToIcon = new Dictionary<ulong, string>();
+    private Dictionary<ulong, string> clientIdToNickname = new Dictionary<ulong, string>();
 
     private HashSet<ulong> readyClientIds = new HashSet<ulong>();
 
-    // Register완료형 변수
-    public static event Action<ulong> OnPlayerFullyRegistered;
+
 
 
     public Dictionary<ulong, int> GetAllMappings()
@@ -35,16 +35,6 @@ public class PlayerDataManager : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-    }
-
-    private void OnEnable()
-    {
-        OnPlayerFullyRegistered += HandlePlayerRegistered;
-    }
-
-    private void OnDisable()
-    {
-        OnPlayerFullyRegistered -= HandlePlayerRegistered;
     }
 
 
@@ -107,7 +97,7 @@ public class PlayerDataManager : NetworkBehaviour
 
     public string GetIconNumberFromClientID(ulong clientId)
     {
-        return clientIdToProfile.TryGetValue(clientId, out var IconNumber) ? IconNumber : "0";
+        return clientIdToIcon.TryGetValue(clientId, out var IconNumber) ? IconNumber : "0";
     }
 
 
@@ -121,21 +111,41 @@ public class PlayerDataManager : NetworkBehaviour
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
         Debug.Log("프로필 등록부분 서버부분에서 작동");
-        RegisterPlayerProfile(clientId, profileIcon);
+        RegisterPlayerIcon(clientId, profileIcon);
         if (clientId != NetworkManager.Singleton.LocalClientId)
         {
-            PlayerUI.Instance.SetOpponentProfileImage(profileIcon);
+            PlayerUI.Instance.SetOpponentIconImage(profileIcon);
         }
 
     }
 
-    public void RegisterPlayerProfile(ulong clientId, string profileIcon)
+    public void RegisterPlayerIcon(ulong clientId, string profileIcon)
     {
         if (!IsServer) return;
 
-        clientIdToProfile[clientId] = profileIcon;
+        clientIdToIcon[clientId] = profileIcon;
         Debug.Log($"[Server] Registered ClientID {clientId} -> Profile {profileIcon}");
     }
+
+
+    //---------------------------------------------------------------------------------------------
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterPlayerNickNameServerRpc(string nickName, ServerRpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        RegisterPlayerNickName(clientId, nickName);
+    }
+
+
+
+    public void RegisterPlayerNickName(ulong clientId, string nickName)
+    {
+        clientIdToNickname[clientId] = nickName;
+    }
+
+
+
 
    
 
@@ -147,32 +157,45 @@ public class PlayerDataManager : NetworkBehaviour
     {
         ulong senderClientId = rpcParams.Receive.SenderClientId;
 
-        Debug.Log($"✅ 클라이언트 {senderClientId} 준비 완료, 이벤트 발행!");
-        OnPlayerFullyRegistered?.Invoke(senderClientId);
+        if(!readyClientIds.Contains(senderClientId))
+        {
+            readyClientIds.Add(senderClientId);
+        }
+
+
+        if(readyClientIds.Count == 2)
+        {
+            Debug.Log("모든 플레이어가 준비 완료됨. 상대방 데이터 동기화 시작");
+            SyncAllOpponentDataToEachClient();
+        }
     }
 
+
+    private void SyncAllOpponentDataToEachClient()
+    {
+        foreach(var clientid in readyClientIds)
+        {
+            string icon = clientIdToIcon[clientid];
+            string nickname = clientIdToNickname[clientid];
+            int rating = clientIdToRating[clientid];
+
+            SendOpponentProfileClientRpc(icon, nickname, rating, clientid);
+        }
+    }
+
+
+
     [ClientRpc]
-    public void SendOpponentProfileClientRpc(string profileIcon, ulong clientId, ClientRpcParams rpcParams = default)
+    public void SendOpponentProfileClientRpc(string profileIcon,string nickName, int rating, ulong clientId, ClientRpcParams rpcParams = default)
     {
 
         Debug.Log("Client RPC 발생함");
         if (NetworkManager.Singleton.LocalClientId != clientId)
         {
-            PlayerUI.Instance?.SetOpponentProfileImage(profileIcon);
+            PlayerUI.Instance?.SetOpponentIconImage(profileIcon);
+            PlayerUI.Instance?.SetOpponentNickName(nickName);
+            PlayerUI.Instance?.SetOpponentRating(rating);
         }
-    }
-
-    //여기서 보내는 id 
-    private void HandlePlayerRegistered(ulong clientId)
-    {
-        Debug.Log($"🎯 서버 이벤트 발생 - 등록된 클라이언트: {clientId}");
-
-
-        string icon = clientIdToProfile[clientId];
-        Debug.Log($"{icon}");
-
-
-        SendOpponentProfileClientRpc(icon, clientId);
     }
 
 

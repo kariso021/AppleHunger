@@ -16,6 +16,15 @@ public class PlayerUI : MonoBehaviour
 
     [Header("Timer UI")]
     [SerializeField] private Slider timerSlider;
+
+    [Header("NickName UI")]
+    [SerializeField] private TextMeshProUGUI myNicknameText;
+    [SerializeField] private TextMeshProUGUI opponentNicknameText;
+
+    [Header("Rating UI")]
+    [SerializeField] private TextMeshProUGUI myRatingText;
+    [SerializeField] private TextMeshProUGUI opponentRatingText;
+
 //  타이머 슬라
     private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
     private ulong myClientId;
@@ -51,7 +60,9 @@ public class PlayerUI : MonoBehaviour
     {
         myClientId = NetworkManager.Singleton.LocalClientId;
         //유저 이미지 프로필 업로드
-        UploadProfileImage();
+        UploadProfileImageSelf();
+        UploadNickNameSelf();
+        UploadRatingSelf();
         //상대방 이미지 프로필 업로드
     }
 
@@ -101,29 +112,48 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
-    // Self 프로필 이미지 동기화
-    private void UploadProfileImage()
+    //---------------------------Self 프로필 이미지, 닉네임, 레이팅  동기화
+    private void UploadProfileImageSelf()
     {
-        Debug.Log("프로필 이미지 업로드");
         string ImagePath = SQLiteManager.Instance.player.profileIcon;
-        Debug.Log("프로필 이미지 경로 : " + ImagePath);
         AddressableManager.Instance.LoadImageFromGroup(ImagePath, Myprofileimage);
     }
 
+    private void UploadRatingSelf()
+    {
+        int rating = SQLiteManager.Instance.player.rating;
+        myRatingText.text = $"R :{rating}";
+    }
+
+    private void UploadNickNameSelf()
+    {
+        string nickname = SQLiteManager.Instance.player.playerName;
+        myNicknameText.text = $"{nickname}";
+    }
+
+
+
+
+    //--------------------------------------------------------------------------------------
 
    
 
 
 
-    public void SetOpponentProfileImage(string iconKey)
+    public void SetOpponentIconImage(string iconKey)
     {
         Debug.Log($"[PlayerUI] 상대방 아이콘 로딩: {iconKey}");
         AddressableManager.Instance.LoadImageFromGroup(iconKey, Opponentprofileimage);
     }
 
-    public void SetOpponentNickname(string nickname)
+    public void SetOpponentNickName(string nickname)
     {
-        string TempNickname = SQLiteManager.Instance.player.playerName;
+        opponentNicknameText.text = nickname;
+    }
+
+    public void SetOpponentRating(int rating)
+    {
+        opponentRatingText.text = $"R : {rating}";
     }
 
 
