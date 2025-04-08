@@ -11,6 +11,13 @@ public class EmotionUI : MonoBehaviour
     public Button laughButton;
     public Button clapButton;
 
+    [Header("Emotion Play Panel")]
+    public GameObject player_ShowEmotionPanel;
+    public Image player_ShowEmotionImage;
+    public GameObject opponent_ShowEmotionPanel;
+    public Image opponent_ShowEmotionImage;
+
+
 
     private bool isPanelOpen = false;
 
@@ -18,6 +25,8 @@ public class EmotionUI : MonoBehaviour
     {
 
         emotionPanel.SetActive(false);
+        player_ShowEmotionPanel.SetActive(false);
+        opponent_ShowEmotionPanel.SetActive(false);
         tauntButton.onClick.AddListener(() => OnEmotionClicked(EmtionType.Taunt));
         laughButton.onClick.AddListener(() => OnEmotionClicked(EmtionType.Laugh));
         clapButton.onClick.AddListener(() => OnEmotionClicked(EmtionType.Clap));

@@ -107,7 +107,7 @@ public class PlayerDataManager : NetworkBehaviour
     //--------------------------------------------------------------------------------UI 관리하기 위한 아이디 식별자public
     [ServerRpc(RequireOwnership = false)]
     public void RegisterPlayerProfileServerRpc(string profileIcon, ServerRpcParams rpcParams = default)
-    {
+    {    
         ulong clientId = rpcParams.Receive.SenderClientId;
         Debug.Log("프로필 등록부분 서버부분에서 작동");
         RegisterPlayerIcon(clientId, profileIcon);

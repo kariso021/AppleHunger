@@ -1,25 +1,45 @@
 using UnityEngine;
-using static TMPro.Examples.ObjectSpin;
+using System.Collections;
+
+
 
 public class EmotionUIHandler : MonoBehaviour
 {
+    public EmotionUI emotionUI;
+
     public void PlayEmotion(EmtionType emotion)
     {
         PlayEmotionLocally(emotion);
 
-        // 상대방에게도 전달 (네트워크 호출)
-        SendEmotionToOthers(emotion);
+        // 네트워크 전송은 나중에
+        // SendEmotionToOthers(emotion);
     }
 
     private void PlayEmotionLocally(EmtionType emotion)
     {
-       
+        Color color = GetEmotionColor(emotion);
+
+        emotionUI.player_ShowEmotionImage.color = color;
+        emotionUI.player_ShowEmotionPanel.SetActive(true);
+
+        StartCoroutine(HideEmotionAfterSeconds(1f));
     }
 
-    private void SendEmotionToOthers(EmtionType emotion)
+    private IEnumerator HideEmotionAfterSeconds(float seconds)
     {
-        // 네트워크 감정 전달
-        //NetworkEmotionSender.Instance.SendEmotion(emotion);
+        yield return new WaitForSeconds(seconds);
+        emotionUI.player_ShowEmotionPanel.SetActive(false);
+    }
+
+    private Color GetEmotionColor(EmtionType emotion)
+    {
+        switch (emotion)
+        {
+            case EmtionType.Taunt: return Color.yellow;
+            case EmtionType.Laugh: return Color.red;
+            case EmtionType.Clap: return Color.green;
+            default: return Color.white;
+        }
     }
 }
 
