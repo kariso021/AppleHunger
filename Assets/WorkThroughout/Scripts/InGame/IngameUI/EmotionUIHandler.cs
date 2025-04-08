@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Netcode;
 
 
 
@@ -11,8 +12,8 @@ public class EmotionUIHandler : MonoBehaviour
     {
         PlayEmotionLocally(emotion);
 
-        // 네트워크 전송은 나중에
-        // SendEmotionToOthers(emotion);
+        //네트워크
+        PlayerDataManager.Instance.SendEmotionServerRpc(emotion, NetworkManager.Singleton.LocalClientId);
     }
 
     private void PlayEmotionLocally(EmtionType emotion)

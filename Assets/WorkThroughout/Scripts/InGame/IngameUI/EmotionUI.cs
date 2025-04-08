@@ -1,8 +1,10 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class EmotionUI : MonoBehaviour
 {
+    public static EmotionUI Instance { get; private set; }
     public GameObject emotionPanel;
     public EmotionUIHandler emotionUIHandler;
 
@@ -20,6 +22,18 @@ public class EmotionUI : MonoBehaviour
 
 
     private bool isPanelOpen = false;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     private void Start()
     {
@@ -48,5 +62,30 @@ public class EmotionUI : MonoBehaviour
     {
         isPanelOpen = false;
         emotionPanel.SetActive(false);
+    }
+
+    public void ShowOpponentEmotion(EmtionType emotion)
+    {
+        Color color = GetColorFromEmotion(emotion);
+        opponent_ShowEmotionImage.color = color;
+        opponent_ShowEmotionPanel.SetActive(true);
+        StartCoroutine(HideOpponentAfterSeconds(1f));
+    }
+
+    private IEnumerator HideOpponentAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        opponent_ShowEmotionPanel.SetActive(false);
+    }
+
+    private Color GetColorFromEmotion(EmtionType emotion) 
+    {
+        switch (emotion)
+        {
+            case EmtionType.Taunt: return Color.red;
+            case EmtionType.Laugh: return Color.yellow;
+            case EmtionType.Clap: return Color.blue;
+            default: return Color.white;
+        }
     }
 }

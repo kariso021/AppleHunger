@@ -197,6 +197,23 @@ public class PlayerDataManager : NetworkBehaviour
         }
     }
 
+    //--------------------------------------------------------------------------------- Emotion 관련
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SendEmotionServerRpc(EmtionType emotion, ulong senderId)
+    {
+        SendEmotionClientRpc(emotion, senderId);
+    }
+
+    [ClientRpc]
+    private void SendEmotionClientRpc(EmtionType emotion, ulong senderId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == senderId) return;
+
+        // 이 시점에서 상대 감정 표시
+        EmotionUI.Instance.ShowOpponentEmotion(emotion);
+    }
+
 
 
 
