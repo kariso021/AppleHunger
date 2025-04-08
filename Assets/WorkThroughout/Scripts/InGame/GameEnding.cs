@@ -5,7 +5,9 @@ using Unity.Netcode;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using Unity.Services.Matchmaker.Models;
+#if UNITY_SEREVR
 using Unity.Services.Multiplay;
+#endif
 using Unity.Services.Authentication;
 using System.Collections;
 

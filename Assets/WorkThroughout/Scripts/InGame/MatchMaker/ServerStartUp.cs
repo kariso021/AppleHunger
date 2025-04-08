@@ -6,7 +6,9 @@ using Unity.Netcode.Transports.UTP;
 using Unity.VisualScripting;
 using UnityEditor.Analytics;
 using UnityEngine;
+#if UNITY_SERVER
 using Unity.Services.Multiplay;
+#endif
 using System.Runtime.InteropServices;
 using UnityEngine.InputSystem.UI;
 using Unity.Services.Matchmaker.Models;
@@ -24,13 +26,15 @@ public class ServerStartUp : MonoBehaviour
 
     private string _externalConnectionString => $"{_externalServerIP}:{_serverPort}";
 
+#if UNITY_SERVER
     private IMultiplayService _multiplayService;
-    private const int _multiplayServiceTimeout = 20000; //20 밀리초
-
-    private string _allocationId;
     private MultiplayEventCallbacks _serverCallbacks;
     private IServerEvents _serverEvents;
+#endif
 
+    private const int _multiplayServiceTimeout = 20000;
+
+    private string _allocationId;
     private BackfillTicket _localBackfillTicket;
     private CreateBackfillTicketOptions _createBackfillTicketOptions;
     private const int _ticketCheckMs = 1000;
@@ -38,31 +42,17 @@ public class ServerStartUp : MonoBehaviour
 
     private bool _backfilling = false;
 
-
-
     async void Start()
     {
         bool server = false;
         var args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == "-dedicatedServer")
-            {
-                server = true;
-            }
-
-            if (args[i] == "-port" &&(i+1 < args.Length))
-            {
-                _serverPort = (ushort)int.Parse(args[i+1]);
-            }
-
-            if (args[i] == "-ip" && (i+1 < args.Length))
-            {
-                _externalServerIP = args[i + 1];
-            }
+            if (args[i] == "-dedicatedServer") server = true;
+            if (args[i] == "-port" && (i + 1 < args.Length)) _serverPort = (ushort)int.Parse(args[i + 1]);
+            if (args[i] == "-ip" && (i + 1 < args.Length)) _externalServerIP = args[i + 1];
         }
 
-        
         if (server)
         {
             StartServer();
@@ -76,15 +66,14 @@ public class ServerStartUp : MonoBehaviour
 
     private void StartServer()
     {
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData
-            (_internalServerIP, _serverPort);
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(_internalServerIP, _serverPort);
         NetworkManager.Singleton.StartServer();
         NetworkManager.Singleton.OnClientDisconnectCallback += ClientDisconnected;
     }
 
-    private void ClientDisconnected(ulong clientId) 
+    private void ClientDisconnected(ulong clientId)
     {
-        if(!_backfilling && NetworkManager.Singleton.ConnectedClients.Count > 0&&NeedsPlayers())
+        if (!_backfilling && NetworkManager.Singleton.ConnectedClients.Count > 0 && NeedsPlayers())
         {
             BeginBackfilling(_matchmakingPayload);
         }
@@ -92,15 +81,16 @@ public class ServerStartUp : MonoBehaviour
 
     async Task StartServerServices()
     {
-         await UnityServices.InitializeAsync();
+        await UnityServices.InitializeAsync();
+#if UNITY_SERVER
         try
         {
             _multiplayService = MultiplayService.Instance;
-            await _multiplayService.StartServerQueryHandlerAsync(10,"n/a","n/a","0","n/a");
+            await _multiplayService.StartServerQueryHandlerAsync(10, "n/a", "n/a", "0", "n/a");
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"Somthing went wrong trying to set up the SQP Services");
+            Debug.LogWarning("Something went wrong trying to set up the SQP Services");
         }
 
         try
@@ -108,14 +98,15 @@ public class ServerStartUp : MonoBehaviour
             _matchmakingPayload = await GetMatchMakerPayload(_multiplayServiceTimeout);
             if (_matchmakingPayload != null)
             {
-                Debug.Log($"Got paylaod : {_matchmakingPayload}");
+                Debug.Log($"Got payload: {_matchmakingPayload}");
                 await StartBackfill(_matchmakingPayload);
             }
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"Somthing went wrong trying to set up the Allocation & Backfill Services : {ex}");
+            Debug.LogWarning($"Something went wrong trying to set up the Allocation & Backfill Services: {ex}");
         }
+#endif
     }
 
     private async Task StartBackfill(MatchmakingResults payload)
@@ -127,8 +118,6 @@ public class ServerStartUp : MonoBehaviour
 
     private async Task BeginBackfilling(MatchmakingResults payload)
     {
-      
-
         if (string.IsNullOrEmpty(_localBackfillTicket.Id))
         {
             var matchProperties = payload.MatchProperties;
@@ -155,10 +144,9 @@ public class ServerStartUp : MonoBehaviour
             if (_backfilling && !NeedsPlayers())
             {
                 await MatchmakerService.Instance.DeleteBackfillTicketAsync(_localBackfillTicket.Id);
-                return;
                 _backfilling = false;
+                return;
             }
-
             await Task.Delay(_ticketCheckMs);
         }
         _backfilling = false;
@@ -166,23 +154,22 @@ public class ServerStartUp : MonoBehaviour
 
     private bool NeedsPlayers()
     {
-        return NetworkManager.Singleton.ConnectedClients.Count < 2; //여기 체크해야됨 maxplayer
+        return NetworkManager.Singleton.ConnectedClients.Count < 2;
     }
 
     private async Task<MatchmakingResults> GetMatchMakerPayload(int timeout)
     {
         var matchmakerPayloadTask = SubscribeAndAwiatMatchmakerAllocation();
-        if (await Task.WhenAny(matchmakerPayloadTask,Task.Delay(timeout))==matchmakerPayloadTask)
+        if (await Task.WhenAny(matchmakerPayloadTask, Task.Delay(timeout)) == matchmakerPayloadTask)
         {
             return matchmakerPayloadTask.Result;
         }
-
         return null;
     }
 
-
     private async Task<MatchmakingResults> SubscribeAndAwiatMatchmakerAllocation()
     {
+#if UNITY_SERVER
         if (_multiplayService == null) return null;
         _allocationId = null;
         _serverCallbacks = new MultiplayEventCallbacks();
@@ -190,55 +177,67 @@ public class ServerStartUp : MonoBehaviour
         _serverEvents = await _multiplayService.SubscribeToServerEventsAsync(_serverCallbacks);
 
         _allocationId = await AwaitAllocationID();
-
-        var mmPayload = await GetMatchMakerAllocationPayloadAsync();
-        return mmPayload;
+        return await GetMatchMakerAllocationPayloadAsync();
+#else
+        return null;
+#endif
     }
 
     private async Task<MatchmakingResults> GetMatchMakerAllocationPayloadAsync()
     {
+#if UNITY_SERVER
         try
         {
             var payloadAllocation = await MultiplayService.Instance.GetPayloadAllocationFromJsonAs<MatchmakingResults>();
             var modelAsJson = JsonConvert.SerializeObject(payloadAllocation, Formatting.Indented);
             Debug.Log($"nameof(GetMatchMakerAllocationPayloadAsync) \n{modelAsJson}");
+            return payloadAllocation;
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"Somthing went wrong trying to set up the get the Matchmaker Payload in  GetMatchmakerAllocationPayloadAsync : {ex}");
+            Debug.LogWarning($"Error in GetMatchMakerAllocationPayloadAsync: {ex}");
         }
+#endif
         return null;
     }
 
     private async Task<string> AwaitAllocationID()
     {
+#if UNITY_SERVER
         var config = _multiplayService.ServerConfig;
-        //Debuglog 
-
         while (string.IsNullOrEmpty(_allocationId))
         {
             var configId = config.AllocationId;
-            if (!string.IsNullOrEmpty(configId) && string.IsNullOrEmpty(_allocationId))
+            if (!string.IsNullOrEmpty(configId))
             {
                 _allocationId = configId;
                 break;
             }
             await Task.Delay(100);
         }
-
         return _allocationId;
+#else
+        return null;
+#endif
     }
 
+#if UNITY_SERVER
     private void OnMultiplayAllocation(MultiplayAllocation allocation)
     {
-        Debug.Log($"On Allocation : {allocation.AllocationId}");
-        if (string.IsNullOrEmpty(allocation.AllocationId)) return;
-        _allocationId = allocation.AllocationId;
-    }
 
-    private void Dispose()
+        Debug.Log($"On Allocation: {allocation.AllocationId}");
+        if (!string.IsNullOrEmpty(allocation.AllocationId))
+        {
+            _allocationId = allocation.AllocationId;
+        }
+}
+#endif
+private void Dispose()
     {
-        _serverCallbacks.Allocate -= OnMultiplayAllocation;
+#if UNITY_SERVER
+        if (_serverCallbacks != null)
+            _serverCallbacks.Allocate -= OnMultiplayAllocation;
         _serverEvents?.UnsubscribeAsync();
+#endif
     }
 }
