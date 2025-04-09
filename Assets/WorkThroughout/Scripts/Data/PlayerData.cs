@@ -1,8 +1,7 @@
 ﻿using System;
-using Unity.Netcode;
 [Serializable]
 
-public class PlayerData : INetworkSerializable
+public class PlayerData
 {
     public int playerId;       // 플레이어 ID, Auto-Increment 계열이라 생성자에서 따로 지정해줄 필요 없음
     public string deviceId;    // 게스트 로그인용 기기 ID
@@ -52,18 +51,4 @@ public class PlayerData : INetworkSerializable
                $"currency: {currency}, " +
                $"createdAt: {createdAt} }}";
     }
-    // 🔥 Netcode에서 직렬화 가능하도록 INetworkSerializable 구현
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref playerId);
-        serializer.SerializeValue(ref deviceId);
-        serializer.SerializeValue(ref googleId);
-        serializer.SerializeValue(ref playerName);
-        serializer.SerializeValue(ref profileIcon);
-        serializer.SerializeValue(ref boardImage);
-        serializer.SerializeValue(ref rating);
-        serializer.SerializeValue(ref currency);
-        serializer.SerializeValue(ref createdAt);
-    }
-
 }

@@ -50,6 +50,8 @@ public class ButtonController : MonoBehaviour
 
     private ClientNetworkManager clientNetworkManager;
 
+    public Managers testManager;
+
     //юс╫ц
     private int id = 1;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -170,7 +172,7 @@ public class ButtonController : MonoBehaviour
         //clientNetworkManager.PurchasePlayerItem(SQLiteManager.Instance.player.playerId,102));
 
         matchAdd.onClick.AddListener(() =>
-        StartCoroutine(clientNetworkManager.AddMatchRecords(SQLiteManager.Instance.player.playerId,
+        StartCoroutine(testManager.AddMatchResult(SQLiteManager.Instance.player.playerId,
         4)));
 
         matchGet.onClick.AddListener(() =>

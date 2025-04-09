@@ -216,21 +216,37 @@ public class SQLiteManager : MonoBehaviour
         }
         else // 📌 Step 3: `streamingAssetsPath`에서 다운로드 (Android)
         {
-            using (UnityWebRequest request = UnityWebRequest.Get(streamingDbPath))
-            {
-                yield return request.SendWebRequest();
+            string sourcePath = Path.Combine(Application.streamingAssetsPath, dbName);
+            Debug.Log("📦 StreamingAssets SQLite 경로: " + sourcePath);
+#if UNITY_ANDROID && !UNITY_EDITOR
+            UnityWebRequest request = UnityWebRequest.Get(sourcePath);
+            yield return request.SendWebRequest();
 
-                if (request.result == UnityWebRequest.Result.Success)
-                {
-                    File.WriteAllBytes(persistentDbPath, request.downloadHandler.data);
-                    Debug.Log("✅ Android에서 SQLite DB 복사 완료!");
-                    yield break;
-                }
-                else
-                {
-                    Debug.LogError("❌ Android에서 DB 다운로드 실패: " + request.error);
-                }
+            if (request.result == UnityWebRequest.Result.Success) {
+                File.WriteAllBytes(persistentDbPath, request.downloadHandler.data);
+            } else {
+                Debug.LogError("❌ Android에서 DB 다운로드 실패: " + request.error);
             }
+#else
+            File.Copy(sourcePath, persistentDbPath, true);
+            Debug.Log("✅ PC/iOS에서 SQLite DB 복사 완료!");
+#endif
+
+            //using (UnityWebRequest request = UnityWebRequest.Get(streamingDbPath))
+            //{
+            //    yield return request.SendWebRequest();
+
+            //    if (request.result == UnityWebRequest.Result.Success)
+            //    {
+            //        File.WriteAllBytes(persistentDbPath, request.downloadHandler.data);
+            //        Debug.Log("✅ Android에서 SQLite DB 복사 완료!");
+            //        yield break;
+            //    }
+            //    else
+            //    {
+            //        Debug.LogError("❌ Android에서 DB 다운로드 실패: " + request.error);
+            //    }
+            //}
         }
 
         // 📌 Step 4: `persistentDataPath`에도 DB가 없으면 새로 생성
