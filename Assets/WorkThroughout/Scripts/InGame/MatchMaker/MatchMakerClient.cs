@@ -10,6 +10,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using System.Collections;
+
 #if UNITY_EDITOR
 using ParrelSync;
 #endif
@@ -36,6 +38,7 @@ public class MatchMakerClient : MonoBehaviour
 
     private async void SignIn()
     {
+
         await ClientSignIn(serviceProfileName:"AppleHungerPlayer");
         //데이터베이스에서 가져온 정보로 가공된 뭔가...
 
@@ -95,10 +98,8 @@ public class MatchMakerClient : MonoBehaviour
 
     public void StartClient() 
     {
-        //매칭 캔버스 활성화
         if (waitingCanvas != null)
             waitingCanvas.SetActive(true);
-
 
         CreateATicket();
     }
@@ -168,19 +169,30 @@ public class MatchMakerClient : MonoBehaviour
 
     private void TicketAssigned(MultiplayAssignment assignment)
     {
-        Debug.Log(message: $"[클라이언트] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
-        Debug.Log(message: $"Ticket Assigned : {assignment.Ip} : {assignment.Port}");
+        Debug.Log($"[클라이언트] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
 
-        //매칭잡히고 표기하는 부분
+        // 바로 메시지 표시
         matchResultText.text = "매칭이 잡혔습니다!";
 
-        // 매칭 완료되면 대기 캔버스 숨기기
+        // 2초 기다렸다가 나머지 처리
+        StartCoroutine(DelayedConnectToServer(assignment));
+    }
+
+
+    private IEnumerator DelayedConnectToServer(MultiplayAssignment assignment)
+    {
+        yield return new WaitForSeconds(2f);
+
+        // 2초 후에 대기 캔버스 끄기
         if (waitingCanvas != null)
             waitingCanvas.SetActive(false);
 
+        // 서버 접속 시도
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(assignment.Ip, (ushort)assignment.Port);
         NetworkManager.Singleton.StartClient();
     }
+
+
 
     [Serializable]
     public class MatchmakingPlayerData
