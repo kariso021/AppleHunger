@@ -1,19 +1,23 @@
-﻿using System;
+﻿using SQLite;
+using System;
 [Serializable]
-
+[Table("players")]
 public class PlayerData
 {
-    public int playerId;       // 플레이어 ID, Auto-Increment 계열이라 생성자에서 따로 지정해줄 필요 없음
-    public string deviceId;    // 게스트 로그인용 기기 ID
-    public string googleId;    // 구글 로그인용 ID
-    public string playerName;  // 닉네임
-    public string profileIcon; // 프로필 아이콘 (경로)
-    public string boardImage;  // 인게임 보드 이미지 (경로)
-    public int rating;         // 레이팅 점수
-    public int currency;       // 보유 재화
-    public string createdAt;   // 유저 회원가입 시점
+    [PrimaryKey]
+    public int playerId { get; set; }
+    public string deviceId { get; set; }
+    public string googleId { get; set; }
+    public string playerName { get; set; }
+    public string profileIcon { get; set; }
+    public string boardImage { get; set; }
+    public int rating { get; set; }
+    public int currency { get; set; }
+    public string createdAt { get; set; }
 
-    //기본 생성자 추가 (JsonUtility와 Fish-Net이 필요로 함)
+    //기본 생성자 추가 (
+    //
+    //와 Fish-Net이 필요로 함)
 
     public PlayerData() { }
     public PlayerData(string deviceId,string googleId,string name, string icon, string board, int rating, int currency)

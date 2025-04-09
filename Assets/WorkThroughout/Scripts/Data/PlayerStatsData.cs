@@ -1,14 +1,17 @@
+using SQLite;
 using System;
 using UnityEngine;
 
 [Serializable]
+[Table("playerStats")]
 public class PlayerStatsData
 {
-    public int playerId;    // 플레이어 ID
-    public int totalGames;  // 총 게임 수
-    public int wins;        // 승리 수
-    public int losses;      // 패배 수
-    public float winRate;   // 승률 (자동 계산됨)
+    [PrimaryKey]
+    public int playerId { get; set; }
+    public int totalGames { get; set; }
+    public int wins { get; set; }
+    public int losses { get; set; }
+    public float winRate { get; set; } // 쿼리로 계산해서 넣는 용도로 사용
 
     public PlayerStatsData() { }
     public PlayerStatsData(int playerId, int totalGames, int wins, int losses, float winRate)

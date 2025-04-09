@@ -222,7 +222,6 @@ public class AddressableManager : MonoBehaviour
             string itemUniqueId = imageObj.GetComponent<RankingData>().profileIcon;
             Image image = imageObj.GetComponent<RankingData>().iconImage;
             string fileName = "icon_" + itemUniqueId;
-
             Addressables.LoadAssetAsync<Sprite>(fileName).Completed += (handle) =>
             {
                 if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -74,7 +75,8 @@ public class ClientNetworkManager : MonoBehaviour
 
     public void TargetReceivePlayerDataClientRpc(string jsonData)
     {
-        SQLiteManager.Instance.SavePlayerData(JsonUtility.FromJson<PlayerData>(jsonData));
+        var parsed = JsonConvert.DeserializeObject<PlayerData>(jsonData);
+        SQLiteManager.Instance.SavePlayerData(parsed);
     }
 
     // 🔹 플레이어 추가
@@ -112,7 +114,7 @@ public class ClientNetworkManager : MonoBehaviour
 
     public void TargetReceivePlayerItemsClientRpc(string jsonData)
     {
-        SQLiteManager.Instance.SavePlayerItem(JsonUtility.FromJson<PlayerItemData>(jsonData));
+        SQLiteManager.Instance.SavePlayerItem(JsonConvert.DeserializeObject<PlayerItemData>(jsonData));
     }
 
     // 플레이어 아이템 구매 요청
@@ -131,7 +133,7 @@ public class ClientNetworkManager : MonoBehaviour
 
     public void TargetReceivePlayerStatsClientRpc(string jsonData)
     {
-        PlayerStatsResponse playerStatsResponse = JsonUtility.FromJson<PlayerStatsResponse>(jsonData);
+        PlayerStatsResponse playerStatsResponse = JsonConvert.DeserializeObject<PlayerStatsResponse>(jsonData);
         Debug.Log($"{playerStatsResponse.playerStats.playerId} , Total : {playerStatsResponse.playerStats.totalGames} , Winrate : {playerStatsResponse.playerStats.winRate}");
         SQLiteManager.Instance.SavePlayerStats(playerStatsResponse.playerStats);
     }
@@ -173,7 +175,7 @@ public class ClientNetworkManager : MonoBehaviour
 
     public void TargetReceiveLoginDataClientRpc(string jsonData)
     {
-        LoginResponse response = JsonUtility.FromJson<LoginResponse>(jsonData);
+        LoginResponse response = JsonConvert.DeserializeObject<LoginResponse>(jsonData);
 
         Debug.Log($"{response.records.playerId} , ip : {response.records.ipAddress} , id : {response.records.loginId}");
 
@@ -190,7 +192,7 @@ public class ClientNetworkManager : MonoBehaviour
         yield return StartCoroutine(ServerToAPIManager.Instance.GetTopRankingData());
 
         // 개별 플레이어 랭킹 요청
-        yield return StartCoroutine(ServerToAPIManager.Instance.GetMyRankingData(SQLiteManager.Instance.player.playerId));
+        yield return StartCoroutine(ServerToAPIManager.Instance.GetMyRankingData(SQLiteManager.Instance.LoadPlayerData().playerId));
     }
 
     // ✅ 서버에서 받은 상위 50명 랭킹 저장
@@ -198,7 +200,7 @@ public class ClientNetworkManager : MonoBehaviour
     {
         Debug.Log($"✅ [Client] 상위 50명 랭킹 데이터 수신: {jsonData}");
 
-        RankingDataResponse rankingListResponse = JsonUtility.FromJson<RankingDataResponse>(jsonData);
+        RankingDataResponse rankingListResponse = JsonConvert.DeserializeObject<RankingDataResponse>(jsonData);
         // SQLite에 저장
         foreach (var rankingData in rankingListResponse.topRankings)
         {
@@ -213,7 +215,7 @@ public class ClientNetworkManager : MonoBehaviour
     {
         Debug.Log($"✅ [Client] 개별 랭킹 데이터 수신: {jsonData}");
 
-        MyRankingData myRankingData = JsonUtility.FromJson<MyRankingData>(jsonData);
+        MyRankingData myRankingData = JsonConvert.DeserializeObject<MyRankingData>(jsonData);
 
         // SQLite에 저장
         SQLiteManager.Instance.SaveMyRankingData(myRankingData.myRanking);
@@ -225,7 +227,7 @@ public class ClientNetworkManager : MonoBehaviour
     {
         Debug.Log($"✅ [Client] 상세 정보 수신: {jsonData}");
 
-        PlayerDetailsResponse playerDetailsResponse = JsonUtility.FromJson<PlayerDetailsResponse>(jsonData);
+        PlayerDetailsResponse playerDetailsResponse = JsonConvert.DeserializeObject<PlayerDetailsResponse>(jsonData);
         Debug.Log(playerDetailsResponse.playerDetails.ToString());
         SQLiteManager.Instance.playerDetails = playerDetailsResponse.playerDetails;
 

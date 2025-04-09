@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ public static class ForbiddenWordsLoader
             return new HashSet<string>();
         }
 
-        ForbiddenWordData data = JsonUtility.FromJson<ForbiddenWordData>(jsonFile.text);
+        ForbiddenWordData data = JsonConvert.DeserializeObject<ForbiddenWordData>(jsonFile.text);
         forbiddenWordsSet = new HashSet<string>(data.forbiddenWords);
         return forbiddenWordsSet;
     }

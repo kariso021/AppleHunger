@@ -1,14 +1,19 @@
+using Newtonsoft.Json;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
+[Table("loginRecords")]
 public class LoginData
 {
-    public int loginId;       // 로그인 ID
-    public int playerId;      // 플레이어 ID
-    public string loginTime;  // 로그인 시간 (JSON 변환을 위해 string)
-    public string ipAddress;  // 로그인 시 사용한 IP 주소
+    [PrimaryKey]
+    public int loginId { get; set; }
+    public int playerId { get; set; }
+    public string loginTime { get; set; }
+    public string ipAddress { get; set; }
+
 
     public LoginData() { }
     public LoginData(int loginId,int playerId, string loginTime,string ipAddress)
@@ -27,11 +32,11 @@ public class LoginList
 
     public static LoginList FromJson(string jsonData)
     {
-        return JsonUtility.FromJson<LoginList>(jsonData);
+        return JsonConvert.DeserializeObject<LoginList>(jsonData);
     }
 
     public string ToJson()
     {
-        return JsonUtility.ToJson(this);
+        return JsonConvert.SerializeObject(this);
     }
 }

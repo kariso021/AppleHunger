@@ -104,7 +104,6 @@ public class RankingRecordsManager : MonoBehaviour
             }
 
             int displayRank = recordCount + 1;
-
             // 🔹 데이터 설정
             rankingData.SetRankingData(
                 rankData.playerId,

@@ -1,4 +1,4 @@
-﻿using Mono.Data.Sqlite;
+﻿using SQLite;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -57,7 +57,7 @@ public class SQLiteManager : MonoBehaviour
         // =========================== 나중에 꼭 지워야 한다 ===============================/
         string rawDbPath = !isDummy ? Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/") : Path.Combine(Application.persistentDataPath, "game_data_dummy.db").Replace("\\", "/");
         // =================================================================================
-        dbPath = "URI=file:" + rawDbPath;  // SQLite 연결을 위해 여전히 사용
+        dbPath = rawDbPath;  // SQLite 연결을 위해 여전히 사용
         Debug.Log($"📂 SQLite DB 경로: {dbPath}");
 
         // ✅ Step 1: SQLite DB가 존재하는지 확인
@@ -67,9 +67,12 @@ public class SQLiteManager : MonoBehaviour
 
             // 여기서 재화를 서버에서 받아오는 부분이 추가되어야 할 것 같음. 재화같은 경우엔 이벤트 등으로 넣어주는게 되니까
             // ✅ Step 2: DB가 존재하면 서버에서 데이터를 받을 필요 없이 로드 후 종료
-            LoadAllData();
-            yield return DataSyncManager.Instance.PlayerRankingUpdated();
+            yield return loadAllDataAwait();
+
             saveRankDataToDictionary();
+
+            yield return DataSyncManager.Instance.PlayerRankingUpdated();
+            
             DataSyncManager.Instance.PlayerItemsUpdated();
             yield break;
         }
@@ -85,10 +88,10 @@ public class SQLiteManager : MonoBehaviour
     {
         yield return StartCoroutine(CreateDatabase()); // ✅ SQLite DB 생성
     }
-    private void createTables(SqliteConnection connection)
+    private void createTables(SQLiteConnection connection)
     {
         // 🔹 플레이어 테이블 (Auto-Increment 제거)
-        ExecuteQuery(connection, @"
+        connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS players (
                     playerId INTEGER PRIMARY KEY,  
                     deviceId TEXT UNIQUE,
@@ -102,7 +105,7 @@ public class SQLiteManager : MonoBehaviour
                 );");
 
         // 🔹 플레이어 스탯 테이블
-        ExecuteQuery(connection, @"
+        connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS playerStats (
                     playerId INTEGER PRIMARY KEY,  
                     totalGames INTEGER DEFAULT 0,
@@ -113,7 +116,7 @@ public class SQLiteManager : MonoBehaviour
                 );");
 
         // 🔹 플레이어 아이템 테이블
-        ExecuteQuery(connection, @"
+        connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS playerItems (
                     itemId INTEGER PRIMARY KEY,  
                     playerId INTEGER NOT NULL,
@@ -127,7 +130,7 @@ public class SQLiteManager : MonoBehaviour
 
 
         // 🔹 로그인 기록 테이블
-        ExecuteQuery(connection, @"
+        connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS loginRecords (
                     loginId INTEGER PRIMARY KEY,  
                     playerId INTEGER NOT NULL,
@@ -137,7 +140,7 @@ public class SQLiteManager : MonoBehaviour
                 );");
 
         // 🔹 매치 기록 테이블
-        ExecuteQuery(connection, @"
+        connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS matchRecords (
                     matchId INTEGER PRIMARY KEY,  
                     player1Id INTEGER NOT NULL,
@@ -160,7 +163,7 @@ public class SQLiteManager : MonoBehaviour
 
         // 🔹 랭킹 테이블 (상위 50명의 랭킹 정보 저장)
         // 🔹 rankings 테이블 (상위 50명의 랭킹 정보 저장)
-        ExecuteQuery(connection, @"
+        connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS rankings (           
                     playerId INTEGER NOT NULL,         -- 플레이어 ID
                     playerName TEXT NOT NULL,          -- 플레이어 닉네임
@@ -171,7 +174,7 @@ public class SQLiteManager : MonoBehaviour
                 );");
 
         // ✅ 개별 플레이어 랭킹 테이블 생성
-        ExecuteQuery(connection, @"
+        connection.Execute( @"
                 CREATE TABLE IF NOT EXISTS myRanking (
                     playerId INTEGER PRIMARY KEY,
                     playerName TEXT NOT NULL,
@@ -184,7 +187,7 @@ public class SQLiteManager : MonoBehaviour
 
         Debug.Log("✅ SQLite 데이터베이스 초기화 완료 (Mono.Data.Sqlite)");
 
-        ExecuteQuery(connection, @"
+        connection.Execute(@"
                 DELETE FROM matchRecords 
                 WHERE matchId NOT IN (
                     SELECT matchId FROM matchRecords 
@@ -262,9 +265,8 @@ public class SQLiteManager : MonoBehaviour
     {
         try
         {
-            using (var connection = new SqliteConnection("URI=file:" + dbPath))
+            using (var connection = new SQLiteConnection(dbPath))
             {
-                connection.Open();
                 Debug.Log("✅ 새 SQLite 데이터베이스 생성 완료!");
                 createTables(connection);
             }
@@ -281,7 +283,7 @@ public class SQLiteManager : MonoBehaviour
             Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
 
             // ✅ 먼저 플레이어 데이터를 받아옴
-            yield return ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId,true);
+            yield return ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId, true);
 
 
             // ✅ 플레이어 ID가 `0`이 아닐 때까지 기다림
@@ -312,6 +314,8 @@ public class SQLiteManager : MonoBehaviour
                 isRankingListLoaded
             );
 
+
+            DataSyncManager.Instance.InvokeUIRankingUpdateEvent();
             Debug.Log("✅ [Client] 모든 데이터 동기화 완료!");
         }
     }
@@ -354,12 +358,9 @@ public class SQLiteManager : MonoBehaviour
     /// <summary>
     /// SQLite 쿼리 실행 함수
     /// </summary>
-    private void ExecuteQuery(SqliteConnection connection, string query)
+    private void ExecuteQuery(SQLiteConnection connection, string query)
     {
-        using (var command = new SqliteCommand(query, connection))
-        {
-            command.ExecuteNonQuery();
-        }
+        connection.Execute(query);
     }
 
     // 🔹 모든 데이터 불러오기 (게임 시작 시 실행)
@@ -386,457 +387,292 @@ public class SQLiteManager : MonoBehaviour
         OnSQLiteDataLoaded?.Invoke();
     }
 
+    private IEnumerator loadAllDataAwait()
+    {
+        LoadAllData();
+        yield return null;
+    }
     private void saveRankDataToDictionary()
     {
         foreach (var rankData in rankings)
         {
+            if (rankDictionary.ContainsKey(rankData.playerId))
+            {
+                Debug.LogWarning($"⚠️ 중복된 playerId 발견: {rankData.playerId}");
+                continue;
+            }
+
             rankDictionary.Add(rankData.playerId, rankData);
         }
     }
 
+
     public void SavePlayerData(PlayerData player)
     {
-        //Debug.Log(player.ToString());
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
+            var command = connection.CreateCommand(@"
             INSERT OR REPLACE INTO players 
             (playerId, deviceId, googleId, playerName, profileIcon, boardImage, rating, currency, createdAt) 
-            VALUES (@playerId, @deviceId, @googleId, @playerName, @profileIcon, @boardImage, @rating, @currency, @createdAt);
-            ";
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                player.playerId,
+                player.deviceId,
+                player.googleId,
+                player.playerName,
+                player.profileIcon,
+                player.boardImage,
+                player.rating,
+                player.currency,
+                player.createdAt
+            );
 
-                command.Parameters.AddWithValue("@playerId", player.playerId);
-                command.Parameters.AddWithValue("@deviceId", player.deviceId);
-                command.Parameters.AddWithValue("@googleId", player.googleId);
-                command.Parameters.AddWithValue("@playerName", player.playerName);
-                command.Parameters.AddWithValue("@profileIcon", player.profileIcon);
-                command.Parameters.AddWithValue("@boardImage", player.boardImage);
-                command.Parameters.AddWithValue("@rating", player.rating);
-                command.Parameters.AddWithValue("@currency", player.currency);
-                command.Parameters.AddWithValue("@createdAt", player.createdAt);
-
-                int rowsAffected = command.ExecuteNonQuery();
-                //Debug.Log($"✅ 플레이어 데이터 저장 완료! 변경된 행 수: {rowsAffected}");
-            }
+            int rowsAffected = command.ExecuteNonQuery();
+            Debug.Log($"✅ 저장 완료: {rowsAffected}행 변경됨");
         }
     }
+
 
     // 🔹 플레이어 스탯 저장
     public void SavePlayerStats(PlayerStatsData stats)
     {
-        Debug.Log($"🔹 SQLite 저장: PlayerID={stats.playerId}, TotalGames={stats.totalGames}, Wins={stats.wins}, Losses={stats.losses}, WinRate={stats.winRate}");
-
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                INSERT INTO playerStats (playerId, totalGames, wins, losses)
-                VALUES (@playerId, @totalGames, @wins, @losses)
-                ON CONFLICT(playerId) DO UPDATE SET
-                totalGames = excluded.totalGames,
-                wins = excluded.wins,
-                losses = excluded.losses;
-            ";
+            var command = connection.CreateCommand(@"
+            INSERT INTO playerStats (playerId, totalGames, wins, losses)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(playerId) DO UPDATE SET
+            totalGames = excluded.totalGames,
+            wins = excluded.wins,
+            losses = excluded.losses;
+        ",
+            stats.playerId,
+            stats.totalGames,
+            stats.wins,
+            stats.losses);
 
-                command.Parameters.AddWithValue("@playerId", stats.playerId);
-                command.Parameters.AddWithValue("@totalGames", stats.totalGames);
-                command.Parameters.AddWithValue("@wins", stats.wins);
-                command.Parameters.AddWithValue("@losses", stats.losses);
-
-                int rowsAffected = command.ExecuteNonQuery();
-                Debug.Log($"✅ 플레이어 스탯 SQLite 저장 완료, 변경된 행 수: {rowsAffected}");
-            }
-            connection.Close();
+            int rows = command.ExecuteNonQuery();
+            Debug.Log($"✅ 플레이어 스탯 저장 완료: {rows}행 변경됨");
         }
     }
 
     // 🔹 로그인 데이터 저장
     public void SaveLoginData(LoginData login)
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                    INSERT OR REPLACE INTO loginRecords 
-                    (loginId, playerId, loginTime, ipAddress) 
-                    VALUES (@loginId, @playerId, @loginTime, @ipAddress);
-                ";
+            var command = connection.CreateCommand(@"
+            INSERT OR REPLACE INTO loginRecords 
+            (loginId, playerId, loginTime, ipAddress) 
+            VALUES (?, ?, ?, ?);",
+                login.loginId,
+                login.playerId,
+                login.loginTime,
+                login.ipAddress);
 
-                command.Parameters.AddWithValue("@loginId", login.loginId);
-                command.Parameters.AddWithValue("@playerId", login.playerId);
-                command.Parameters.AddWithValue("@loginTime", login.loginTime);
-                command.Parameters.AddWithValue("@ipAddress", login.ipAddress);
-
-                command.ExecuteNonQuery();
-            }
-            connection.Close();
+            command.ExecuteNonQuery();
         }
-        Debug.Log("✅ 로그인 데이터 SQLite에 저장 완료");
+        Debug.Log("✅ 로그인 데이터 저장 완료");
     }
 
     // 🔹 매치 기록 저장
     public void SaveMatchHistory(MatchHistoryData match)
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                INSERT OR REPLACE INTO matchRecords 
-                (matchId, player1Id, player1Name, player1Rating, player1Icon,
-                 player2Id, player2Name, player2Rating, player2Icon, 
-                 winnerId, matchDate) 
-                VALUES (@matchId, @player1Id, @player1Name, @player1Rating, @player1Icon,
-                        @player2Id, @player2Name, @player2Rating, @player2Icon,
-                        @winnerId, @matchDate);
-            ";
+            var command = connection.CreateCommand(@"
+            INSERT OR REPLACE INTO matchRecords 
+            (matchId, player1Id, player1Name, player1Rating, player1Icon,
+             player2Id, player2Name, player2Rating, player2Icon, 
+             winnerId, matchDate) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                match.matchId,
+                match.player1Id,
+                match.player1Name,
+                match.player1Rating,
+                match.player1Icon,
+                match.player2Id,
+                match.player2Name,
+                match.player2Rating,
+                match.player2Icon,
+                match.winnerId,
+                match.matchDate);
 
-                command.Parameters.AddWithValue("@matchId", match.matchId);
-                command.Parameters.AddWithValue("@player1Id", match.player1Id);
-                command.Parameters.AddWithValue("@player1Name", match.player1Name);
-                command.Parameters.AddWithValue("@player1Rating", match.player1Rating);
-                command.Parameters.AddWithValue("@player1Icon", match.player1Icon);
-
-                command.Parameters.AddWithValue("@player2Id", match.player2Id);
-                command.Parameters.AddWithValue("@player2Name", match.player2Name);
-                command.Parameters.AddWithValue("@player2Rating", match.player2Rating);
-                command.Parameters.AddWithValue("@player2Icon", match.player2Icon);
-
-                command.Parameters.AddWithValue("@winnerId", match.winnerId);
-                command.Parameters.AddWithValue("@matchDate", match.matchDate);
-
-                command.ExecuteNonQuery();
-            }
-            connection.Close();
+            command.ExecuteNonQuery();
         }
-        Debug.Log("✅ 매치 기록 SQLite에 저장 완료");
+        Debug.Log("✅ 매치 기록 저장 완료");
     }
-
 
     // 🔹 플레이어 아이템 저장
     public void SavePlayerItem(PlayerItemData item)
     {
-
-
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                INSERT OR REPLACE INTO playerItems 
-                (itemId, playerId, itemUniqueId, itemType, price, isUnlocked, acquiredAt) 
-                VALUES (@itemId, @playerId, @itemUniqueId, @itemType, @price, @isUnlocked, @acquiredAt);
-            ";
+            var command = connection.CreateCommand(@"
+            INSERT OR REPLACE INTO playerItems 
+            (itemId, playerId, itemUniqueId, itemType, price, isUnlocked, acquiredAt) 
+            VALUES (?, ?, ?, ?, ?, ?, ?);",
+                item.itemId,
+                item.playerId,
+                item.itemUniqueId,
+                item.itemType,
+                item.price,
+                item.isUnlocked ? 1 : 0,
+                item.acquiredAt);
 
-                command.Parameters.AddWithValue("@itemId", item.itemId);
-                command.Parameters.AddWithValue("@playerId", item.playerId);
-                command.Parameters.AddWithValue("@itemUniqueId", item.itemUniqueId);
-                command.Parameters.AddWithValue("@itemType", item.itemType);
-                command.Parameters.AddWithValue("@price", item.price);
-                command.Parameters.AddWithValue("@isUnlocked", item.isUnlocked ? 1 : 0);
-                command.Parameters.AddWithValue("@acquiredAt", item.acquiredAt);
-
-                command.ExecuteNonQuery();
-            }
-            connection.Close();
+            command.ExecuteNonQuery();
         }
-        //Debug.Log("✅ 플레이어 아이템 SQLite에 저장 완료");
     }
-
 
     // 🔹 랭킹 데이터 저장
     public void SaveRankingData(PlayerRankingData ranking)
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                INSERT OR REPLACE INTO rankings (playerId, playerName, rating, rankPosition, profileIcon)
-                VALUES (@playerId, @playerName, @rating, @rankPosition, @profileIcon);";
+            var command = connection.CreateCommand(@"
+            INSERT OR REPLACE INTO rankings 
+            (playerId, playerName, rating, rankPosition, profileIcon)
+            VALUES (?, ?, ?, ?, ?);",
+                ranking.playerId,
+                ranking.playerName,
+                ranking.rating,
+                ranking.rankPosition,
+                ranking.profileIcon);
 
-                command.Parameters.AddWithValue("@playerId", ranking.playerId);
-                command.Parameters.AddWithValue("@playerName", ranking.playerName);
-                command.Parameters.AddWithValue("@rating", ranking.rating);
-                command.Parameters.AddWithValue("@rankPosition", ranking.rankPosition);
-                command.Parameters.AddWithValue("@profileIcon", ranking.profileIcon);
-
-                command.ExecuteNonQuery();
-            }
+            command.ExecuteNonQuery();
         }
     }
+
     // 내 랭킹 데이터 저장
     public void SaveMyRankingData(PlayerRankingData myRanking)
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                INSERT OR REPLACE INTO myRanking 
-                (playerId, playerName, rating, rankPosition, profileIcon)
-                VALUES (@playerId, @playerName, @rating, @rankPosition, @profileIcon);
-            ";
+            var command = connection.CreateCommand(@"
+            INSERT OR REPLACE INTO myRanking 
+            (playerId, playerName, rating, rankPosition, profileIcon)
+            VALUES (?, ?, ?, ?, ?);",
+                myRanking.playerId,
+                myRanking.playerName,
+                myRanking.rating,
+                myRanking.rankPosition,
+                myRanking.profileIcon);
 
-                command.Parameters.AddWithValue("@playerId", myRanking.playerId);
-                command.Parameters.AddWithValue("@playerName", myRanking.playerName);
-                command.Parameters.AddWithValue("@rating", myRanking.rating);
-                command.Parameters.AddWithValue("@rankPosition", myRanking.rankPosition);
-                command.Parameters.AddWithValue("@profileIcon", myRanking.profileIcon);
-
-
-                command.ExecuteNonQuery();
-            }
+            command.ExecuteNonQuery();
         }
-        Debug.Log("✅ 내 랭킹 데이터 SQLite에 저장 완료!");
+        Debug.Log("✅ 내 랭킹 데이터 저장 완료");
     }
+
 
     // ===================== 🟢 데이터 로드 함수들 ===================== //
 
     // 🔹 1️⃣ 플레이어 데이터 불러오기
     public PlayerData LoadPlayerData()
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            string query = "SELECT * FROM players Limit 1";//WHERE deviceId = @deviceId";//추가 가능
-
-            using (var command = new SqliteCommand(query, connection))
+            var result = connection.Query<PlayerData>("SELECT * FROM players LIMIT 1");
+            if (result.Count > 0)
             {
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        PlayerData loadedPlayer = new PlayerData(
-                            reader.GetInt32(0),  // playerId
-                            reader.GetString(1), // deviceId
-                            reader.GetString(2), // googleId
-                            reader.GetString(3), // playerName
-                            reader.GetString(4), // profileIcon
-                            reader.GetString(5), // boardImage
-                            reader.GetInt32(6),  // rating
-                            reader.GetInt32(7),  // currency
-                            reader.GetString(8)  // createdAt
-                        );
-                        //Debug.Log($"✅ 불러온 플레이어 데이터: {loadedPlayer.ToString()}");
-                        return loadedPlayer;
-                    }
-                }
+                return result[0];
             }
         }
         Debug.Log("❌ SQLite에 플레이어 데이터 없음");
-        return null; // 플레이어 데이터 없음
+        return null;
     }
+
 
 
     // 🔹 2️⃣ 플레이어 스탯 불러오기 (SQLite)
     public PlayerStatsData LoadPlayerStats()
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            string query = "SELECT * FROM playerStats WHERE playerId = @playerId";
-            using (var command = new SqliteCommand(query, connection))
+            var result = connection.Query<PlayerStatsData>(
+                "SELECT * FROM playerStats WHERE playerId = ?", player.playerId);
+            if (result.Count > 0)
             {
-                command.Parameters.AddWithValue("@playerId", player.playerId);
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        int totalGames = reader.GetInt32(1);
-                        int wins = reader.GetInt32(2);
-                        int losses = reader.GetInt32(3);
-                        double winRate = reader.GetDouble(4); // REAL 값 가져오기
-
-                        //Debug.Log($"✅ 플레이어 스탯 로드 성공: playerId={player.playerId}, totalGames={totalGames}, wins={wins}, losses={losses}, winRate={winRate}");
-
-                        return new PlayerStatsData(player.playerId, totalGames, wins, losses, (float)winRate);
-                    }
-                }
+                return result[0];
             }
         }
-        Debug.LogWarning($"⚠️ playerStats 테이블에서 playerId={player.playerId} 데이터를 찾을 수 없음!");
+        Debug.LogWarning($"playerStats 테이블에서 playerId={player.playerId} 데이터를 찾을 수 없음!");
         return null;
     }
+
 
     // 🔹 3️⃣ 로그인 기록 불러오기
     public LoginData LoadLoginData()
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            string query = "SELECT * FROM loginRecords ORDER BY loginTime DESC LIMIT 1";
-            using (var command = new SqliteCommand(query, connection))
+            var result = connection.Query<LoginData>(
+                "SELECT * FROM loginRecords ORDER BY loginTime DESC LIMIT 1");
+            if (result.Count > 0)
             {
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        int loginId = reader.GetInt32(0);
-                        int playerId = reader.GetInt32(1);
-                        // 🔹 loginTime이 NULL일 가능성이 있으므로 체크
-                        string loginTime = reader.IsDBNull(2) ? "" : reader.GetString(2);
-
-                        // 🔹 ipAddress가 NULL일 가능성이 있으므로 체크
-                        string ipAddress = reader.IsDBNull(3) ? "0.0.0.0" : reader.GetString(3);
-
-                        return new LoginData(
-                            loginId,  // loginId
-                            playerId,  // playerId
-                            loginTime, // loginTime
-                            ipAddress  // ipAddress
-                        );
-                    }
-                }
+                return result[0];
             }
         }
-        return null; // 로그인 기록 없음
+        return null;
     }
+
 
     // 🔹 4️⃣ 매치 기록 불러오기 (리스트 반환)
     public List<MatchHistoryData> LoadMatchHistory()
     {
-        List<MatchHistoryData> matchList = new List<MatchHistoryData>();
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            string query = @"
-            SELECT matchId, player1Id, player1Name, player1Rating, player1Icon, 
-                   player2Id, player2Name, player2Rating, player2Icon, 
-                   winnerId, strftime('%Y-%m-%d %H:%M:%S', matchDate) as matchDate 
-            FROM matchRecords ORDER BY matchDate DESC
-            LIMIT 10;";
-
-            using (var command = new SqliteCommand(query, connection))
-            {
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        matchList.Add(new MatchHistoryData(
-                            reader.GetInt32(0),  // matchId
-                            reader.GetInt32(1),  // player1Id
-                            reader.GetString(2), // player1Name
-                            reader.GetInt32(3),  // player1Rating
-                            reader.GetString(4), // player1Icon
-
-                            reader.GetInt32(5),  // player2Id
-                            reader.GetString(6), // player2Name
-                            reader.GetInt32(7),  // player2Rating
-                            reader.GetString(8), // player2Icon
-
-                            reader.GetInt32(9),  // winnerId
-                            reader.GetValue(10).ToString()  // matchDate
-                        ));
-                    }
-                }
-            }
+            return connection.Query<MatchHistoryData>(
+                @"SELECT matchId, player1Id, player1Name, player1Rating, player1Icon, 
+                     player2Id, player2Name, player2Rating, player2Icon, 
+                     winnerId, strftime('%Y-%m-%d %H:%M:%S', matchDate) as matchDate 
+              FROM matchRecords 
+              ORDER BY matchDate DESC 
+              LIMIT 10;");
         }
-        return matchList;
     }
+
 
     // 🔹 플레이어 아이템 불러오기 (리스트 반환)
     public List<PlayerItemData> LoadPlayerItems()
     {
-        List<PlayerItemData> itemList = new List<PlayerItemData>();
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            string query = "SELECT * FROM playerItems";
-            using (var command = new SqliteCommand(query, connection))
-            {
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        itemList.Add(new PlayerItemData(
-                            reader.GetInt32(0),  // itemId
-                            reader.GetInt32(1),  // playerId
-                            reader.GetInt32(2),  // itemUniqueId
-                            reader.GetString(3), // itemType
-                            reader.GetInt32(4),  // 
-                            reader.GetInt32(5) == 1, // isUnlocked
-                            reader.GetString(6)  // acquiredAt
-                        ));
-                    }
-                }
-            }
+            return connection.Query<PlayerItemData>("SELECT * FROM playerItems");
         }
-        return itemList;
     }
 
 
-    // 🔹 랭킹 데이터 불러오기
+
     public List<PlayerRankingData> LoadRankings()
     {
-        List<PlayerRankingData> rankings = new List<PlayerRankingData>();
-
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            string query = "SELECT * FROM rankings ORDER BY rankPosition ASC";
-            using (var command = new SqliteCommand(query, connection))
-            {
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        rankings.Add(new PlayerRankingData(
-                            reader.GetInt32(0), // playerId
-                            reader.GetString(1), // playerName
-                            reader.GetInt32(2),  // rating
-                            reader.GetInt32(3),  // rankPosition
-                            !reader.IsDBNull(4) ? reader.GetString(4) : "101" // 🔹 NULL 체크 후 기본값 설정
-                        ));
-                    }
-                }
-            }
+            var command = connection.CreateCommand("SELECT * FROM rankings ORDER BY rankPosition ASC");
+            return new List<PlayerRankingData>(command.ExecuteDeferredQuery<PlayerRankingData>());
         }
-        return rankings;
     }
-    // 내 랭킹 데이터 불러오기
+
+
     public PlayerRankingData LoadMyRankingData()
     {
-        using (var connection = new SqliteConnection(dbPath))
+        using (var connection = new SQLiteConnection(dbPath))
         {
-            connection.Open();
-            using (var command = connection.CreateCommand())
+            var command = connection.CreateCommand(
+                "SELECT * FROM myRanking WHERE playerId = ?", player.playerId);
+
+            var result = new List<PlayerRankingData>(command.ExecuteDeferredQuery<PlayerRankingData>());
+
+            if (result.Count > 0)
             {
-                command.CommandText = "SELECT * FROM myRanking WHERE playerId = @playerId";
-                command.Parameters.AddWithValue("@playerId", player.playerId);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        PlayerRankingData myRanking = new PlayerRankingData(
-                            reader.GetInt32(0),  // playerId
-                            reader.GetString(1), // playerName
-                            reader.GetInt32(2),  // rating
-                            reader.GetInt32(3),   // rankPosition
-                            !reader.IsDBNull(4) ? reader.GetString(4) : "101" // 🔹 NULL 체크 후 기본값 설정
-                        );
-
-                        Debug.Log($"✅ [SQLite] 내 랭킹 데이터 로드 성공: {myRanking.playerName} (Rank: {myRanking.rankPosition})");
-                        return myRanking;
-                    }
-                }
+                Debug.Log($" [SQLite] 내 랭킹 데이터 로드 성공: {result[0].playerName} (Rank: {result[0].rankPosition})");
+                return result[0];
             }
         }
 
-        Debug.LogWarning("⚠️ [SQLite] 내 랭킹 데이터 없음!");
-        return null; // 저장된 내 랭킹 데이터가 없는 경우
+        Debug.LogWarning(" [SQLite] 내 랭킹 데이터 없음!");
+        return null;
     }
+
+
+
 
 }

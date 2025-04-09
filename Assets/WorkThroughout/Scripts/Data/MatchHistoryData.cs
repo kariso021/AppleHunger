@@ -1,24 +1,25 @@
-﻿using Unity.Netcode;
-using System;
-
+﻿using System;
+using SQLite;
 [Serializable]
-public struct MatchHistoryData : INetworkSerializable
+[Table("matchRecords")]
+public class MatchHistoryData
 {
-    public int matchId;
-    public int player1Id;
-    public string player1Name;
-    public int player1Rating;
-    public string player1Icon;
+    [PrimaryKey]
+    public int matchId { get; set; }
+    public int player1Id { get; set; }
+    public string player1Name { get; set; }
+    public int player1Rating { get; set; }
+    public string player1Icon { get; set; }
+    public int player2Id { get; set; }
+    public string player2Name { get; set; }
+    public int player2Rating { get; set; }
+    public string player2Icon { get; set; }
+    public int winnerId { get; set; }
+    public string matchDate { get; set; }
 
-    public int player2Id;
-    public string player2Name;
-    public int player2Rating;
-    public string player2Icon;
+    public MatchHistoryData() { }
 
-    public int winnerId;
-    public string matchDate;
-
-    // 🔥 사용자 정의 생성자 추가 (모든 필드 초기화)
+    // 커스텀 생성자
     public MatchHistoryData(int matchId, int player1Id, string player1Name, int player1Rating, string player1Icon,
                             int player2Id, string player2Name, int player2Rating, string player2Icon,
                             int winnerId, string matchDate)
@@ -36,21 +37,5 @@ public struct MatchHistoryData : INetworkSerializable
 
         this.winnerId = winnerId;
         this.matchDate = matchDate;
-    }
-
-    // 🔥 Netcode 직렬화 지원 (INetworkSerializable 구현)
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref matchId);
-        serializer.SerializeValue(ref player1Id);
-        serializer.SerializeValue(ref player1Name);
-        serializer.SerializeValue(ref player1Rating);
-        serializer.SerializeValue(ref player1Icon);
-        serializer.SerializeValue(ref player2Id);
-        serializer.SerializeValue(ref player2Name);
-        serializer.SerializeValue(ref player2Rating);
-        serializer.SerializeValue(ref player2Icon);
-        serializer.SerializeValue(ref winnerId);
-        serializer.SerializeValue(ref matchDate);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -15,7 +16,7 @@ public class Managers : MonoBehaviour
     {
         string url = $"{apiBaseUrl}/players/{updatedData.playerId}";
 
-        string jsonData = JsonUtility.ToJson(updatedData);
+        string jsonData = JsonConvert.SerializeObject(updatedData);
         using (UnityWebRequest request = new UnityWebRequest(url, "PUT")) // PUT 사용
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
@@ -39,7 +40,7 @@ public class Managers : MonoBehaviour
     public IEnumerator UpdateCurrencyAndRating(int playerId, int currency, int rating)
     {
         string url = $"{apiBaseUrl}/players/updateRewards";
-        string jsonData = JsonUtility.ToJson(new UpdateStatsRequest(playerId, currency, rating));
+        string jsonData = JsonConvert.SerializeObject(new UpdateStatsRequest(playerId, currency, rating));
 
         UnityWebRequest request = new UnityWebRequest(url, "PUT");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);

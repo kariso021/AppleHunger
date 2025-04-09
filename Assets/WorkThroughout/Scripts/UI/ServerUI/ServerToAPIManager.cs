@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ public class ServerToAPIManager : MonoBehaviour
             "101",
             "201",
             1200, 500);
-        string jsonData = JsonUtility.ToJson(newPlayer);
+        string jsonData = JsonConvert.SerializeObject(newPlayer);
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
@@ -56,7 +57,7 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string playerJsonData = request.downloadHandler.text;
-                PlayerAddResponse response = JsonUtility.FromJson<PlayerAddResponse>(playerJsonData);
+                PlayerAddResponse response = JsonConvert.DeserializeObject<PlayerAddResponse>(playerJsonData);
 
                 // 클라이언트에 Players 정보 저장
                 TargetReceivePlayerDataClientRpc(playerJsonData);
@@ -93,7 +94,7 @@ public class ServerToAPIManager : MonoBehaviour
     {
         string url = $"{apiBaseUrl}/players/updatePlayer/{updatedData.playerId}";
 
-        string jsonData = JsonUtility.ToJson(updatedData);
+        string jsonData = JsonConvert.SerializeObject(updatedData);
         using (UnityWebRequest request = new UnityWebRequest(url, "PUT")) // PUT 사용
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
@@ -149,7 +150,7 @@ public class ServerToAPIManager : MonoBehaviour
     {
         string url = $"{apiBaseUrl}/players/updateNickname";
         int playerId = SQLiteManager.Instance.player.playerId;
-        string jsonData = JsonUtility.ToJson(new NicknameUpdateRequest(playerId, playerName));
+        string jsonData = JsonConvert.SerializeObject(new NicknameUpdateRequest(playerId, playerName));
 
         UnityWebRequest request = new UnityWebRequest(url, "PUT");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
@@ -190,7 +191,7 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                var response = JsonUtility.FromJson<NicknameDuplicateResponse>(request.downloadHandler.text);
+                var response = JsonConvert.DeserializeObject<NicknameDuplicateResponse>(request.downloadHandler.text);
                 callback?.Invoke(response.isDuplicate);
             }
             else
@@ -244,7 +245,7 @@ public class ServerToAPIManager : MonoBehaviour
             {
                 string jsonData = request.downloadHandler.text; // Matchrecords 테이블에서 playerId가 동일한 컬럼들만 추려서 json형태로 list를 만들어 가져온다는 느낌
                 Debug.Log($"매치 데이터 json {jsonData}");
-                MatchHistoryResponse response = JsonUtility.FromJson<MatchHistoryResponse>(jsonData);
+                MatchHistoryResponse response = JsonConvert.DeserializeObject<MatchHistoryResponse>(jsonData);
 
                 Debug.Log($"✅ 매치 기록 조회 성공! 총 {response.matches.Length}개 경기");
 
@@ -316,12 +317,12 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text;
-                PlayerItemsResponse response = JsonUtility.FromJson<PlayerItemsResponse>(jsonData);
+                PlayerItemsResponse response = JsonConvert.DeserializeObject<PlayerItemsResponse>(jsonData);
 
                 // 🔹 리스트 안에 여러 개의 아이템이 들어있으므로, 각각을 TargetReceivePlayerItems로 넘겨줌
                 foreach (var playerItem in response.items)
                 {
-                    TargetReceivePlayerItemsClientRpc(JsonUtility.ToJson(playerItem));
+                    TargetReceivePlayerItemsClientRpc(JsonConvert.SerializeObject(playerItem));
                 }
 
                 //DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
@@ -397,7 +398,9 @@ public class ServerToAPIManager : MonoBehaviour
         ClientNetworkManager.Instance.TargetReceiveLoginDataClientRpc(jsonData);
 
         // 로그인 데이터를 여러개로 관리할 게 아니라 하나로 관리할 예정인데 이건 나중에 order같은걸 해서 빼던가 해야할거같음
-        //List<LoginRecordData> loginRecords = JsonUtility.FromJson<LoginRecordList>(jsonData).records;
+        //List<LoginRecordData> loginRecords =
+        //
+        //.FromJson<LoginRecordList>(jsonData).records;
 
         //foreach (var record in loginRecords)
         //{
@@ -409,7 +412,7 @@ public class ServerToAPIManager : MonoBehaviour
     public IEnumerator UpdateLoginTime(int playerId, string ipAddress)
     {
         string url = $"{apiBaseUrl}/loginRecords";
-        string jsonData = JsonUtility.ToJson(new LoginUpdateRequest(playerId, ipAddress));
+        string jsonData = JsonConvert.SerializeObject(new LoginUpdateRequest(playerId, ipAddress));
         // JsonUtility는 명시적인 클래스 구조를 필요로 하기때문에 별도의 DTO(Data Transfer Object) 클래스 생성해서 넘겨줌
 
         using (UnityWebRequest request = new UnityWebRequest(url, "PUT"))
@@ -465,6 +468,8 @@ public class ServerToAPIManager : MonoBehaviour
     public IEnumerator GetMyRankingData(int playerId)
     {
         string url = $"{apiBaseUrl}/rankings/{playerId}";
+
+        Debug.Log($"최초 실행시 들어오는 playerID : {playerId}");
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -525,7 +530,7 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string json = request.downloadHandler.text;
-                var result = JsonUtility.FromJson<RankingShouldUpdateResponse>(json);
+                var result = JsonConvert.DeserializeObject<RankingShouldUpdateResponse>(json);
 
                 if (result.shouldUpdate)
                 {

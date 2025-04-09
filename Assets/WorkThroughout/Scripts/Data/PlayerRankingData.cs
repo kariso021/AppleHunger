@@ -1,16 +1,20 @@
+using SQLite;
 using System;
 using System.Collections.Generic;
-using UnityEngine.Experimental.GlobalIllumination;
 
 [Serializable]
+[Table("rankings")]
 public class PlayerRankingData
 {
-    public int playerId;       // 플레이어 ID
-    public string playerName;  // 플레이어 이름
-    public int rating;         // 레이팅 점수
-    public int rankPosition;   // 랭킹 순위
-    public string profileIcon;
+    [PrimaryKey]
+    public int playerId { get; set; }       // 플레이어 ID
 
+    public string playerName { get; set; } // 플레이어 이름
+    public int rating { get; set; }         // 레이팅 점수
+    public int rankPosition { get; set; }   // 랭킹 순위
+    public string profileIcon { get; set; }
+
+    public PlayerRankingData() { }
     public PlayerRankingData(int playerId, string playerName, int rating, int rankPosition, string profileIcon)
     {
         this.playerId = playerId;

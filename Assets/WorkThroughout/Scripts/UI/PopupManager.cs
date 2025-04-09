@@ -60,6 +60,7 @@ public class PopupManager : MonoBehaviour
     }
     public void ShowPopup(GameObject popup, int playerId)
     {
+        Debug.Log("팝업실행");
         // 만약 현재 활성화 된 팝업이 있다면?
         if (activePopup != null)
         {
