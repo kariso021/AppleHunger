@@ -43,6 +43,7 @@ public class PlayerRegister : NetworkBehaviour
             rating = SQLiteManager.Instance.player.rating;
             profileIcon = SQLiteManager.Instance.player.profileIcon;
             nickName = SQLiteManager.Instance.player.playerName;
+            
 
         }
         else
@@ -56,6 +57,7 @@ public class PlayerRegister : NetworkBehaviour
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
             PlayerDataManager.Instance.RegisterPlayerNickNameServerRpc(nickName);
             PlayerDataManager.Instance.RegisterPlayerProfileServerRpc(profileIcon);
+            ScoreManager.Instance.AddScore(NetworkManager.Singleton.LocalClientId, 0, 0); //점수 초기등록
 
 
             Debug.Log($"✅ Player 등록 완료 - ID: {playerId}, Rating: {rating}, Icon: {profileIcon}");

@@ -58,7 +58,7 @@ public class PlayerController : NetworkBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
-        //scoreManager = GetComponent<ScoreManager>(); // ScoreManager 연결
+     
 
         if (localDragBox != null)
         {

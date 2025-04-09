@@ -38,16 +38,13 @@ public class GameEnding : NetworkBehaviour
         LastWinnerId = winnerId;
         LastLoserId = loserId;
 
-        ShowGameOverScreenClientRpc(winnerId, loserId);
 
         SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
 
+
         NotifyClientsToFetchDataClientRpc();
 
-       
-        SceneManager.LoadScene("Lobby");
-
-        ShutdownServer();
+        ShutdownNetworkObject();
     }
 
 
@@ -93,46 +90,69 @@ public class GameEnding : NetworkBehaviour
 
     /// 게임 결과 UI 표시 (클라이언트)
     [ClientRpc]
-    private void ShowGameOverScreenClientRpc(int winnerPlayerId, int loserPlayerId)
+    private void ShowGameOverScreenClientRpc(
+     int winnerPlayerId,
+     int loserPlayerId,
+     int ratingDelta,
+     int winnerGold,
+     int loserGold)
     {
         gameOverPanel.SetActive(true);
 
         int myId = SQLiteManager.Instance.player.playerId;
+        int myRating = SQLiteManager.Instance.player.rating;
+        int myCurrency = SQLiteManager.Instance.player.currency;
 
-        if (myId == winnerPlayerId)
+        string result;
+        int finalRating = myRating;
+        int finalGold = myCurrency;
+
+        bool isWinner = (myId == winnerPlayerId);
+        bool isLoser = (myId == loserPlayerId);
+
+        if (isWinner)
         {
-            resultText.text = "Winner!";
+            result = "🏆 Winner!";
+            finalRating += ratingDelta;
+            finalGold += winnerGold;
         }
-        else if (myId == loserPlayerId)
+        else if (isLoser)
         {
-            resultText.text = "Loser...";
+            result = "❌ Loser...";
+            finalRating -= ratingDelta;
+            finalGold += loserGold;
         }
         else
         {
-            resultText.text = "Draw?";
+            result = "Draw?";
         }
+
+        string ratingLine = $"Rating: {myRating} → {finalRating}  ({(isWinner ? "+" : "-")}{ratingDelta})";
+        string goldLine = $"Gold: {myCurrency} → {finalGold}  (+{(isWinner ? winnerGold : (isLoser ? loserGold : 0))})";
+
+        resultText.text = $"{result}\n{ratingLine}\n{goldLine}";
     }
 
     ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
 
     private void SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
     {
-        if (Managers == null)
-        {
-            Debug.Log("❌ Managers 참조가 없습니다");
-        }
 
         Debug.Log("서버에 승자 제출");
 
-        Managers.AddMatchResult(winnerID, loserID);
+        StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
 
         int winnerGold = 100 + UnityEngine.Random.Range(0, 91);
         int loserGold = UnityEngine.Random.Range(0, 91);
 
         int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
 
-        Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta);
-        Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta);
+        StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta));
+        StartCoroutine(Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta));
+
+
+        ShowGameOverScreenClientRpc(winnerID, loserID, ratingDelta, winnerGold, loserGold);
+
     }
 
 
@@ -147,23 +167,12 @@ public class GameEnding : NetworkBehaviour
         StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId));
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId));
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
-
     }
 
     ///--------------------------------------추후에 로딩씬으로 넘기고 나중에 바꾸기<로딩씬으로>--------------------------------------------------------
 
 
-    //New version
-    [ClientRpc]
-    private void GoToLobbyClientRpc()
-    {
-        
-        NetworkManager.Singleton.Shutdown();
-        Destroy(NetworkManager.Singleton.gameObject);
 
-        SceneManager.LoadScene("Lobby");
-
-    }
 
     //-----------------------------------------------점수처리함수 목록------------------------------------------------------------------
 
@@ -180,15 +189,13 @@ public class GameEnding : NetworkBehaviour
     }
 
     //-------------------------------------------------------ServerShutDown---------------------------------------------------------------
+    //어려웠던 부분
 
-    private void ShutdownServer()
+
+    private void ShutdownNetworkObject()
     {
         Debug.Log("서버 종료");
-
-#if UNITY_SERVER
         NetworkManager.Singleton.Shutdown();
-        Application.Quit();
-#endif
     }
 
     //------------------------------------------------------------------------------------ DB로 결과 조정 순차적 진행을 위해 코루틴.

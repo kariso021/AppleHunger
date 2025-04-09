@@ -8,12 +8,12 @@ public class ScoreManager : NetworkBehaviour
 
     private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
     private Dictionary<ulong, float> lastCollectTime = new Dictionary<ulong, float>();
-  
+
 
     //콤보 점수 계산을 위한 변수
     [SerializeField] private float comboDuration = 2f; // 콤보 지속 시간
     [SerializeField] private float comboScoreMultiplier = 0.2f; // 콤보 점수 배율
-    [SerializeField] private Dictionary<ulong , int> comboCounts= new Dictionary<ulong, int>(); // 콤보 점수 저장
+    [SerializeField] private Dictionary<ulong, int> comboCounts = new Dictionary<ulong, int>(); // 콤보 점수 저장
     [SerializeField] private int maxCombo = 5; // 최대 콤보 수
 
 
@@ -64,11 +64,11 @@ public class ScoreManager : NetworkBehaviour
             playerScores[ClientID] = 0;
         }
 
-        if(!lastCollectTime.ContainsKey(ClientID) || now - lastCollectTime[ClientID] > comboDuration)
-    {
+        if (!lastCollectTime.ContainsKey(ClientID) || now - lastCollectTime[ClientID] > comboDuration)
+        {
             comboCounts[ClientID] = 1;
         }
-    else
+        else
         {
             comboCounts[ClientID] = Mathf.Min(comboCounts.GetValueOrDefault(ClientID, 0) + 1, maxCombo);
         }
@@ -100,4 +100,15 @@ public class ScoreManager : NetworkBehaviour
     {
         return new Dictionary<ulong, int>(playerScores); // 점수 복사하여 반환
     }
+
+
+    [ServerRpc]
+    public void InitializePlayerScoreServerRpc(ulong clientId)
+    {
+        if (!playerScores.ContainsKey(clientId))
+        {
+            playerScores[clientId] = 0;
+        }
+    }
+
 }
