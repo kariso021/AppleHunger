@@ -66,8 +66,9 @@ public class EmotionUI : MonoBehaviour
 
     public void ShowOpponentEmotion(EmtionType emotion)
     {
-        Color color = GetColorFromEmotion(emotion);
-        opponent_ShowEmotionImage.color = color;
+        string EmotionCode = GetStringFromEmotion(emotion);
+
+        AddressableManager.Instance.LoadImageFromGroup(EmotionCode, opponent_ShowEmotionImage);
         opponent_ShowEmotionPanel.SetActive(true);
         StartCoroutine(HideOpponentAfterSeconds(1f));
     }
@@ -78,14 +79,14 @@ public class EmotionUI : MonoBehaviour
         opponent_ShowEmotionPanel.SetActive(false);
     }
 
-    private Color GetColorFromEmotion(EmtionType emotion) 
+    private string GetStringFromEmotion(EmtionType emotion) 
     {
         switch (emotion)
         {
-            case EmtionType.Taunt: return Color.red;
-            case EmtionType.Laugh: return Color.yellow;
-            case EmtionType.Clap: return Color.blue;
-            default: return Color.white;
+            case EmtionType.Taunt: return "306";
+            case EmtionType.Laugh: return "305";
+            case EmtionType.Clap: return "303";
+            default: return "301";
         }
     }
 }

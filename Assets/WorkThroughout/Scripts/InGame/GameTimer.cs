@@ -12,6 +12,22 @@ public class GameTimer : NetworkBehaviour
     public static event Action OnGameEnded;
     public static event Action<float> OnTimerUpdated;
 
+
+    public static GameTimer Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+
+
+
     public override void OnNetworkSpawn()
     {
         if (IsServer)
@@ -59,5 +75,15 @@ public class GameTimer : NetworkBehaviour
     private void HandleTimerUpdated(float oldTime, float newTime)
     {
         OnTimerUpdated?.Invoke(newTime);
+    }
+
+    public void ExtendTime(float extraSeconds)
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        totalGameTime += extraSeconds;
     }
 }

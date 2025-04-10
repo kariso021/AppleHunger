@@ -98,6 +98,11 @@ public class ScoreManager : NetworkBehaviour
 
     public Dictionary<ulong, int> GetScores()
     {
+        foreach (var kvp in playerScores)
+        {
+            Debug.Log($"PlayerId: {kvp.Key}, Score: {kvp.Value}");
+        }
+
         return new Dictionary<ulong, int>(playerScores); // 점수 복사하여 반환
     }
 
@@ -109,6 +114,12 @@ public class ScoreManager : NetworkBehaviour
         {
             playerScores[clientId] = 0;
         }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestAddScoreServerRpc(ulong clientId, int appleCount, int appleScoreValue)
+    {
+        AddScore(clientId, appleCount, appleScoreValue);
     }
 
 }

@@ -18,9 +18,9 @@ public class EmotionUIHandler : MonoBehaviour
 
     private void PlayEmotionLocally(EmtionType emotion)
     {
-        Color color = GetEmotionColor(emotion);
+        string EmotionString = GetEmotionCode(emotion);
 
-        emotionUI.player_ShowEmotionImage.color = color;
+        AddressableManager.Instance.LoadImageFromGroup(EmotionString, emotionUI.player_ShowEmotionImage);
         emotionUI.player_ShowEmotionPanel.SetActive(true);
 
         StartCoroutine(HideEmotionAfterSeconds(1f));
@@ -32,14 +32,14 @@ public class EmotionUIHandler : MonoBehaviour
         emotionUI.player_ShowEmotionPanel.SetActive(false);
     }
 
-    private Color GetEmotionColor(EmtionType emotion)
+    private string GetEmotionCode(EmtionType emotion)
     {
         switch (emotion)
         {
-            case EmtionType.Taunt: return Color.yellow;
-            case EmtionType.Laugh: return Color.red;
-            case EmtionType.Clap: return Color.green;
-            default: return Color.white;
+            case EmtionType.Taunt: return "306";
+            case EmtionType.Laugh: return "305";
+            case EmtionType.Clap: return "303";
+            default: return "301";
         }
     }
 }

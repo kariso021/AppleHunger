@@ -57,7 +57,7 @@ public class PlayerRegister : NetworkBehaviour
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
             PlayerDataManager.Instance.RegisterPlayerNickNameServerRpc(nickName);
             PlayerDataManager.Instance.RegisterPlayerProfileServerRpc(profileIcon);
-            ScoreManager.Instance.AddScore(NetworkManager.Singleton.LocalClientId, 0, 0); //점수 초기등록
+            ScoreManager.Instance.RequestAddScoreServerRpc(NetworkManager.Singleton.LocalClientId, 0, 0); //점수 초기등록
 
 
             Debug.Log($"✅ Player 등록 완료 - ID: {playerId}, Rating: {rating}, Icon: {profileIcon}");
@@ -69,4 +69,6 @@ public class PlayerRegister : NetworkBehaviour
             Debug.LogError($"❌ 등록 중 예외 발생: {ex}");
         }
     }
+
+
 }

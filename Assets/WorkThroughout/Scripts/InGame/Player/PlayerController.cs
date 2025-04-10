@@ -324,4 +324,21 @@ public class PlayerController : NetworkBehaviour
     }
 
 
+    //-------------------------------------------------------------------------------------------
+
+    [ClientRpc]
+    public void RestrictDragOnlyClientRpc()
+    {
+        if (!IsOwner) return;
+        StartCoroutine(RestrictDragOnlyCoroutine());
+    }
+
+    private IEnumerator RestrictDragOnlyCoroutine()
+    {
+        isDragRestricted = true;
+        yield return new WaitForSeconds(2f); // 2초 동안 조작 제한
+        isDragRestricted = false;
+    }
+
+
 }
