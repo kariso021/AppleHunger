@@ -10,6 +10,8 @@ public class CurrencyManager : MonoBehaviour
     public GameObject currecnyLayout;
     public Image currencyIcon;
     public TMP_Text currencyText;
+
+    private static bool isFirst = true;
     private void Start()
     {
         if (currecnyLayout != null)
@@ -20,6 +22,12 @@ public class CurrencyManager : MonoBehaviour
             DataSyncManager.Instance.OnPlayerProfileChanged += DelayedCurrencyUpdate;
             Debug.Log("재화 변화 등록");
 
+            if (isFirst)
+            {
+                isFirst = false;
+                StartCoroutine(DelayedCurrencyUpdateFirstTime());
+                return;
+            }
             DelayedCurrencyUpdate(); // 20250331 일단 강제로 처리를 해두긴 했음. 아마 각 오브젝트들의 로드 순서에따른 문제같은데
             // 당장 해결하기엔 좀 힘듬
         }
@@ -33,9 +41,15 @@ public class CurrencyManager : MonoBehaviour
         CancelInvoke(nameof(currencyChanged));
     }
 
+    private IEnumerator DelayedCurrencyUpdateFirstTime()
+    {
+        yield return ClientNetworkManager.Instance.GetPlayerCurrency();
+
+        DelayedCurrencyUpdate();
+    }
     private void DelayedCurrencyUpdate()
     {
-        Invoke(nameof(currencyChanged), 0.5f); // 딜레이 적용
+        Invoke(nameof(currencyChanged), 0.25f); // 딜레이 적용
     }
 
     private void currencyChanged()

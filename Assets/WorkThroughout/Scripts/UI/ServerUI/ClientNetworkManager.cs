@@ -68,15 +68,19 @@ public class ClientNetworkManager : MonoBehaviour
     }
 
     // 0403 임시
-    //public IEnumerator GetPlayerCurrency()
-    //{
-    //    yield return ServerToAPIManager.Instance.GetPlayerCurrency();
-    //}
-
-    public void TargetReceivePlayerDataClientRpc(string jsonData)
+    public IEnumerator GetPlayerCurrency()
     {
+        yield return ServerToAPIManager.Instance.GetCurrency();
+    }
+
+    public IEnumerator TargetReceivePlayerDataClientRpc(string jsonData)
+    {
+        
         var parsed = JsonConvert.DeserializeObject<PlayerData>(jsonData);
+        Debug.Log($"플레이어 데이터 세이브 직전 : {parsed}");
         SQLiteManager.Instance.SavePlayerData(parsed);
+
+        yield return null;
     }
 
     // 🔹 플레이어 추가

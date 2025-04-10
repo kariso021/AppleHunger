@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -60,7 +61,7 @@ public class ServerToAPIManager : MonoBehaviour
                 PlayerAddResponse response = JsonConvert.DeserializeObject<PlayerAddResponse>(playerJsonData);
 
                 // 클라이언트에 Players 정보 저장
-                TargetReceivePlayerDataClientRpc(playerJsonData);
+                yield return TargetReceivePlayerDataClientRpc(playerJsonData);
 
                 Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
             }
@@ -69,9 +70,9 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
-    private void TargetReceivePlayerDataClientRpc(string jsonData)
+    private IEnumerator TargetReceivePlayerDataClientRpc(string jsonData)
     {
-        ClientNetworkManager.Instance.TargetReceivePlayerDataClientRpc(jsonData);
+        yield return ClientNetworkManager.Instance.TargetReceivePlayerDataClientRpc(jsonData);
     }
 
     public IEnumerator DeletePlayer(int playerId)
@@ -134,7 +135,7 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text;
-                TargetReceivePlayerDataClientRpc(jsonData);
+                yield return TargetReceivePlayerDataClientRpc(jsonData);
             }
             else
             {
@@ -198,6 +199,40 @@ public class ServerToAPIManager : MonoBehaviour
             {
                 Debug.LogError($"❌ 닉네임 중복 확인 실패: {request.error}");
                 callback?.Invoke(false); // 실패 시 기본값 false
+            }
+        }
+    }
+
+    public IEnumerator GetCurrency()
+    {
+        int playerId = SQLiteManager.Instance.player.playerId;
+        string url = $"{apiBaseUrl}/players/getCurrency/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    string json = request.downloadHandler.text;
+                    JObject obj = JObject.Parse(json);
+                    int currency = obj["currency"].Value<int>();
+
+                    Debug.Log($"[API] 플레이어의 현재 보유 화폐: {currency}");
+
+                    SQLiteManager.Instance.SavePlayerCurrency(currency);
+                    
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[API] JSON 파싱 실패: {e.Message}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"[API] 통신 실패: {request.error}");
             }
         }
     }

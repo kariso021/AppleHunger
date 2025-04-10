@@ -390,6 +390,16 @@ public class SQLiteManager : MonoBehaviour
     private IEnumerator loadAllDataAwait()
     {
         LoadAllData();
+
+        if(SQLiteManager.Instance.player == null || SQLiteManager.Instance.player.playerId == 0)
+        {
+            Debug.Log("플레이어 데이터가 비어있음...재요청");
+            yield return ClientNetworkManager.Instance.GetPlayerData(
+                player.googleId == null ? "deviceId" : "googleId", 
+                player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId, 
+                false);
+            LoadAllData();
+        }
         yield return null;
     }
     private void saveRankDataToDictionary()
@@ -430,6 +440,24 @@ public class SQLiteManager : MonoBehaviour
             Debug.Log($"✅ 저장 완료: {rowsAffected}행 변경됨");
         }
     }
+
+    public void SavePlayerCurrency(int currency)
+    {
+        using (var connection = new SQLiteConnection(dbPath))
+        {
+            var command = connection.CreateCommand(@"
+            UPDATE players 
+            SET currency = ? 
+            WHERE playerId = ?;",
+                currency,
+                SQLiteManager.Instance.player.playerId
+            );
+
+            int rowsAffected = command.ExecuteNonQuery();
+            Debug.Log($"✅ Currency 업데이트 완료: {rowsAffected}행 변경됨");
+        }
+    }
+
 
 
     // 🔹 플레이어 스탯 저장

@@ -22,16 +22,16 @@ public class GameEnding : NetworkBehaviour
 
     private void OnEnable()
     {
-        GameTimer.OnGameEnded += HandleGameEnd;
+        GameTimer.OnGameEnded += () => StartCoroutine(HandleGameEnd());
     }
 
     private void OnDisable()
     {
-        GameTimer.OnGameEnded -= HandleGameEnd;
+        GameTimer.OnGameEnded -= () => StartCoroutine(HandleGameEnd());
     }
 
     /// 서버에서 게임 종료 처리
-    private void HandleGameEnd()
+    private IEnumerator HandleGameEnd()
     {
         DetermineWinner(out int winnerId, out int loserId, out int winnerRating, out int loserRating);
 
@@ -39,7 +39,7 @@ public class GameEnding : NetworkBehaviour
         LastLoserId = loserId;
 
 
-        SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
+        yield return SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
 
 
         NotifyClientsToFetchDataClientRpc();
@@ -135,20 +135,22 @@ public class GameEnding : NetworkBehaviour
 
     ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
 
-    private void SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
+    private IEnumerator SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
     {
 
         Debug.Log("서버에 승자 제출");
 
-        StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
+        yield return StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
 
         int winnerGold = 100 + UnityEngine.Random.Range(0, 91);
         int loserGold = UnityEngine.Random.Range(0, 91);
 
         int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
 
-        StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta));
-        StartCoroutine(Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta));
+        yield return StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta));
+        yield return StartCoroutine(Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta));
+
+
 
 
         ShowGameOverScreenClientRpc(winnerID, loserID, ratingDelta, winnerGold, loserGold);
