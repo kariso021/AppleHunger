@@ -13,6 +13,9 @@ using System.Collections;
 
 public class GameEnding : NetworkBehaviour
 {
+    public static GameEnding Instance { get; private set; }
+
+
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TMPro.TextMeshProUGUI resultText;
     [SerializeField] private GameObject extendPanel;
@@ -20,7 +23,7 @@ public class GameEnding : NetworkBehaviour
     private bool resultIsDraw = false;
     public Managers Managers;
 
-    private enum GameResultType
+    public enum GameResultType
     {
         Win,     // 승패 있음
         Draw,    // 무승부 (연장 후)
@@ -29,6 +32,18 @@ public class GameEnding : NetworkBehaviour
 
     public static int LastWinnerId { get; private set; }
     public static int LastLoserId { get; private set; }
+
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject); // 중복 방지
+            return;
+        }
+
+        Instance = this;
+    }
 
     private void OnEnable()
     {
@@ -52,7 +67,7 @@ public class GameEnding : NetworkBehaviour
 
         if (result == GameResultType.Extend)
         {
-            Debug.Log("⏸ 게임 연장 처리됨 → 종료 중단");
+            Debug.Log("게임 연장 처리됨 → 종료 중단");
             yield break;
         }
 
@@ -73,7 +88,7 @@ public class GameEnding : NetworkBehaviour
     }
 
 
-    private GameResultType DetermineWinner(
+    public GameResultType DetermineWinner(
     out int winnerId,
     out int loserId,
     out int winnerRating,
@@ -89,7 +104,7 @@ public class GameEnding : NetworkBehaviour
 
         if (scores.Count == 0)
         {
-            Debug.LogWarning("❌ 플레이어 없음");
+            Debug.LogWarning("플레이어 없음");
             return GameResultType.Win; // 그냥 종료
         }
 
@@ -110,7 +125,7 @@ public class GameEnding : NetworkBehaviour
             if (hasExtendedOnce)
             {
                 resultIsDraw = true;
-                Debug.Log("🤝 연장 후 무승부 처리");
+                Debug.Log("연장 후 무승부 처리");
                 winnerId = playerDataManager.GetNumberFromClientID(sorted[0].Key);
                 loserId = playerDataManager.GetNumberFromClientID(sorted[1].Key);
                 winnerRating = playerDataManager.GetRatingFromClientID(sorted[0].Key);
@@ -119,7 +134,7 @@ public class GameEnding : NetworkBehaviour
             }
 
             hasExtendedOnce = true;
-            Debug.Log("🔁 무승부 → 15초 연장");
+            Debug.Log(" 무승부 → 15초 연장");
             StartCoroutine(HandleGameTimeExtension(15f));
             return GameResultType.Extend;
         }
@@ -151,11 +166,6 @@ public class GameEnding : NetworkBehaviour
         if (extendPanel != null)
             extendPanel.SetActive(true);
 
-        if (resultText != null)
-        {
-            resultText.text = "15초 연장!";
-            resultText.gameObject.SetActive(true);
-        }
 
         yield return new WaitForSeconds(2f);
 
