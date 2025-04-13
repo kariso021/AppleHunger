@@ -1,27 +1,24 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
-using System.Linq;
-using Unity.Services.Matchmaker.Models;
-#if UNITY_SEREVR
-using Unity.Services.Multiplay;
-#endif
-using Unity.Services.Authentication;
-using System.Collections;
+using TMPro;
 
 public class GameEnding : NetworkBehaviour
 {
     public static GameEnding Instance { get; private set; }
 
-
     [SerializeField] private GameObject gameOverPanel;
-    [SerializeField] private TMPro.TextMeshProUGUI resultText;
+    [SerializeField] private TextMeshProUGUI resultText;
     [SerializeField] private GameObject extendPanel;
     private bool hasExtendedOnce = false;
     private bool resultIsDraw = false;
-    public Managers Managers;
+    public Managers Managers; // DB 등 외부 매니저
+
+    private bool hasFinalGameBeenHandled = false; // 최종 게임 종료 처리 여부
 
     public enum GameResultType
     {
@@ -33,7 +30,6 @@ public class GameEnding : NetworkBehaviour
     public static int LastWinnerId { get; private set; }
     public static int LastLoserId { get; private set; }
 
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -41,7 +37,6 @@ public class GameEnding : NetworkBehaviour
             Destroy(gameObject); // 중복 방지
             return;
         }
-
         Instance = this;
     }
 
@@ -55,15 +50,31 @@ public class GameEnding : NetworkBehaviour
         GameTimer.OnGameEnded -= OnGameEndedHandler;
     }
 
+    // OnGameEndedHandler에서 연장 상태이면 최종 처리 없이 무시함
     private void OnGameEndedHandler()
     {
+        // 만약 현재 GameTimer가 연장 모드라면, 최종 로직을 진행하지 않음
+        if (GameTimer.Instance != null && GameTimer.Instance.IsInExtension)
+        {
+            Debug.Log("연장 중이므로 OnGameEndedHandler 실행 무시");
+            return;
+        }
+
         StartCoroutine(HandleGameEnd());
     }
 
+    /// <summary>
     /// 서버에서 게임 종료 처리
+    /// </summary>
     private IEnumerator HandleGameEnd()
     {
+        if (hasFinalGameBeenHandled)
+        {
+            yield break;
+        }
+
         var result = DetermineWinner(out int winnerId, out int loserId, out int winnerRating, out int loserRating);
+
 
         if (result == GameResultType.Extend)
         {
@@ -71,12 +82,13 @@ public class GameEnding : NetworkBehaviour
             yield break;
         }
 
+        hasFinalGameBeenHandled = true;
         LastWinnerId = winnerId;
         LastLoserId = loserId;
 
         if (result == GameResultType.Draw)
         {
-            yield return SubmitDrawToDB(winnerId,loserId,winnerRating,loserRating);
+            yield return SubmitDrawToDB(winnerId, loserId, winnerRating, loserRating);
         }
         else if (result == GameResultType.Win)
         {
@@ -87,12 +99,11 @@ public class GameEnding : NetworkBehaviour
         ShutdownNetworkObject();
     }
 
-
     public GameResultType DetermineWinner(
-    out int winnerId,
-    out int loserId,
-    out int winnerRating,
-    out int loserRating)
+        out int winnerId,
+        out int loserId,
+        out int winnerRating,
+        out int loserRating)
     {
         winnerId = -1;
         loserId = -1;
@@ -105,7 +116,7 @@ public class GameEnding : NetworkBehaviour
         if (scores.Count == 0)
         {
             Debug.LogWarning("플레이어 없음");
-            return GameResultType.Win; // 그냥 종료
+            return GameResultType.Win;
         }
 
         if (scores.Count == 1)
@@ -134,12 +145,11 @@ public class GameEnding : NetworkBehaviour
             }
 
             hasExtendedOnce = true;
-            Debug.Log(" 무승부 → 15초 연장");
-            StartCoroutine(HandleGameTimeExtension(15f));
+            Debug.Log("무승부 → 15초 연장");
+            StartCoroutine(HandleGameTimeExtension());
             return GameResultType.Extend;
         }
 
-        // 정상 승패 처리
         resultIsDraw = false;
         winnerId = playerDataManager.GetNumberFromClientID(sorted[0].Key);
         loserId = playerDataManager.GetNumberFromClientID(sorted[1].Key);
@@ -148,11 +158,21 @@ public class GameEnding : NetworkBehaviour
         return GameResultType.Win;
     }
 
-
-    //--------------------------------------게임시간 15초 연장-------------------------------------------------------------------------------------
-    private void ExtendGameTime(float v)
+    //-------------------------------------- 게임시간 15초 연장  ---------------------------------------
+    private IEnumerator HandleGameTimeExtension()
     {
-        StartCoroutine(HandleGameTimeExtension(v));
+
+        NotifyClientsToExtendGameTimeClientRpc();
+
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (client.PlayerObject.TryGetComponent(out PlayerController pc))
+            {
+                pc.RestrictDragOnlyClientRpc();
+            }
+        }
+
+        yield return new WaitForSeconds(2f);
     }
 
     [ClientRpc]
@@ -166,49 +186,21 @@ public class GameEnding : NetworkBehaviour
         if (extendPanel != null)
             extendPanel.SetActive(true);
 
-
         yield return new WaitForSeconds(2f);
-
 
         if (extendPanel != null)
             extendPanel.SetActive(false);
     }
-
-    private IEnumerator HandleGameTimeExtension(float extraSeconds)
-    {
-
-        NotifyClientsToExtendGameTimeClientRpc();
-
-
-        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-        {
-            if (client.PlayerObject.TryGetComponent(out PlayerController pc))
-            {
-                pc.RestrictDragOnlyClientRpc();
-            }
-        }
-
- 
-        yield return new WaitForSeconds(2f);
-
-
-        if (IsServer && GameTimer.Instance != null)
-            GameTimer.Instance.ExtendTime(extraSeconds);
-    }
-
-
-
-
-
+    //---------------------------------------------------------------------------------------------
 
     /// 게임 결과 UI 표시 (클라이언트)
     [ClientRpc]
     private void ShowGameOverScreenClientRpc(
-    int winnerPlayerId,
-    int loserPlayerId,
-    int ratingDelta,
-    int winnerGold,
-    int loserGold)
+        int winnerPlayerId,
+        int loserPlayerId,
+        int ratingDelta,
+        int winnerGold,
+        int loserGold)
     {
         gameOverPanel.SetActive(true);
 
@@ -238,9 +230,9 @@ public class GameEnding : NetworkBehaviour
         }
         else if (isDraw)
         {
-            result = " Draw!";
+            result = "Draw!";
             finalRating += ratingDelta;
-            finalGold += winnerGold; // winnerGold를 무승부 보상으로 재사용
+            finalGold += winnerGold;
         }
         else
         {
@@ -253,28 +245,23 @@ public class GameEnding : NetworkBehaviour
         resultText.text = $"{result}\n{ratingLine}\n{goldLine}";
     }
 
-    ///-----------------------------------------------------------------서버 전송부분----------------------------------------------------------
-
+    ///------------------------------ 서버로 결과 전송 -----------------------------------
     private IEnumerator SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
     {
-
         Debug.Log("서버에 승자 제출");
 
+
+        //문제인 DB 결과제출
         yield return StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
 
         int winnerGold = 100 + UnityEngine.Random.Range(0, 91);
         int loserGold = UnityEngine.Random.Range(0, 91);
-
         int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
 
         yield return StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta));
         yield return StartCoroutine(Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta));
 
-
-
-
         ShowGameOverScreenClientRpc(winnerID, loserID, ratingDelta, winnerGold, loserGold);
-
     }
 
     private IEnumerator SubmitDrawToDB(int ID1, int ID2, int ID1Rating, int ID2Rating)
@@ -289,32 +276,19 @@ public class GameEnding : NetworkBehaviour
         ShowGameOverScreenClientRpc(ID1, ID2, DrawGold, DrawGold, DrawGold);
     }
 
-
-
-
-
-    ///-----------------------------------------------------------------클라로 전송부분---------------------------------------------------------- 
     [ClientRpc]
     private void NotifyClientsToFetchDataClientRpc()
     {
-        Debug.Log("클라에서 DB로 데이터 업데이트 요청 성공");
+        Debug.Log("클라에서 DB 데이터 업데이트 요청 성공");
         StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId));
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId));
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
     }
 
-    ///--------------------------------------추후에 로딩씬으로 넘기고 나중에 바꾸기<로딩씬으로>--------------------------------------------------------
-
-
-
-
-    //-----------------------------------------------점수처리함수 목록------------------------------------------------------------------
-
-    int CalculateRatingDelta(int winnerRating, int loserRating)
+    private int CalculateRatingDelta(int winnerRating, int loserRating)
     {
         int ratingGap = Math.Abs(winnerRating - loserRating);
 
-        // 절대값 기준 레이팅 델타
         if (ratingGap >= 200) return 10;
         if (ratingGap >= 100) return 15;
         if (ratingGap >= 0) return 20;
@@ -322,23 +296,9 @@ public class GameEnding : NetworkBehaviour
         return 30;
     }
 
-    //-------------------------------------------------------ServerShutDown---------------------------------------------------------------
-    //어려웠던 부분
-
-
     private void ShutdownNetworkObject()
     {
         Debug.Log("서버 종료");
         NetworkManager.Singleton.Shutdown();
     }
-
-    //------------------------------------------------------------------------------------ DB로 결과 조정 순차적 진행을 위해 코루틴.
-
-
-
-
-
-
 }
-
-
