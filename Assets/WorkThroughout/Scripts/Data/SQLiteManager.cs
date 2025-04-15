@@ -35,6 +35,10 @@ public class SQLiteManager : MonoBehaviour
 
     // 데이터로드가 끝나면 실행될 이벤트
     public event Action OnSQLiteDataLoaded;
+
+    //
+    public bool isSqlExist = false;
+
     private void Awake()
     {
         if (instance == null)
@@ -64,7 +68,7 @@ public class SQLiteManager : MonoBehaviour
         if (File.Exists(rawDbPath))
         {
             Debug.Log("✅ SQLite DB가 이미 존재합니다. 서버 요청 없이 로컬 DB 사용.");
-
+            isSqlExist = true;
             // 여기서 재화를 서버에서 받아오는 부분이 추가되어야 할 것 같음. 재화같은 경우엔 이벤트 등으로 넣어주는게 되니까
             // ✅ Step 2: DB가 존재하면 서버에서 데이터를 받을 필요 없이 로드 후 종료
             yield return loadAllDataAwait();
@@ -72,7 +76,7 @@ public class SQLiteManager : MonoBehaviour
             saveRankDataToDictionary();
 
             yield return DataSyncManager.Instance.PlayerRankingUpdated();
-            
+
             DataSyncManager.Instance.PlayerItemsUpdated();
             yield break;
         }
@@ -174,7 +178,7 @@ public class SQLiteManager : MonoBehaviour
                 );");
 
         // ✅ 개별 플레이어 랭킹 테이블 생성
-        connection.Execute( @"
+        connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS myRanking (
                     playerId INTEGER PRIMARY KEY,
                     playerName TEXT NOT NULL,
@@ -282,8 +286,17 @@ public class SQLiteManager : MonoBehaviour
         {
             Debug.Log("🌍 [Client] 서버에서 플레이어 데이터 요청 중...");
 
+            yield return ClientNetworkManager.Instance.GetPlayerData(
+                "deviceId", SystemInfo.deviceUniqueIdentifier, true);
+            // googleId가 존재한다면 → 서버에 업데이트 요청
+            if (!string.IsNullOrEmpty(TransDataClass.googleIdToApply))
+            {
+                SQLiteManager.Instance.player.googleId = TransDataClass.googleIdToApply;
+                yield return ClientNetworkManager.Instance.UpdatePlayerData();
+            }
+
             // ✅ 먼저 플레이어 데이터를 받아옴
-            yield return ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId, true);
+            //yield return ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId, true);
 
 
             // ✅ 플레이어 ID가 `0`이 아닐 때까지 기다림
@@ -391,12 +404,12 @@ public class SQLiteManager : MonoBehaviour
     {
         LoadAllData();
 
-        if(SQLiteManager.Instance.player == null || SQLiteManager.Instance.player.playerId == 0)
+        if (SQLiteManager.Instance.player == null || SQLiteManager.Instance.player.playerId == 0)
         {
             Debug.Log("플레이어 데이터가 비어있음...재요청");
             yield return ClientNetworkManager.Instance.GetPlayerData(
-                player.googleId == null ? "deviceId" : "googleId", 
-                player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId, 
+                player.googleId == null ? "deviceId" : "googleId",
+                player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId,
                 false);
             LoadAllData();
         }

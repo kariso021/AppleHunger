@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -249,7 +250,12 @@ public class ClientNetworkManager : MonoBehaviour
         }
     }
     #endregion
-
+    #region Unity Auth
+    public async Task SignInWithCustomId(string customId)
+    {
+        await ServerToAPIManager.Instance.SignInWithCustomId(customId);
+    }
+    #endregion
 }
 
 [System.Serializable]

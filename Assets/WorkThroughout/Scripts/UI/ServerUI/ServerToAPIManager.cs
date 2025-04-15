@@ -4,6 +4,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -40,7 +42,7 @@ public class ServerToAPIManager : MonoBehaviour
         string url = $"{apiBaseUrl}/players";
 
         PlayerData newPlayer = new PlayerData(SQLiteManager.Instance.player.deviceId,
-            SQLiteManager.Instance.player.googleId, $"User_{UnityEngine.Random.Range(1000, 9999)}",
+            SQLiteManager.Instance.player.googleId, $"User_{UnityEngine.Random.Range(0, 9999)}",
             "101",
             "201",
             1200, 500);
@@ -125,7 +127,7 @@ public class ServerToAPIManager : MonoBehaviour
     /// </summary>
     /// <param name="idType"></param>
     /// <param name="idValue"></param>
-    public IEnumerator GetPlayer(string idType, string idValue,bool isFirstTime) // 
+    public IEnumerator GetPlayer(string idType, string idValue, bool isFirstTime) // 
     {
         string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
         using (UnityWebRequest request = UnityWebRequest.Get(url))
@@ -141,7 +143,7 @@ public class ServerToAPIManager : MonoBehaviour
             {
                 Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
                 Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
-                if(isFirstTime)
+                if (isFirstTime)
                     yield return StartCoroutine(AddPlayer());
             }
         }
@@ -223,7 +225,7 @@ public class ServerToAPIManager : MonoBehaviour
                     Debug.Log($"[API] 플레이어의 현재 보유 화폐: {currency}");
 
                     SQLiteManager.Instance.SavePlayerCurrency(currency);
-                    
+
                 }
                 catch (System.Exception e)
                 {
@@ -298,7 +300,7 @@ public class ServerToAPIManager : MonoBehaviour
     }
     public void TargetReceiveMatchRecordsClientRpc(MatchHistoryData matchHistoryData)
     {
-       ClientNetworkManager.Instance.TargetReceiveMatchRecordsClientRpc(matchHistoryData);
+        ClientNetworkManager.Instance.TargetReceiveMatchRecordsClientRpc(matchHistoryData);
     }
 
 
@@ -529,7 +531,7 @@ public class ServerToAPIManager : MonoBehaviour
     public IEnumerator GetPlayerDetails(int playerId)
     {
         string url = $"{apiBaseUrl}/playerDetails/{playerId}";
-        
+
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
@@ -590,6 +592,46 @@ public class ServerToAPIManager : MonoBehaviour
     }
 
 
+    #endregion
+
+    #region Unity Auth
+    public async Task SignInWithCustomId(string customId)
+    {
+        string url = $"{apiBaseUrl}/unityAuth/getUnityTokens";
+
+        // JSON 데이터 준비
+        string jsonData = JsonConvert.SerializeObject(new { customId = customId });
+
+        // UTF8 바이트로 변환
+        byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(jsonData);
+
+        // UnityWebRequest POST 생성
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(jsonBytes);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            var operation = request.SendWebRequest();
+            while (!operation.isDone)
+                await Task.Yield();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($" Unity 인증 토큰 요청 실패: {request.error}");
+                return;
+            }
+
+            // 응답 파싱
+            string json = request.downloadHandler.text;
+            Debug.Log($" 응답: {json}");
+
+            UnityTokenResponse tokens = JsonConvert.DeserializeObject<UnityTokenResponse>(json);
+
+            AuthenticationService.Instance.ProcessAuthenticationTokens(tokens.idToken, tokens.sessionToken);
+            Debug.Log(" Custom ID 로그인 성공!");
+        }
+    }
     #endregion
     // 🔹 데이터 구조
     [System.Serializable]
@@ -655,5 +697,12 @@ public class ServerToAPIManager : MonoBehaviour
     public class NicknameDuplicateResponse
     {
         public bool isDuplicate;
+    }
+
+    [System.Serializable]
+    public class UnityTokenResponse
+    {
+        public string idToken;
+        public string sessionToken;
     }
 }
