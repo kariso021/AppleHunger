@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using System.Collections;
+using UnityEngine.Networking;
+
 
 #if UNITY_EDITOR
 using ParrelSync;
@@ -24,6 +26,16 @@ public class MatchMakerClient : MonoBehaviour
     private string _ticketId;
     [SerializeField] private GameObject waitingCanvas;
     [SerializeField] private TMPro.TextMeshProUGUI matchResultText;
+
+    [Serializable]
+    private class UnityTokenResponse
+    {
+        public string idToken;
+        public string sessionToken;
+    }
+
+
+
 
 
     private void OnEnable()
@@ -42,15 +54,29 @@ public class MatchMakerClient : MonoBehaviour
         await ClientSignIn(serviceProfileName:"AppleHungerPlayer");
         //데이터베이스에서 가져온 정보로 가공된 뭔가...
 
-        if(!AuthenticationService.Instance.IsSignedIn)//로그인 안되어있으면 로그인 시키기(테스트용으로 익명로그인 사용중임. 나중에 바꿔야함.)
-        {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        }
-        else {
-            Debug.Log($"Already Signed In as {PlayerID()}");
-            }
+        //--------------------------------------------------------------Before CustomId SignIn
+        //if(!AuthenticationService.Instance.IsSignedIn)//로그인 안되어있으면 로그인 시키기(테스트용으로 익명로그인 사용중임. 나중에 바꿔야함.)
+        //{
+        //    await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        //}
+        //else {
+        //    Debug.Log($"Already Signed In as {PlayerID()}");
+        //    }
 
-        
+        //--------------------------------------------------------------CustomId 로그인
+
+
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
+            string customId = SQLiteManager.Instance.player.playerId.ToString();
+            await SignInWithCustomId(customId);
+        }
+        else
+        {
+            Debug.Log($"Already Signed In as {PlayerID()}");
+        }
+
+
 
         //여기에 클라시작
         StartClient();
@@ -177,6 +203,35 @@ public class MatchMakerClient : MonoBehaviour
         // 2초 기다렸다가 나머지 처리
         StartCoroutine(DelayedConnectToServer(assignment));
     }
+
+    private async Task SignInWithCustomId(string customId)
+    {
+        string url = $"http://localhost:3000/api/get-unity-tokens";
+
+        var form = new WWWForm();
+        form.AddField("customId", customId);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
+        {
+            await www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Unity 인증 토큰 요청 실패: {www.error}");
+                return;
+            }
+
+            // 받은 JSON 응답 파싱
+            string json = www.downloadHandler.text;
+            var tokens = JsonUtility.FromJson<UnityTokenResponse>(json);
+
+            AuthenticationService.Instance.ProcessAuthenticationTokens(tokens.idToken, tokens.sessionToken);
+            Debug.Log("Custom ID 로그인 성공!");
+        }
+    }
+
+
+
 
 
     private IEnumerator DelayedConnectToServer(MultiplayAssignment assignment)

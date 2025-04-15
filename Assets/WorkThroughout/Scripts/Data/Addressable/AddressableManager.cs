@@ -132,7 +132,7 @@ public class AddressableManager : MonoBehaviour
         else if (itemUniqueId[0] == '2')
             key = "board_" + itemUniqueId;
         else if (itemUniqueId[0] == '3')
-            key = "emoji_" + itemUniqueId;
+            key = "Emoji_" + itemUniqueId;
 
         Addressables.LoadAssetAsync<Sprite>(key).Completed += (handle) =>
         {

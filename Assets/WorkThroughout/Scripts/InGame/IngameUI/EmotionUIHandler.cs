@@ -19,7 +19,6 @@ public class EmotionUIHandler : MonoBehaviour
     private void PlayEmotionLocally(EmtionType emotion)
     {
         string EmotionString = GetEmotionCode(emotion);
-
         AddressableManager.Instance.LoadImageFromGroup(EmotionString, emotionUI.player_ShowEmotionImage);
         emotionUI.player_ShowEmotionPanel.SetActive(true);
 
