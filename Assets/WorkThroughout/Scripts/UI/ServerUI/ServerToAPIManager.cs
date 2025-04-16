@@ -602,13 +602,12 @@ public class ServerToAPIManager : MonoBehaviour
         // JSON 데이터 준비
         string jsonData = JsonConvert.SerializeObject(new { customId = customId });
 
-        // UTF8 바이트로 변환
-        byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(jsonData);
 
         // UnityWebRequest POST 생성
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
-            request.uploadHandler = new UploadHandlerRaw(jsonBytes);
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 
