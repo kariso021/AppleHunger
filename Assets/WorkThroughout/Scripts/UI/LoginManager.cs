@@ -1,3 +1,5 @@
+癤퓎sing GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +15,11 @@ public class LoginManager : MonoBehaviour
     public GameObject downCheck;
     public GameObject loginPanel;
     // Start is called before the first frame update
+    private void Awake()
+    {
+        PlayGamesPlatform.DebugLogEnabled = true;
+        PlayGamesPlatform.Activate();
+    }
     void Start()
     {
         downManager = FindAnyObjectByType<DownManager>();
@@ -22,22 +29,62 @@ public class LoginManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void GoogleSignIn()
     {
-        
+        Debug.Log("Google Login Start");
+        PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
     }
+    internal void ProcessAuthentication(SignInStatus status)
+    {
+        Debug.Log($"[Google Sign-In Response Status] {status}");
+
+        if (status == SignInStatus.Success)
+        {
+            string googleId = PlayGamesPlatform.Instance.GetUserId();
+            TransDataClass.googleIdToApply = googleId;
+            TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
+            Debug.Log($" Google Sign-In Success: {googleId}");
+
+            loginPanel.SetActive(false);
+            downCheck.SetActive(true);
+            StartCoroutine(downManager.CheckUpdateFiles());
+        }
+        else
+        {
+            if (status == SignInStatus.InternalError)
+            {
+                Debug.LogWarning("[Internal Error] Internal Error - Google Sign-In failed.\n" +
+                               "Please check the following:\n" +
+                               "- Missing SHA-1 in Firebase/Google Cloud Console\n" +
+                               "- Incorrect OAuth2 configuration\n" +
+                               "- Google Play Games not published");
+            }
+            else if (status == SignInStatus.Canceled)
+            {
+                Debug.LogWarning("[Cancled] Google Sign-In canceled by the user.");
+            }
+            else
+            {
+                Debug.LogWarning($" Sign-In failed - Unknown error: {status.ToString()}");
+            }
+
+            // General failure handling
+            Debug.Log("Google Sign-In failure handling completed.");
+        }
+    }
+
 
     public void OnGuestLoginButtonClick()
     {
         TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
         loginPanel.SetActive(false);
         downCheck.SetActive(true);
-        StartCoroutine(downManager.CheckUpdateFiles());      
+        StartCoroutine(downManager.CheckUpdateFiles());
     }
 
     public void OnGoogleLoginButtonClick()
     {
-        TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier; // 구글로 로그인해도 디바이스 아이디는 항상 저장이 이루어져야 함
-        //TransDataClass.googleIdToApply = 구글아이디?
+        Debug.Log("Google Login Button Clicked");
+        GoogleSignIn();
     }
 }
