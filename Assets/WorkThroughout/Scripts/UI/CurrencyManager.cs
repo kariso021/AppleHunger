@@ -26,7 +26,7 @@ public class CurrencyManager : MonoBehaviour
             {
                 isFirst = false;
                 if (SQLiteManager.Instance.isSqlExist)
-                    Debug.Log("재화 업데이트 by 서버");//StartCoroutine(DelayedCurrencyUpdateFirstTime());
+                    StartCoroutine(DelayedCurrencyUpdateFirstTime());
                 return;
             }
             DelayedCurrencyUpdate(); // 20250331 일단 강제로 처리를 해두긴 했음. 아마 각 오브젝트들의 로드 순서에따른 문제같은데
