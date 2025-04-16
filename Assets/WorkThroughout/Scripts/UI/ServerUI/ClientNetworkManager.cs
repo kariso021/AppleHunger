@@ -253,6 +253,7 @@ public class ClientNetworkManager : MonoBehaviour
     #region Unity Auth
     public async Task SignInWithCustomId(string customId)
     {
+        Debug.Log($"🔑 [Client] Custom ID로 로그인 시도: {customId}");
         await ServerToAPIManager.Instance.SignInWithCustomId(customId);
     }
     #endregion

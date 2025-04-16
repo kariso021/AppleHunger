@@ -69,7 +69,7 @@ public class MatchMakerClient : MonoBehaviour
         if (!AuthenticationService.Instance.IsSignedIn)
         {
             string customId = SQLiteManager.Instance.player.playerId.ToString();
-            await SignInWithCustomId(customId);
+            await ClientNetworkManager.Instance.SignInWithCustomId(customId);
         }
         else
         {
@@ -202,32 +202,6 @@ public class MatchMakerClient : MonoBehaviour
 
         // 2초 기다렸다가 나머지 처리
         StartCoroutine(DelayedConnectToServer(assignment));
-    }
-
-    private async Task SignInWithCustomId(string customId)
-    {
-        string url = $"http://localhost:3000/api/get-unity-tokens";
-
-        var form = new WWWForm();
-        form.AddField("customId", customId);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
-        {
-            await www.SendWebRequest();
-
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError($"Unity 인증 토큰 요청 실패: {www.error}");
-                return;
-            }
-
-            // 받은 JSON 응답 파싱
-            string json = www.downloadHandler.text;
-            var tokens = JsonUtility.FromJson<UnityTokenResponse>(json);
-
-            AuthenticationService.Instance.ProcessAuthenticationTokens(tokens.idToken, tokens.sessionToken);
-            Debug.Log("Custom ID 로그인 성공!");
-        }
     }
 
 
