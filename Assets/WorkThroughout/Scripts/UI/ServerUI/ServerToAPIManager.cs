@@ -632,7 +632,7 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
     #endregion
-    // 🔹 데이터 구조
+    // 데이터 구조
     [System.Serializable]
     public class LoginRecordData
     {
