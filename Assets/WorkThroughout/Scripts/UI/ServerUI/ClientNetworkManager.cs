@@ -3,6 +3,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements.Experimental;
 
 public class ClientNetworkManager : MonoBehaviour
 {
@@ -108,6 +109,11 @@ public class ClientNetworkManager : MonoBehaviour
     public IEnumerator UpdatePlayerNickname(string nickname)
     {
         yield return ServerToAPIManager.Instance.UpdateNicknameOnServer(nickname);
+    }
+
+    public IEnumerator UpdatePlayerGoogleId(string deviceId, string googleId)
+    {
+        yield return ServerToAPIManager.Instance.UpdatePlayerGoogleId(deviceId, googleId);
     }
     #endregion
     #region Player Items
@@ -253,8 +259,19 @@ public class ClientNetworkManager : MonoBehaviour
     #region Unity Auth
     public async Task SignInWithCustomId(string customId)
     {
-        Debug.Log($"🔑 [Client] Custom ID로 로그인 시도: {customId}");
+        Debug.Log($"[Client] Custom ID로 로그인 시도: {customId}");
         await ServerToAPIManager.Instance.SignInWithCustomId(customId);
+    }
+    #endregion
+    #region Session
+    public async Task GetIsInGame(int playerId)
+    {
+        bool isInGame = await ServerToAPIManager.Instance.GetIsInGame(playerId);
+        Debug.Log($"[Client] Get Session player is in Game? : {isInGame}");
+    }
+    public async Task UpdatePlayerSession(int playerId, bool isInGame)
+    {
+        await ServerToAPIManager.Instance.UpdatePlayerSession(playerId, isInGame);
     }
     #endregion
 }
