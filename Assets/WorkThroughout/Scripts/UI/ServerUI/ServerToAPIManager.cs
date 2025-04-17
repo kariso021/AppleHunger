@@ -65,10 +65,10 @@ public class ServerToAPIManager : MonoBehaviour
                 // 클라이언트에 Players 정보 저장
                 yield return TargetReceivePlayerDataClientRpc(playerJsonData);
 
-                Debug.Log($"플레이어 추가 성공! 할당된 playerId: {response.playerId}");
+                Debug.Log($"[ServerToAPI] Complete Player Add! ,Added Player Id: {response.playerId}");
             }
             else
-                Debug.LogError("플레이어 추가 실패: " + request.error);
+                Debug.LogError("[ServerToAPI] Failed Player Add: " + request.error);
         }
     }
 
@@ -86,9 +86,9 @@ public class ServerToAPIManager : MonoBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
-                Debug.Log(" 플레이어 삭제 성공");
+                Debug.Log("[ServerToAPI Complete Player Delete");
             else
-                Debug.LogError(" 플레이어 삭제 실패: " + request.error);
+                Debug.LogError("[ServerToAPI] Failed Player Delete: " + request.error);
         }
     }
 
@@ -109,13 +109,13 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("플레이어 클라이언트 데이터를  데이터 서버로 업데이트 성공");
+                Debug.Log("[ServerToAPI] Complete Player Info Update");
                 // 🔹 데이터가 변경되었음을 알림 (자동 동기화)
                 DataSyncManager.Instance.PlayerDataUpdated();
             }
 
             else
-                Debug.LogError("업데이트 실패: " + request.error);
+                Debug.LogError("[ServerToAPI] Failed Player Info Update: " + request.error);
         }
     }
 
@@ -141,8 +141,8 @@ public class ServerToAPIManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("❌ 플레이어 조회 실패: " + request.error);
-                Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
+                Debug.LogError("[ServerToAPI] Failed Player Search : " + request.error);
+                Debug.LogError("[ServerToAPI] Response: " + request.downloadHandler.text);
                 if (isFirstTime)
                     yield return StartCoroutine(AddPlayer());
             }
@@ -161,13 +161,11 @@ public class ServerToAPIManager : MonoBehaviour
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        Debug.Log($"닉네임 json : {jsonData}");
-
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log("✅ 닉네임 서버 업데이트 성공!");
+            Debug.Log("[ServerToAPI] Complete Nickname Change");
             DataSyncManager.Instance.PlayerDataUpdated();
 
             //// 팝업 닫기
@@ -180,7 +178,7 @@ public class ServerToAPIManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"❌ 닉네임 서버 업데이트 실패 {request.error}");
+            Debug.LogError($"[ServerToAPI] Failed Nickname Change : {request.error}");
         }
     }
 
@@ -199,7 +197,7 @@ public class ServerToAPIManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"❌ 닉네임 중복 확인 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed Nickname Duplicate Check: {request.error}");
                 callback?.Invoke(false); // 실패 시 기본값 false
             }
         }
@@ -221,21 +219,43 @@ public class ServerToAPIManager : MonoBehaviour
                     string json = request.downloadHandler.text;
                     JObject obj = JObject.Parse(json);
                     int currency = obj["currency"].Value<int>();
-
-                    Debug.Log($"[API] 플레이어의 현재 보유 화폐: {currency}");
-
                     SQLiteManager.Instance.SavePlayerCurrency(currency);
 
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError($"[API] JSON 파싱 실패: {e.Message}");
+                    Debug.LogError($"[ServerToAPI] Failed Currency Json Parsing: {e.Message}");
                 }
             }
             else
             {
-                Debug.LogError($"[API] 통신 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed Currency Communicate with server: {request.error}");
             }
+        }
+    }
+
+    public IEnumerator UpdatePlayerGoogleId(string deviceId, string googleId)
+    {
+        string url = $"{apiBaseUrl}/players/updateGoogleId";
+        string json = JsonConvert.SerializeObject(new GoogleIdUpdateRequest(deviceId,googleId));
+        byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
+
+        UnityWebRequest request = new UnityWebRequest(url, "PUT");
+        request.uploadHandler = new UploadHandlerRaw(jsonBytes);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"[ServerToAPI] Failed Google Id Update: {request.error}");
+        }
+        else
+        {
+            Debug.Log($"[ServerToAPI] Complete Google Id Update: {request.downloadHandler.text}");
+            // 이미 SQLiteManager 부분에서 player.googleId 에 값을 넣어둔 상태라 저장만 하면 됨.
+            SQLiteManager.Instance.SavePlayerData(SQLiteManager.Instance.player);
         }
     }
     #endregion
@@ -259,7 +279,7 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log($"✅ 매치 결과를 서버에 저장 성공! Winner: {winnerId}, Loser: {loserId}");
+                Debug.Log($"[ServerToAPI] Complete Match Result Update - Winner: {winnerId}, Loser: {loserId}");
 
                 // 🔹 자동 동기화 트리거
                 DataSyncManager.Instance.MatchHistoryUpdated(); // 매치 기록 업데이트
@@ -267,7 +287,7 @@ public class ServerToAPIManager : MonoBehaviour
                 //DataSyncManager.Instance.PlayerRankingUpdated(); // 랭킹 업데이트 (승패 반영) , 랭킹은 굳이 실시간으로 체크해줄 필요가 없음. 서버에서 일정 시간마다 최신화를 해주는게 더 효율적
             }
             else
-                Debug.LogError($"❌ 매치 결과 저장 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to save match result: {request.error}");
         }
     }
     public IEnumerator GetMatchResult(int playerId)
@@ -281,20 +301,17 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text; // Matchrecords 테이블에서 playerId가 동일한 컬럼들만 추려서 json형태로 list를 만들어 가져온다는 느낌
-                Debug.Log($"매치 데이터 json {jsonData}");
                 MatchHistoryResponse response = JsonConvert.DeserializeObject<MatchHistoryResponse>(jsonData);
-
-                Debug.Log($"✅ 매치 기록 조회 성공! 총 {response.matches.Length}개 경기");
+                Debug.Log($"[ServerToAPI] Complete Match Records Retrieval - Total {response.matches.Length} matches");
 
                 foreach (var match in response.matches)
                 {
-                    Debug.Log($"Match ID: {match.matchId}, Winner: {match.winnerId}, Date: {match.matchDate}");
                     TargetReceiveMatchRecordsClientRpc(match);
                 }
             }
             else
             {
-                Debug.LogError($"❌ 매치 기록 조회 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to retrieve match records: {request.error}");
             }
         }
     }
@@ -320,20 +337,19 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
+                Debug.Log($"[ServerToAPI] Complete Player Stats Retrieval");
                 TargetReceivePlayerStatClientRpc(request.downloadHandler.text);
             }
             else
             {
-                Debug.LogError("❌ 플레이어 스탯 조회 실패: " + request.error);
-                Debug.LogError(" 응답 내용: " + request.downloadHandler.text);
+                Debug.LogError($"[ServerToAPI] Failed to retrieve player stats: {request.error}");
+                Debug.LogError($"[ServerToAPI] Stats response: {request.downloadHandler.text}");
             }
         }
     }
 
     private void TargetReceivePlayerStatClientRpc(string jsonData)
     {
-        Debug.Log($"✅ 서버에서 받은 PlayerStats 데이터: {jsonData}");
-
         ClientNetworkManager.Instance.TargetReceivePlayerStatsClientRpc(jsonData);
     }
 
@@ -355,7 +371,7 @@ public class ServerToAPIManager : MonoBehaviour
             {
                 string jsonData = request.downloadHandler.text;
                 PlayerItemsResponse response = JsonConvert.DeserializeObject<PlayerItemsResponse>(jsonData);
-
+                Debug.Log($"[ServerToAPI] Complete Player Items Retrieval");
                 // 🔹 리스트 안에 여러 개의 아이템이 들어있으므로, 각각을 TargetReceivePlayerItems로 넘겨줌
                 foreach (var playerItem in response.items)
                 {
@@ -365,7 +381,7 @@ public class ServerToAPIManager : MonoBehaviour
                 //DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
             }
             else
-                Debug.LogError($"❌ PlayerItems 조회 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to retrieve player items: {request.error}");
         }
     }
 
@@ -392,22 +408,17 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log($"✅ 아이템 구매 성공! playerId: {playerId}, itemUniqueId: {itemUniqueId}");
+                Debug.Log($"[ServerToAPI] Complete Item Purchase - playerId: {playerId}, itemUniqueId: {itemUniqueId}");
                 // 🔹 자동 동기화 트리거
                 DataSyncManager.Instance.PlayerDataUpdated();  // 재화(currency) 업데이트
                 DataSyncManager.Instance.PlayerItemsUpdated(); // 아이템 상태 업데이트
             }
             else
             {
-                Debug.LogError($"❌ 아이템 구매 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to purchase item: {request.error}");
             }
         }
     }
-
-
-
-
-
     #endregion
 
     #region Player Login Region
@@ -423,15 +434,17 @@ public class ServerToAPIManager : MonoBehaviour
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"[ServerToAPI] Complete Login Records Retrieval");
                 TargetReceiveLoginRecordsClientRpc(request.downloadHandler.text);
+            }
             else
-                Debug.LogError($"❌ LoginRecords 조회 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to retrieve login records: {request.error}");
         }
     }
 
     private void TargetReceiveLoginRecordsClientRpc(string jsonData)
     {
-        Debug.Log($"✅ 서버에서 받은 LoginRecords 데이터: {jsonData}");
         ClientNetworkManager.Instance.TargetReceiveLoginDataClientRpc(jsonData);
 
         // 로그인 데이터를 여러개로 관리할 게 아니라 하나로 관리할 예정인데 이건 나중에 order같은걸 해서 빼던가 해야할거같음
@@ -463,13 +476,13 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("✅ 로그인 시간 업데이트 성공");
+                Debug.Log($"[ServerToAPI] Complete Login Time Update");
 
                 // 🔹 자동 동기화 트리거
                 DataSyncManager.Instance.PlayerDataUpdated(); // 로그인 정보 업데이트
             }
             else
-                Debug.LogError($"❌ 로그인 시간 업데이트 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to update login time: {request.error}");
         }
     }
     #endregion
@@ -487,12 +500,12 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log($"✅ [Server] 상위 50명 랭킹 조회 성공: {request.downloadHandler.text}");
+                Debug.Log($"[ServerToAPI] 상위 50명 랭킹 조회 성공: {request.downloadHandler.text}");
                 TargetReceiveTopRankingDataClientRpc(request.downloadHandler.text);
             }
             else
             {
-                Debug.LogError($"❌ [Server] 상위 50명 랭킹 조회 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] 상위 50명 랭킹 조회 실패: {request.error}");
             }
         }
     }
@@ -514,12 +527,12 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log($"✅ [Server] 개별 랭킹 조회 성공: {request.downloadHandler.text}");
+                Debug.Log($"[ServerToAPI] Complete Individual Ranking Retrieval - Data: {request.downloadHandler.text}");
                 TargetReceiveMyRankingDataClientRpc(request.downloadHandler.text);
             }
             else
             {
-                Debug.LogError($"❌ [Server] 개별 랭킹 조회 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to retrieve individual ranking: {request.error}");
             }
         }
     }
@@ -539,11 +552,12 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string json = request.downloadHandler.text;
+                Debug.Log($"[ServerToAPI] Complete Player Details Retrieval");
                 TargetReceivePlayerDetailsDataClientRpc(json);
             }
             else
             {
-                Debug.LogError("❌ 플레이어 상세 정보 조회 실패: " + request.error);
+                Debug.LogError($"[ServerToAPI] Failed to retrieve player details: {request.error}");
             }
         }
     }
@@ -571,7 +585,7 @@ public class ServerToAPIManager : MonoBehaviour
 
                 if (result.shouldUpdate)
                 {
-                    Debug.Log(" 서버에서 랭킹 갱신 필요함 → 랭킹 데이터 요청 및 UI 갱신");
+                    Debug.Log($"[ServerToAPI] Ranking update required - refreshing data and UI");
 
                     // 랭킹 갱신
                     yield return DataSyncManager.Instance.PlayerRankingUpdated();
@@ -581,18 +595,20 @@ public class ServerToAPIManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log(" 랭킹 데이터는 최신 상태");
+                    Debug.Log($"[ServerToAPI] Ranking data is up to date");
                 }
             }
             else
             {
-                Debug.LogError($" 랭킹 갱신 여부 확인 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to check ranking update status: {request.error}");
             }
         }
     }
 
 
     #endregion
+
+    // <====================== InGame ======================>
 
     #region Unity Auth
     public async Task SignInWithCustomId(string customId)
@@ -617,18 +633,76 @@ public class ServerToAPIManager : MonoBehaviour
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError($" Unity 인증 토큰 요청 실패: {request.error}");
+                Debug.LogError($"[ServerToAPI] Failed to request token: {request.error}");
                 return;
             }
 
             // 응답 파싱
             string json = request.downloadHandler.text;
-            Debug.Log($" 응답: {json}");
-
             UnityTokenResponse tokens = JsonConvert.DeserializeObject<UnityTokenResponse>(json);
 
             AuthenticationService.Instance.ProcessAuthenticationTokens(tokens.idToken, tokens.sessionToken);
-            Debug.Log(" Custom ID 로그인 성공!");
+            Debug.Log("[ServerToAPI] Complete Custom Id Login");
+        }
+    }
+    #endregion
+    #region Session
+    public async Task UpdatePlayerSession(int playerId, bool isInGame)
+    {
+        string url = $"{apiBaseUrl}/gameSession/upsert";
+
+        var payload = new PlayerSessionRequest
+        {
+            playerId = playerId,
+            isInGame = isInGame ? 1 : 0 // bool → int 변환
+        };
+
+        string json = JsonConvert.SerializeObject(payload);
+        byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(jsonBytes);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            var operation = request.SendWebRequest();
+            while (!operation.isDone)
+                await Task.Yield();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("[ServerToAPI] playerSession 업데이트 성공: " + request.downloadHandler.text);
+            }
+            else
+            {
+                Debug.LogError($"[ServerToAPI]  playerSession 업데이트 실패: {request.responseCode} / {request.error}");
+            }
+        }
+    }
+
+    public async Task<bool> GetIsInGame(int playerId)
+    {
+        string url = $"{apiBaseUrl}/gameSession/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            var operation = request.SendWebRequest();
+            while (!operation.isDone)
+                await Task.Yield();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string json = request.downloadHandler.text;
+                IsInGameResponse response = JsonUtility.FromJson<IsInGameResponse>(json);
+                Debug.Log($"[ServerToAPI] playerId: {playerId}, isInGame: {response.isInGame}");
+                return response.isInGame == 1;
+            }
+            else
+            {
+                Debug.LogError($"[ServerToAPI]세션 조회 실패: {request.responseCode} / {request.error}");
+                return false;
+            }
         }
     }
     #endregion
@@ -703,5 +777,29 @@ public class ServerToAPIManager : MonoBehaviour
     {
         public string idToken;
         public string sessionToken;
+    }
+
+    [System.Serializable]
+    public class GoogleIdUpdateRequest
+    {
+        public string deviceId;
+        public string googleId;
+
+        public GoogleIdUpdateRequest(string deviceId, string googleId)
+        {
+            this.deviceId = deviceId;
+            this.googleId = googleId;
+        }
+    }
+    [System.Serializable]
+    public class PlayerSessionRequest
+    {
+        public int playerId;
+        public int isInGame; // bool로 보내고 싶다면 1/0으로 변환해서 넣기
+    }
+    [System.Serializable]
+    public class IsInGameResponse
+    {
+        public int isInGame;
     }
 }

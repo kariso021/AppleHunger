@@ -736,24 +736,24 @@ public class SQLiteManager : MonoBehaviour
         return null;
     }
 
-    public PlayerSessionData LoadPlayerSession(int playerId)
+    public PlayerSessionData LoadPlayerSession()
     {
         using (var connection = new SQLiteConnection(dbPath))
         {
             var command = connection.CreateCommand(@"
             SELECT playerId, ticketId, serverIp, serverPort, isInGame, timestamp
             FROM playerSession
-            WHERE playerId = ?;", playerId);
+            WHERE playerId = ?;", player.playerId);
 
             var result = command.ExecuteQuery<PlayerSessionData>();
             if (result.Count > 0)
             {
-                Debug.Log($" [SQLite] PlayerSession 불러오기 완료 - playerId: {playerId}");
+                Debug.Log($" [SQLite] PlayerSession 불러오기 완료 - playerId: {player.playerId}");
                 return result[0];
             }
             else
             {
-                Debug.LogWarning($" [SQLite]  PlayerSession 없음 - playerId: {playerId}");
+                Debug.LogWarning($" [SQLite]  PlayerSession 없음 - playerId: {player.playerId}");
                 return null;
             }
         }

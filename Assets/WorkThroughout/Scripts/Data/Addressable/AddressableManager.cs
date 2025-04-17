@@ -91,7 +91,7 @@ public class AddressableManager : MonoBehaviour
         }
         pendingProfileUpdateActions.Clear();
 
-        Debug.Log("✅ 비활성 포함한 UI 바인딩 완료!");
+        Debug.Log("[Addressable] Complete UI Binding include deactive objects!");
     }
 
     void OnSceneUnLoaded(Scene scene)
@@ -123,7 +123,7 @@ public class AddressableManager : MonoBehaviour
     }
     public void LoadImageFromGroup(string itemUniqueId,Image image)
     {
-        Debug.Log("이미지 업데이트 요청");
+        Debug.Log("[Addressable] Request Image Update");
 
         string key = null;
 
@@ -241,7 +241,7 @@ public class AddressableManager : MonoBehaviour
 
         if (!isUIReady)
         {
-            Debug.Log("UI 준비 전이므로 LoadMyRankingIconFromGroup 보류");
+            Debug.Log("[Addressable] UI isn't ready for LoadImage.");
             pendingProfileUpdateActions.Add(() => LoadMyRankingIconFromGroup());
             return;
         }
@@ -260,7 +260,7 @@ public class AddressableManager : MonoBehaviour
                     loadedSprites.Add(itemUniqueId, handle.Result);
                 }
 
-                Debug.Log(" 내 랭킹 아이콘 로드 완료");
+                Debug.Log("[Addressable] Complete load my ranking icon");
             }
         };
 

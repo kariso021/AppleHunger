@@ -24,11 +24,8 @@ public class RankingManager : MonoBehaviour
         // ✅ ServerToAPIManager가 준비될 때까지 대기
         while (ServerToAPIManager.Instance == null || SQLiteManager.Instance == null || SQLiteManager.Instance.player == null)
         {
-            //Debug.Log("[RankingManager] ServerToAPIManager 초기화 대기 중...");
             yield return null;
         }
-
-        Debug.Log(" ServerToAPIManager 초기화 완료 -> 랭킹 폴링 시작");
 
         // 이제 안전하게 루틴 실행
         yield return StartCoroutine(AutoUpdateRankingRoutine());

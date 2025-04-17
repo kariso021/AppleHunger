@@ -38,13 +38,13 @@ public class DataSyncManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("❌ [DataSyncManager] SQLiteManager 인스턴스를 찾을 수 없음!");
+            Debug.LogError("[DataSyncManager] SQLiteManager 인스턴스를 찾을 수 없음!");
         }
     }
     // 🔹 플레이어 데이터가 변경되었을 때 호출 (예: 이름, 프로필, 재화 등)
     public void PlayerDataUpdated()
     {
-        Debug.Log("🔄 플레이어 데이터 변경 감지 → MySQL에서 최신 데이터 가져오기");
+        Debug.Log("[DataSyncManager] 플레이어 데이터 변경 감지 → MySQL에서 최신 데이터 가져오기");
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
@@ -55,7 +55,7 @@ public class DataSyncManager : MonoBehaviour
     // 🔹 플레이어 아이템이 변경되었을 때 호출 (예: 아이템 구매, 해금)
     public void PlayerItemsUpdated()
     {
-        Debug.Log("🔄 플레이어 아이템 변경 감지 → MySQL에서 최신 데이터 가져오기");
+        Debug.Log("[DataSyncManager] 플레이어 아이템 변경 감지 → MySQL에서 최신 데이터 가져오기");
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerItems(SQLiteManager.Instance.player.playerId)); 
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
@@ -65,7 +65,7 @@ public class DataSyncManager : MonoBehaviour
     // 🔹 매치 기록이 변경되었을 때 호출 (예: 경기 종료 후 업데이트)
     public void MatchHistoryUpdated()
     {
-        Debug.Log("🔄 매치 기록 변경 감지 → MySQL에서 최신 데이터 가져오기");
+        Debug.Log("[DataSyncManager] 매치 기록 변경 감지 → MySQL에서 최신 데이터 가져오기");
         StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
@@ -75,7 +75,7 @@ public class DataSyncManager : MonoBehaviour
     // 🔹 플레이어 스탯이 변경되었을 때 호출 (예: 승/패 증가)
     public void PlayerStatsUpdated()
     {
-        Debug.Log("🔄 플레이어 스탯 변경 감지 → MySQL에서 최신 데이터 가져오기");
+        Debug.Log("[DataSyncManager] 플레이어 스탯 변경 감지 → MySQL에서 최신 데이터 가져오기");
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId));
 
         // ✅ 동기화가 완료된 후, SQLite에 반영
@@ -85,7 +85,7 @@ public class DataSyncManager : MonoBehaviour
     // 🔹 랭킹 정보가 변경되었을 때 호출 (예: 레이팅 변화)
     public IEnumerator PlayerRankingUpdated()
     {
-        Debug.Log("🔄 플레이어 랭킹 변경 감지 → MySQL에서 최신 데이터 가져오기");
+        Debug.Log("[DataSyncManager] 플레이어 랭킹 변경 감지 → MySQL에서 최신 데이터 가져오기");
         yield return ClientNetworkManager.Instance.GetRankingList();
   
 
@@ -96,13 +96,13 @@ public class DataSyncManager : MonoBehaviour
     // 🔹 SQLite 데이터 최신화 실행
     private void SyncSQLite()
     {
-        Debug.Log("🔄 SQLite 최신 데이터 동기화 실행...");
+        Debug.Log("[DataSyncManager] SQLite 최신 데이터 동기화 실행...");
         SQLiteManager.Instance.LoadAllData();
     }
 
     private void InvokeUIUpdateEvents()
     {
-        Debug.Log("🔄 SQLite 동기화 완료 → UI 업데이트 시작");
+        Debug.Log("[DataSyncManager] SQLite 동기화 완료 → UI 업데이트 시작");
 
         // ✅ UI 갱신 이벤트 실행 (모든 UI 업데이트 트리거)
         OnMatchHistoryChanged?.Invoke();
@@ -114,7 +114,7 @@ public class DataSyncManager : MonoBehaviour
 
     public void InvokeUIRankingUpdateEvent()
     {
-        Debug.Log("Ranking UI Update");
+        Debug.Log("[DataSyncManager] Ranking UI Update");
 
         OnPlayerRankingChanged?.Invoke();
     }
