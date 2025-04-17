@@ -34,7 +34,9 @@ public class RankingManager : MonoBehaviour
     {
         while (true)
         {
+            Debug.Log("[RM] 체크 시작");
             yield return StartCoroutine(ServerToAPIManager.Instance.CheckRankingShouldUpdate());
+            Debug.Log("[RM] 체크 끝");
             yield return new WaitForSeconds(interval);
         }
     }

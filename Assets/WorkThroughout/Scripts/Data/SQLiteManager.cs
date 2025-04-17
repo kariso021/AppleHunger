@@ -87,7 +87,7 @@ public class SQLiteManager : MonoBehaviour
 
             saveRankDataToDictionary();
 
-            // yield return DataSyncManager.Instance.PlayerRankingUpdated();
+            yield return DataSyncManager.Instance.PlayerRankingUpdated();
 
             ClientNetworkManager.Instance.GetPlayerItems(player.playerId);
             yield break;
