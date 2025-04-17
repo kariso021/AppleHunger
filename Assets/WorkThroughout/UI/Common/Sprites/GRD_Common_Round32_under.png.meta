@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 56d34005ef8aa984ab685ec75d30d430
+guid: 157e117d50a8e4f40a93713b9dca93e4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8179884495889897071
-    second: GRD_Common_Round30_Line4_0
+      213: 5708422319479089293
+    second: GRD_Common_Round32_under_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +52,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 32, y: 32, z: 32, w: 32}
+  spriteBorder: {x: 32, y: 0, z: 32, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GRD_Common_Round30_Line4_0
+      name: GRD_Common_Round32_under_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 64
-        height: 64
+        height: 40
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -114,8 +114,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f661e313c99c48170800000000000000
-      internalID: 8179884495889897071
+      spriteID: d886674ead3683f40800000000000000
+      internalID: 5708422319479089293
       vertices: []
       indices: 
       edges: []
@@ -131,7 +131,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      GRD_Common_Round30_Line4_0: 8179884495889897071
+      GRD_Common_Round32_under_0: 5708422319479089293
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

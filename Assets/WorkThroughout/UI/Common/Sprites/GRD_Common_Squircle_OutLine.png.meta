@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 56d34005ef8aa984ab685ec75d30d430
+guid: 4f53d48cb19f9444ca79d43e6d4d96a7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8179884495889897071
-    second: GRD_Common_Round30_Line4_0
+      213: 6768719009503129844
+    second: GRD_Common_Squircle_OutLine_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +52,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 32, y: 32, z: 32, w: 32}
+  spriteBorder: {x: 56, y: 56, z: 56, w: 56}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GRD_Common_Round30_Line4_0
+      name: GRD_Common_Squircle_OutLine_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 64
-        height: 64
+        width: 112
+        height: 112
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -114,8 +114,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f661e313c99c48170800000000000000
-      internalID: 8179884495889897071
+      spriteID: 4f03ed1b3125fed50800000000000000
+      internalID: 6768719009503129844
       vertices: []
       indices: 
       edges: []
@@ -131,7 +131,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      GRD_Common_Round30_Line4_0: 8179884495889897071
+      GRD_Common_Squircle_OutLine_0: 6768719009503129844
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
