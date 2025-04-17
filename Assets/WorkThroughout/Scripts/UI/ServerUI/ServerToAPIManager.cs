@@ -646,6 +646,33 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
     #endregion
+    #region Session
+    public async Task<bool> GetIsInGame(int playerId)
+    {
+        string url = $"{apiBaseUrl}/gameSession/{playerId}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            var operation = request.SendWebRequest();
+            while (!operation.isDone)
+                await Task.Yield();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string json = request.downloadHandler.text;
+                IsInGameResponse response = JsonUtility.FromJson<IsInGameResponse>(json);
+                Debug.Log($"[ServerToAPI] playerId: {playerId}, isInGame: {response.isInGame}");
+                return response.isInGame == 1;
+            }
+            else
+            {
+                Debug.LogError($"[ServerToAPI]세션 조회 실패: {request.responseCode} / {request.error}");
+                return false;
+            }
+        }
+    }
+    #endregion
+
     // 데이터 구조
     [System.Serializable]
     public class LoginRecordData
