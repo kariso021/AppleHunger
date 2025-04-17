@@ -26,6 +26,13 @@ public class LoginManager : MonoBehaviour
 
         guestLoginButton.onClick.AddListener(() => OnGuestLoginButtonClick());
         googleLoginButton.onClick.AddListener(() => OnGoogleLoginButtonClick());
+
+
+        // 이미 로그인 되어있는 경우
+        if (PlayGamesPlatform.Instance.localUser.authenticated)
+        {           
+            toDownCheck();
+        }
     }
 
     // Update is called once per frame
@@ -43,11 +50,10 @@ public class LoginManager : MonoBehaviour
             string googleId = PlayGamesPlatform.Instance.GetUserId();
             TransDataClass.googleIdToApply = googleId;
             TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
+
             Debug.Log($" Google Sign-In Success: {googleId}");
 
-            loginPanel.SetActive(false);
-            downCheck.SetActive(true);
-            StartCoroutine(downManager.CheckUpdateFiles());
+            toDownCheck();
         }
         else
         {
@@ -77,14 +83,19 @@ public class LoginManager : MonoBehaviour
     public void OnGuestLoginButtonClick()
     {
         TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
-        loginPanel.SetActive(false);
-        downCheck.SetActive(true);
-        StartCoroutine(downManager.CheckUpdateFiles());
+        toDownCheck();
     }
 
     public void OnGoogleLoginButtonClick()
     {
         Debug.Log("Google Login Button Clicked");
         GoogleSignIn();
+    }
+
+    private void toDownCheck()
+    {
+        loginPanel.SetActive(false);
+        downCheck.SetActive(true);
+        StartCoroutine(downManager.CheckUpdateFiles());
     }
 }

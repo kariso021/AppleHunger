@@ -420,6 +420,7 @@ public class SQLiteManager : MonoBehaviour
 
         // 모든 데이터가 로드되면 그 떄 UI 업데이트를 실행
         // 
+        Debug.Log("로드 전부 완료 인보크 실행");
         OnSQLiteDataLoaded?.Invoke();
     }
 

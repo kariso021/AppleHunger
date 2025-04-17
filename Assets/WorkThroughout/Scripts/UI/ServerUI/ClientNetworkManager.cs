@@ -263,17 +263,6 @@ public class ClientNetworkManager : MonoBehaviour
         await ServerToAPIManager.Instance.SignInWithCustomId(customId);
     }
     #endregion
-    #region Session
-    public async Task GetIsInGame(int playerId)
-    {
-        bool isInGame = await ServerToAPIManager.Instance.GetIsInGame(playerId);
-        Debug.Log($"[Client] Get Session player is in Game? : {isInGame}");
-    }
-    public async Task UpdatePlayerSession(int playerId, bool isInGame)
-    {
-        await ServerToAPIManager.Instance.UpdatePlayerSession(playerId, isInGame);
-    }
-    #endregion
 }
 
 [System.Serializable]
