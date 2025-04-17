@@ -69,10 +69,22 @@ public class MatchMakerClient : MonoBehaviour
 
 
 
+
+        //TODO : 재접속 판단 해야할것
+
+        // 재접속 판단
+        //서버에 playerid로 요청을 보내서 현재 게임중인지 아닌지
+        //ingame == true && 연결 끊긴 상태라면
+        //재접속을 판단하고
+        // 재접속 판단을 하기 위해서 필요한 변수 -> isReconnectable -> 판단은 Isingame 이랑 Isconnected 로 판단 isingame == true && isconnected == false
+        //NetworkManager.Singleton.GetComponent<Unitytransport>().SetConnectionData(assignment.Ip, (ushort)assignment.Port);
+        //재접속 바로 하고 ClientID Start Client를 하면 된다.
+
+
+
+
         //여기에 클라시작
         StartClient();
-
-
     }
 
     private async Task ClientSignIn(string serviceProfileName = null)
@@ -260,7 +272,4 @@ public class MatchMakerClient : MonoBehaviour
             }
         }
     }
-
-
-
 }
