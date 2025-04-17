@@ -96,6 +96,11 @@ public class GameEnding : NetworkBehaviour
         }
 
         NotifyClientsToFetchDataClientRpc();
+
+        //게임세션 false
+        yield return StartCoroutine(UpdateAllSessionsFalse());
+
+
         ShutdownNetworkObject();
     }
 
@@ -300,5 +305,24 @@ public class GameEnding : NetworkBehaviour
     {
         Debug.Log("서버 종료");
         NetworkManager.Singleton.Shutdown();
+    }
+
+    //--------------------------------------------------------------------------------세션 false 로 만드는 부분
+
+    private IEnumerator UpdateAllSessionsFalse()
+    {
+        var mappings = PlayerDataManager.Instance.GetAllMappings();
+        foreach (var kv in mappings)
+        {
+            int playerId = kv.Value;
+
+            // 1) API 서버에 isInGame=false 업데이트
+            yield return StartCoroutine(
+                Managers.UpdatePlayerSessionCoroutine(playerId, false)
+            );
+
+            // 2) 로컬 DB 에서도 세션 초기화
+            SQLiteManager.Instance.ResetPlayerSession(playerId);
+        }
     }
 }

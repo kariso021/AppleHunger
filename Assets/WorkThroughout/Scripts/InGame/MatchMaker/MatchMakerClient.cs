@@ -1,4 +1,4 @@
-using NUnit.Framework;
+ï»¿using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
@@ -52,9 +52,9 @@ public class MatchMakerClient : MonoBehaviour
     {
 
         await ClientSignIn(serviceProfileName:"AppleHungerPlayer");
-        //µ¥ÀÌÅÍº£ÀÌ½º¿¡¼­ °¡Á®¿Â Á¤º¸·Î °¡°øµÈ ¹º°¡...
+        //ë°ì´í„°ë² ì´ìŠ¤ì—ì„œ ê°€ì ¸ì˜¨ ì •ë³´ë¡œ ê°€ê³µëœ ë­”ê°€...
 
-        //--------------------------------------------------------------CustomId ·Î±×ÀÎ
+        //--------------------------------------------------------------CustomId ë¡œê·¸ì¸
 
 
         if (!AuthenticationService.Instance.IsSignedIn)
@@ -70,21 +70,44 @@ public class MatchMakerClient : MonoBehaviour
 
 
 
-        //TODO : ÀçÁ¢¼Ó ÆÇ´Ü ÇØ¾ßÇÒ°Í
+        //TODO : ì¬ì ‘ì† íŒë‹¨ í•´ì•¼í• ê²ƒ
 
-        // ÀçÁ¢¼Ó ÆÇ´Ü
-        //¼­¹ö¿¡ playerid·Î ¿äÃ»À» º¸³»¼­ ÇöÀç °ÔÀÓÁßÀÎÁö ¾Æ´ÑÁö
-        //ingame == true && ¿¬°á ²÷±ä »óÅÂ¶ó¸é
-        //ÀçÁ¢¼ÓÀ» ÆÇ´ÜÇÏ°í
-        // ÀçÁ¢¼Ó ÆÇ´ÜÀ» ÇÏ±â À§ÇØ¼­ ÇÊ¿äÇÑ º¯¼ö -> isReconnectable -> ÆÇ´ÜÀº Isingame ÀÌ¶û Isconnected ·Î ÆÇ´Ü isingame == true && isconnected == false
+        // ì¬ì ‘ì† íŒë‹¨
+        //ì„œë²„ì— playeridë¡œ ìš”ì²­ì„ ë³´ë‚´ì„œ í˜„ì¬ ê²Œì„ì¤‘ì¸ì§€ ì•„ë‹Œì§€
+        //ingame == true && ì—°ê²° ëŠê¸´ ìƒíƒœë¼ë©´
+        //ì¬ì ‘ì†ì„ íŒë‹¨í•˜ê³ 
+        // ì¬ì ‘ì† íŒë‹¨ì„ í•˜ê¸° ìœ„í•´ì„œ í•„ìš”í•œ ë³€ìˆ˜ -> isReconnectable -> íŒë‹¨ì€ Isingame ì´ë‘ Isconnected ë¡œ íŒë‹¨ isingame == true && isconnected == false
         //NetworkManager.Singleton.GetComponent<Unitytransport>().SetConnectionData(assignment.Ip, (ushort)assignment.Port);
-        //ÀçÁ¢¼Ó ¹Ù·Î ÇÏ°í ClientID Start Client¸¦ ÇÏ¸é µÈ´Ù.
+        //ì¬ì ‘ì† ë°”ë¡œ í•˜ê³  ClientID Start Clientë¥¼ í•˜ë©´ ëœë‹¤.
 
+        var session = SQLiteManager.Instance.LoadPlayerSession();
+        bool isReconnect = session.isInGame;
 
+        if (isReconnect)
+        {
+            // â€” ì¬ì ‘ì† ëª¨ë“œ â€”
+            Debug.Log("[MatchMakerClient] ì¬ì ‘ì† ëª¨ë“œ");
 
+            // (A) ëŒ€ê¸° UI
+            waitingCanvas?.SetActive(true);
 
-        //¿©±â¿¡ Å¬¶ó½ÃÀÛ
-        StartClient();
+            // (B) ìºì‹œëœ IP/Portë¡œ ì„¤ì •
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetConnectionData(session.serverIp, (ushort)session.serverPort);
+
+            // (C) í´ë¼ì´ì–¸íŠ¸ ì‹œì‘
+            NetworkManager.Singleton.StartClient();
+
+            // (D) ì—°ê²°ë˜ë©´ ë§¤í•‘ ê°±ì‹ 
+            NetworkManager.Singleton.OnClientConnectedCallback += OnReconnected;
+        }
+
+        else
+        {
+            // â€” ì‹ ê·œ ë§¤ì¹­ ëª¨ë“œ â€”
+            Debug.Log("[MatchMakerClient] ì‹ ê·œ ë§¤ì¹­ ëª¨ë“œ");
+            StartClient();  // ë‚´ë¶€ì—ì„œ CreateTicket() í˜¸ì¶œ
+        }
     }
 
     private async Task ClientSignIn(string serviceProfileName = null)
@@ -111,7 +134,7 @@ public class MatchMakerClient : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    private string GetCloneNumberSuffix()//Å×½ºÆÃ¿ëÀ¸·Î  Parrrel Sink »ç¿ë °¡´É
+    private string GetCloneNumberSuffix()//í…ŒìŠ¤íŒ…ìš©ìœ¼ë¡œ  Parrrel Sink ì‚¬ìš© ê°€ëŠ¥
     {
         string projectPath = ClonesManager.GetCurrentProjectPath();
         int lastUnderScore = projectPath.LastIndexOf('_');
@@ -143,7 +166,7 @@ public class MatchMakerClient : MonoBehaviour
                 PlayerID(),
                 new MatchmakingPlayerData
                 {
-                    //ÀÌºÎºĞÀÌ ·¹ÀÌÆÃÀÌ µÇ¾î¾ß ÇÏ°í ±×¿¡ ¸Â´Â ¸ÅÄªÀ» Àâ¾ÆÁà¾ßÇÔ
+                    //ì´ë¶€ë¶„ì´ ë ˆì´íŒ…ì´ ë˜ì–´ì•¼ í•˜ê³  ê·¸ì— ë§ëŠ” ë§¤ì¹­ì„ ì¡ì•„ì¤˜ì•¼í•¨
                     //Rating=SQLiteManager.Instance.player.rating,
                     Rating = 100,
     
@@ -198,12 +221,12 @@ public class MatchMakerClient : MonoBehaviour
 
     private void TicketAssigned(MultiplayAssignment assignment)
     {
-        Debug.Log($"[Å¬¶óÀÌ¾ğÆ®] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
+        Debug.Log($"[í´ë¼ì´ì–¸íŠ¸] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
 
-        // ¹Ù·Î ¸Ş½ÃÁö Ç¥½Ã
-        matchResultText.text = "¸ÅÄªÀÌ ÀâÇû½À´Ï´Ù!";
+        // ë°”ë¡œ ë©”ì‹œì§€ í‘œì‹œ
+        matchResultText.text = "ë§¤ì¹­ì´ ì¡í˜”ìŠµë‹ˆë‹¤!";
 
-        // 2ÃÊ ±â´Ù·È´Ù°¡ ³ª¸ÓÁö Ã³¸®
+        // 2ì´ˆ ê¸°ë‹¤ë ¸ë‹¤ê°€ ë‚˜ë¨¸ì§€ ì²˜ë¦¬
         StartCoroutine(DelayedConnectToServer(assignment));
     }
 
@@ -215,11 +238,11 @@ public class MatchMakerClient : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
 
-        // 2ÃÊ ÈÄ¿¡ ´ë±â Äµ¹ö½º ²ô±â
+        // 2ì´ˆ í›„ì— ëŒ€ê¸° ìº”ë²„ìŠ¤ ë„ê¸°
         if (waitingCanvas != null)
             waitingCanvas.SetActive(false);
 
-        // ¼­¹ö Á¢¼Ó ½Ãµµ
+        // ì„œë²„ ì ‘ì† ì‹œë„
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(assignment.Ip, (ushort)assignment.Port);
         NetworkManager.Singleton.StartClient();
     }
@@ -244,7 +267,7 @@ public class MatchMakerClient : MonoBehaviour
         return false;
     }
 
-    //----------------------------------------------------------------À¯·ÉÆ¼ÄÏ Ã³¸®¹®Á¦
+    //----------------------------------------------------------------ìœ ë ¹í‹°ì¼“ ì²˜ë¦¬ë¬¸ì œ
 
 
     private async void OnApplicationQuit()
@@ -271,5 +294,20 @@ public class MatchMakerClient : MonoBehaviour
                 Debug.LogWarning($"[MatchMakerClient] Failed to cancel ticket: {ex.Message}");
             }
         }
+    }
+
+    //------------------------------------------------------------------Reconnect ì²˜ë¦¬ë¬¸ì œ
+
+    private void OnReconnected(ulong newCid)
+    {
+        // í•œ ë²ˆë§Œ ìˆ˜í–‰
+        NetworkManager.Singleton.OnClientConnectedCallback -= OnReconnected;
+        waitingCanvas?.SetActive(false);
+
+        // oldCid â†’ newCid ë§¤í•‘ ê°±ì‹ 
+        int playerId = SQLiteManager.Instance.player.playerId;
+        PlayerDataManager.Instance.RequestReconnectServerRpc(playerId);
+
+        // ì´ì œ í´ë¼ì´ì–¸íŠ¸ëŠ” ë°”ë¡œ ê²Œì„ë£¸ì— ë“¤ì–´ê°€ê²Œ ë©ë‹ˆë‹¤.
     }
 }

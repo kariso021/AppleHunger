@@ -16,6 +16,9 @@ public class PlayerDataManager : NetworkBehaviour
 
     private HashSet<ulong> readyClientIds = new HashSet<ulong>();
 
+    public Managers managers;
+
+
 
 
 
@@ -242,22 +245,76 @@ public class PlayerDataManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RequestReconnectServerRpc(int playerId, ServerRpcParams rpc = default)
     {
-        // 새로 연결된 clientId
         ulong newCid = rpc.Receive.SenderClientId;
-
-        // 1) playerId→oldCid 역추적
         ulong oldCid = GetClientIdFromPlayerId(playerId);
         if (oldCid == 0) return;
 
-        // 2) 매핑 갱신
+        // 1) copy & remove oldCid data
+        var oldRating = clientIdToRating[oldCid];
+        var oldIcon = clientIdToIcon[oldCid];
+        var oldName = clientIdToNickname[oldCid];
         UnbindByPlayerId(playerId);
-        clientIdToPlayerId[newCid] = playerId;
 
-        // 3) 점수 이관
+        // 2) bind newCid → playerId + restore data
+        clientIdToPlayerId[newCid] = playerId;
+        clientIdToRating[newCid] = oldRating;
+        clientIdToIcon[newCid] = oldIcon;
+        clientIdToNickname[newCid] = oldName;
+
+        // 3) move score
         ScoreManager.Instance.HandleReconnect(oldCid, newCid);
 
-        // 4) 프로필·레이팅·닉네임 등도 동일 방식으로 이관해주시면 됩니다.
+        // 4) prepare RPC to only the reconnecting client
+        var rpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new[] { newCid }
+            }
+        };
+
+        // 5) for every live client (you + opponent), call the same RPC
+        foreach (var kv in clientIdToPlayerId)
+        {
+            ulong cid = kv.Key;
+            int pid = kv.Value;
+            int rating = clientIdToRating[cid];
+            string icon = clientIdToIcon[cid];
+            string nick = clientIdToNickname[cid];
+
+            SyncPlayerStateClientRpc(pid, rating, icon, nick, cid, rpcParams);
+        }
     }
+
+    [ClientRpc]
+    private void SyncPlayerStateClientRpc(
+      int number,
+      int rating,
+      string icon,
+      string nickname,
+      ulong clientId,
+      ClientRpcParams rpcParams = default)
+    {
+        bool amI = NetworkManager.Singleton.LocalClientId == clientId;
+        if (amI)
+        {
+            // My own UI
+            PlayerUI.Instance.SetMyNumber(number);
+            PlayerUI.Instance.SetMyRating(rating);
+            PlayerUI.Instance.SetMyProfileImage(icon);
+            PlayerUI.Instance.SetMyNickname(nickname);
+        }
+        else
+        {
+            // Opponent's UI
+            PlayerUI.Instance.SetOpponentNumber(number);
+            PlayerUI.Instance.SetOpponentRating(rating);
+            PlayerUI.Instance.SetOpponentIconImage(icon);
+            PlayerUI.Instance.SetOpponentNickName(nickname);
+        }
+    }
+
+
 
     //unbind
 
@@ -266,12 +323,49 @@ public class PlayerDataManager : NetworkBehaviour
     /// </summary>
     public void UnbindByPlayerId(int playerId)
     {
-        // clientIdToPlayerId: Dictionary<ulong, int>
-        // playerId가 값인 엔트리를 찾아서 제거
+        // 1) playerId → clientId 역추적
         var entry = clientIdToPlayerId.FirstOrDefault(kv => kv.Value == playerId);
         if (!entry.Equals(default(KeyValuePair<ulong, int>)))
         {
-            clientIdToPlayerId.Remove(entry.Key);
+            ulong oldCid = entry.Key;
+
+            // 2) 모든 딕셔너리에서 oldCid 키 제거
+            clientIdToPlayerId.Remove(oldCid);
+            clientIdToRating.Remove(oldCid);
+            clientIdToIcon.Remove(oldCid);
+            clientIdToNickname.Remove(oldCid);
+
+            Debug.Log($"[PlayerDataManager] Unbound all data for oldCid={oldCid}, playerId={playerId}");
+        }
+    }
+
+
+    //세선 호출
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SetClientInGameServerRpc(bool inGame, ServerRpcParams rpcParams = default)
+    {
+        ulong cid = rpcParams.Receive.SenderClientId;
+        Debug.Log($"[PlayerDataManager] CID={cid} → inGame={inGame}");
+
+        // playerId로 변환
+        if (!clientIdToPlayerId.TryGetValue(cid, out var playerId))
+            return;
+
+        // 외부 API에도 즉시 업스트림
+        if (managers != null)
+        {
+            StartCoroutine(
+                managers.UpdatePlayerSessionCoroutine(
+                    playerId,
+                    inGame,
+                    success => Debug.Log($"[API] playerSession({playerId}) inGame={inGame} → {(success ? "OK" : "FAIL")}")
+                )
+            );
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerDataManager] Managers가 할당되지 않았습니다!");
         }
     }
 

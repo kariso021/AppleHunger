@@ -91,65 +91,73 @@ public class Managers : MonoBehaviour
 
     #endregion
     #region Session
-    public async Task UpdatePlayerSession(int playerId, bool isInGame)
+    public IEnumerator UpdatePlayerSessionCoroutine(int playerId, bool isInGame, System.Action<bool> onComplete = null)
     {
         string url = $"{apiBaseUrl}/gameSession/upsert";
 
         var payload = new PlayerSessionRequest
         {
             playerId = playerId,
-            isInGame = isInGame ? 1 : 0 // bool → int 변환
+            isInGame = isInGame ? 1 : 0
         };
-
         string json = JsonConvert.SerializeObject(payload);
         byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        using (var request = new UnityWebRequest(url, "POST"))
         {
             request.uploadHandler = new UploadHandlerRaw(jsonBytes);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 
-            var operation = request.SendWebRequest();
-            while (!operation.isDone)
-                await Task.Yield();
+            yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.Success)
-            {
+            bool success = request.result == UnityWebRequest.Result.Success;
+            if (success)
                 Debug.Log("[ServerToAPI] playerSession 업데이트 성공: " + request.downloadHandler.text);
-            }
             else
-            {
-                Debug.LogError($"[ServerToAPI]  playerSession 업데이트 실패: {request.responseCode} / {request.error}");
-            }
+                Debug.LogError($"[ServerToAPI] playerSession 업데이트 실패: {request.responseCode} / {request.error}");
+
+            onComplete?.Invoke(success);
         }
     }
 
-    public async Task<bool> GetIsInGame(int playerId)
+    public IEnumerator GetIsInGameCoroutine(int playerId, System.Action<bool> onResult)
     {
         string url = $"{apiBaseUrl}/gameSession/{playerId}";
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        using (var request = UnityWebRequest.Get(url))
         {
-            var operation = request.SendWebRequest();
-            while (!operation.isDone)
-                await Task.Yield();
+            yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string json = request.downloadHandler.text;
-                IsInGameResponse response = JsonUtility.FromJson<IsInGameResponse>(json);
+                var response = JsonUtility.FromJson<IsInGameResponse>(json);
                 Debug.Log($"[ServerToAPI] playerId: {playerId}, isInGame: {response.isInGame}");
-                return response.isInGame == 1;
+                onResult(response.isInGame == 1);
             }
             else
             {
-                Debug.LogError($"[ServerToAPI]세션 조회 실패: {request.responseCode} / {request.error}");
-                return false;
+                Debug.LogError($"[ServerToAPI] 세션 조회 실패: {request.responseCode} / {request.error}");
+                onResult(false);
             }
         }
     }
     #endregion
+
+    [System.Serializable]
+    public class PlayerSessionRequest
+    {
+        public int playerId;
+        public int isInGame;
+    }
+
+    [System.Serializable]
+    public class IsInGameResponse
+    {
+        public int isInGame;
+    }
+
     // 서버에서 위 함수들을 위 함수들을 이용해 DB 서버에 값을 넘기고
     // 클라로 넘기는 함수쪽에서 FindAnyObjectByType<> 을 이용해 
     // 각 클라의 ClientNetworkManager의 GetMatchrecords 와 GetPlayerData 를 실행시키도록
