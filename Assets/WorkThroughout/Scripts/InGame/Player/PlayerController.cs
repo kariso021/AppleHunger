@@ -260,28 +260,27 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void RequestAppleRemovalServerRpc(ulong[] appleIds, int sum, ulong clientId)
     {
-        if (sum == 10)
+        if (sum != 10) return;
+
+        Debug.Log($"Server: Removing {appleIds.Length} apples.");
+
+        int appleCount = appleIds.Length;
+        int appleScoreValue = 0;
+
+        // AppleScoreValue 계산
+        foreach (ulong appleId in appleIds)
         {
-            Debug.Log($"Server: Removing {appleIds.Length} apples.");
-
-            int appleCount = appleIds.Length;
-            int AppleScoreValue = 0;
-
-            foreach (ulong appleId in appleIds)
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects
+                .TryGetValue(appleId, out NetworkObject appleObj) &&
+                appleObj.TryGetComponent(out Apple appleComponent))
             {
-                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(appleId, out NetworkObject appleObj))
-                {
-                    if (appleObj.TryGetComponent(out Apple appleComponent))
-                    {
-                        AppleScoreValue = appleComponent.ScoreValue;
-                        //appleObj.Despawn();
-
-                        AppleManager.Instance?.DespawnApple(appleComponent);
-                    }
-                }
+                appleScoreValue = appleComponent.ScoreValue;
+                AppleManager.Instance?.DespawnApple(appleComponent);
             }
-            ScoreManager.Instance?.AddScore(clientId, appleCount, AppleScoreValue);
         }
+
+        // clientId 기준으로 점수 처리
+        ScoreManager.Instance.AddScore(clientId, appleCount, appleScoreValue);
     }
 
     //TrigerFlashImage
