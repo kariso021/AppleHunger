@@ -34,6 +34,8 @@ public class MatchMakerClient : MonoBehaviour
         public string sessionToken;
     }
 
+    public Managers managers;
+
 
 
 
@@ -230,6 +232,17 @@ public class MatchMakerClient : MonoBehaviour
             serverPort = (int)assignment.Port,
             isInGame = true
         });
+
+        managers.UpdatePlayerSessionCoroutine(
+            SQLiteManager.Instance.player.playerId,
+            true,
+            success => Debug.Log("[MatchMakerClient] playerSession 업데이트 " +
+                                  (success ? "성공" : "실패"))
+        );
+
+       // 서버 잡혔다고 isingame 신호 주기
+       
+
 
         // 바로 메시지 표시
         matchResultText.text = "매칭이 잡혔습니다!";

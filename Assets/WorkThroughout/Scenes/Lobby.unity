@@ -9319,7 +9319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7b8e98fea2916444a5e51c93d8de937, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inGameSceneName: Ingame
+  inGameSceneName: InGame
   managers: {fileID: 600251164}
 --- !u!4 &600251166
 Transform:
