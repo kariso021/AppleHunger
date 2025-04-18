@@ -47,12 +47,9 @@ public class SQLiteManager : MonoBehaviour
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
 
             player.deviceId = TransDataClass.deviceIdToApply;
-            player.googleId = TransDataClass.googleIdToApply;
-
-            if (player.googleId != null)
-                StartCoroutine(ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, player.googleId));
 
             StartCoroutine(InitializeDatabase());
+
         }
         else
         {
@@ -85,6 +82,9 @@ public class SQLiteManager : MonoBehaviour
             // Step 2: DB가 존재하면 서버에서 데이터를 받을 필요 없이 로드 후 종료
             yield return loadAllDataAwait();
 
+            if (player.googleId == null && TransDataClass.googleIdToApply != null)
+                StartCoroutine(ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, TransDataClass.googleIdToApply));
+
             saveRankDataToDictionary();
 
             yield return DataSyncManager.Instance.PlayerRankingUpdated();
@@ -96,6 +96,8 @@ public class SQLiteManager : MonoBehaviour
         yield return StartCoroutine(CreateDatabaseAndFetchPlayerData());
         LoadAllData();
 
+        if (string.IsNullOrEmpty(player.googleId) && !string.IsNullOrEmpty(TransDataClass.googleIdToApply))
+            StartCoroutine(ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, TransDataClass.googleIdToApply));
         //dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
     }
     private IEnumerator CreateDatabaseAndFetchPlayerData()
@@ -311,12 +313,12 @@ public class SQLiteManager : MonoBehaviour
 
             yield return ClientNetworkManager.Instance.GetPlayerData(
                 "deviceId", SystemInfo.deviceUniqueIdentifier, true);
-            // googleId가 존재한다면 → 서버에 업데이트 요청
-            if (!string.IsNullOrEmpty(TransDataClass.googleIdToApply))
-            {
-                SQLiteManager.Instance.player.googleId = TransDataClass.googleIdToApply;
-                yield return ClientNetworkManager.Instance.UpdatePlayerData();
-            }
+            //// googleId가 존재한다면 → 서버에 업데이트 요청
+            //if (!string.IsNullOrEmpty(TransDataClass.googleIdToApply))
+            //{
+            //    SQLiteManager.Instance.player.googleId = TransDataClass.googleIdToApply;
+            //    yield return ClientNetworkManager.Instance.UpdatePlayerData();
+            //}
 
             // ✅ 먼저 플레이어 데이터를 받아옴
             //yield return ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId, true);

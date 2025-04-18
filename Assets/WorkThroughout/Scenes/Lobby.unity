@@ -13399,7 +13399,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 864, y: 1920}
+  m_ReferenceResolution: {x: 1080, y: 1920}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
@@ -21612,6 +21612,7 @@ GameObject:
   - component: {fileID: 1246450636}
   - component: {fileID: 1246450635}
   - component: {fileID: 1246450638}
+  - component: {fileID: 1246450639}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -21737,6 +21738,18 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &1246450639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1246450634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cf2c11c8009ca44aa4aba2987068c9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1257415706
 GameObject:
   m_ObjectHideFlags: 0
@@ -23564,7 +23577,7 @@ MonoBehaviour:
   nicknamePopup: {fileID: 1017549640}
   loadingPopup: {fileID: 1122263518}
   settingPopup: {fileID: 903735057}
-  activePopup: {fileID: 1017549640}
+  activePopup: {fileID: 0}
 --- !u!114 &1366320881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25998,6 +26011,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1538939631}
   m_CullTransparentMesh: 1
+--- !u!1 &1545955903
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1545955905}
+  - component: {fileID: 1545955904}
+  m_Layer: 0
+  m_Name: AndroidInputManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1545955904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1545955903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 259d6642a3436f64b98574e87da243c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1545955905
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1545955903}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -103.21042, y: 1053.918, z: -10.724655}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1548492058
 GameObject:
   m_ObjectHideFlags: 0
@@ -35365,3 +35422,4 @@ SceneRoots:
   - {fileID: 218543477}
   - {fileID: 1070782257}
   - {fileID: 600251166}
+  - {fileID: 1545955905}
