@@ -223,6 +223,13 @@ public class MatchMakerClient : MonoBehaviour
     {
         Debug.Log($"[클라이언트] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
 
+        SQLiteManager.Instance.SavePlayerSession(new PlayerSessionData
+        {
+            serverIp = assignment.Ip,
+            serverPort = (int)assignment.Port,
+            isInGame = true
+        });
+
         // 바로 메시지 표시
         matchResultText.text = "매칭이 잡혔습니다!";
 

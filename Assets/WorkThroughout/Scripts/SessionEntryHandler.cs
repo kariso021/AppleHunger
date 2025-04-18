@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class SessionEntryHandler : MonoBehaviour
 {
-    [SerializeField] private string inGameSceneName = "IngameS";
+    [SerializeField] private string inGameSceneName = "InGame";
     [SerializeField] private Managers managers;
 
     private void Start()
