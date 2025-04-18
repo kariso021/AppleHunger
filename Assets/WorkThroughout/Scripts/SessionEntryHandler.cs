@@ -31,6 +31,9 @@ public class SessionEntryHandler : MonoBehaviour
             )
         );
 
+        session.isInGame = isInGame;
+        SQLiteManager.Instance.SavePlayerSession(session);
+
         // 3) 결과에 따라 씬 전환
         if (isInGame)
         {

@@ -225,6 +225,7 @@ public class MatchMakerClient : MonoBehaviour
 
         SQLiteManager.Instance.SavePlayerSession(new PlayerSessionData
         {
+            playerId = SQLiteManager.Instance.player.playerId,
             serverIp = assignment.Ip,
             serverPort = (int)assignment.Port,
             isInGame = true
