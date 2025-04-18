@@ -1,5 +1,7 @@
-﻿using GooglePlayGames;
+﻿#if UNITY_ANDROID && !UNITY_SERVER
+using GooglePlayGames;
 using GooglePlayGames.BasicApi;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,8 +19,10 @@ public class LoginManager : MonoBehaviour
     // Start is called before the first frame update
     private void Awake()
     {
+#if UNITY_ANDROID && !UNITY_SERVER
         PlayGamesPlatform.DebugLogEnabled = true;
         PlayGamesPlatform.Activate();
+#endif
     }
     void Start()
     {
@@ -27,17 +31,22 @@ public class LoginManager : MonoBehaviour
         guestLoginButton.onClick.AddListener(() => OnGuestLoginButtonClick());
         googleLoginButton.onClick.AddListener(() => OnGoogleLoginButtonClick());
 
-
+#if UNITY_ANDROID && !UNITY_SERVER
         // 이미 로그인 되어있는 경우
         if (PlayGamesPlatform.Instance.localUser.authenticated)
         {           
             toDownCheck();
         }
+#endif
     }
+
+
 
     // Update is called once per frame
     public void GoogleSignIn()
     {
+#if UNITY_ANDROID && !UNITY_SERVER
+
         Debug.Log("Google Login Start");
         PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
     }
@@ -77,6 +86,7 @@ public class LoginManager : MonoBehaviour
             // General failure handling
             Debug.Log("Google Sign-In failure handling completed.");
         }
+#endif
     }
 
 

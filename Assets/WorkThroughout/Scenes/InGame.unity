@@ -2871,8 +2871,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   myScoreText: {fileID: 358529142}
   opponentScoreText: {fileID: 1485358725}
-  Myprofileimage: {fileID: 971879830}
-  Opponentprofileimage: {fileID: 2146131904}
+  myNumberText: {fileID: 0}
+  opponentNumberText: {fileID: 0}
+  myProfileImage: {fileID: 0}
+  opponentProfileImage: {fileID: 0}
   timerSlider: {fileID: 49871048}
   myNicknameText: {fileID: 719818866}
   opponentNicknameText: {fileID: 852442223}
@@ -3855,7 +3857,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1544002600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4696,6 +4698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8cbbee73c498984d9dfb1636e546fed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  managers: {fileID: 0}
 --- !u!4 &1942438308
 Transform:
   m_ObjectHideFlags: 0
