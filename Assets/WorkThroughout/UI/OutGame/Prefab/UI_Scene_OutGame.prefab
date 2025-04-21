@@ -81,7 +81,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1219886231791809060}
   m_Layer: 5
-  m_Name: UI_Scene_Out_Game
+  m_Name: UI_Scene_OutGame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -644,7 +644,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4274645601564166461}
   m_Layer: 5
-  m_Name: UI_Canvas_HUD_Lobby
+  m_Name: UI_Scene_OutGame_Lobby
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1510,6 +1510,26 @@ PrefabInstance:
     - target: {fileID: 7689267301611589064, guid: c8bec961823dc904c828156174c4f36d, type: 3}
       propertyPath: m_Color.r
       value: 0.41399136
+      objectReference: {fileID: 0}
+    - target: {fileID: 7961769757550128795, guid: c8bec961823dc904c828156174c4f36d, type: 3}
+      propertyPath: m_Color.b
+      value: 0.25882354
+      objectReference: {fileID: 0}
+    - target: {fileID: 7961769757550128795, guid: c8bec961823dc904c828156174c4f36d, type: 3}
+      propertyPath: m_Color.g
+      value: 0.76470596
+      objectReference: {fileID: 0}
+    - target: {fileID: 7961769757550128795, guid: c8bec961823dc904c828156174c4f36d, type: 3}
+      propertyPath: m_Color.r
+      value: 0.4156863
+      objectReference: {fileID: 0}
+    - target: {fileID: 8331562313222083295, guid: c8bec961823dc904c828156174c4f36d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8548771129260015998, guid: c8bec961823dc904c828156174c4f36d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
