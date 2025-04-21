@@ -233,12 +233,12 @@ public class MatchMakerClient : MonoBehaviour
             isInGame = true
         });
 
-        managers.UpdatePlayerSessionCoroutine(
+        StartCoroutine(managers.UpdatePlayerSessionCoroutine(
             SQLiteManager.Instance.player.playerId,
             true,
             success => Debug.Log("[MatchMakerClient] playerSession 업데이트 " +
                                   (success ? "성공" : "실패"))
-        );
+        ));
 
        // 서버 잡혔다고 isingame 신호 주기
        
