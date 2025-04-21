@@ -156,6 +156,11 @@ public class PopupManager : MonoBehaviour
         if (loadingPopup != null && loadingPopup.activeSelf)
             loadingPopup.SetActive(false);
     }
+
+    public void HideLoading(float time)
+    {
+        Invoke(nameof(HideLoading), time);
+    }
     // 🔹 클라이언트에서 데이터를 받은 후 실행
     public void OnDataReceived()
     {

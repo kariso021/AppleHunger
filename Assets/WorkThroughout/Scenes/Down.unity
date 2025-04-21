@@ -364,9 +364,9 @@ RectTransform:
   - {fileID: 1669266134}
   m_Father: {fileID: 731349419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50, y: -220}
   m_SizeDelta: {x: 700, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &297547407
@@ -657,8 +657,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   guestLoginButton: {fileID: 297547407}
   googleLoginButton: {fileID: 1059814602}
-  downCheck: {fileID: 1542443531}
   loginPanel: {fileID: 731349418}
+  downCheck: {fileID: 1542443531}
 --- !u!1 &628093096
 GameObject:
   m_ObjectHideFlags: 0
@@ -842,12 +842,12 @@ GameObject:
   - component: {fileID: 731349419}
   - component: {fileID: 731349420}
   m_Layer: 5
-  m_Name: Layout
+  m_Name: LoginPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &731349419
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1304,9 +1304,9 @@ RectTransform:
   - {fileID: 318919080}
   m_Father: {fileID: 731349419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50, y: -40}
   m_SizeDelta: {x: 700, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1059814602

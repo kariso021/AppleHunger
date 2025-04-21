@@ -35,7 +35,7 @@ public class SQLiteManager : MonoBehaviour
     public PlayerSessionData playerSession;
     // 데이터로드가 끝나면 실행될 이벤트
     public event Action OnSQLiteDataLoaded;
-
+    public event Action OnInitializeComplete;
     //
     public bool isSqlExist = false;
 
@@ -47,6 +47,8 @@ public class SQLiteManager : MonoBehaviour
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
 
             player.deviceId = TransDataClass.deviceIdToApply;
+
+            PopupManager.Instance.ShowLoading("데이터 로딩");
 
             StartCoroutine(InitializeDatabase());
 
@@ -89,15 +91,17 @@ public class SQLiteManager : MonoBehaviour
 
             yield return DataSyncManager.Instance.PlayerRankingUpdated();
 
-            ClientNetworkManager.Instance.GetPlayerItems(player.playerId);
-            yield break;
+            yield return ClientNetworkManager.Instance.GetPlayerItems(player.playerId);
         }
+        else
+        {
+            yield return StartCoroutine(CreateDatabaseAndFetchPlayerData());
+            LoadAllData();
 
-        yield return StartCoroutine(CreateDatabaseAndFetchPlayerData());
-        LoadAllData();
-
-        if (string.IsNullOrEmpty(player.googleId) && !string.IsNullOrEmpty(TransDataClass.googleIdToApply))
-            StartCoroutine(ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, TransDataClass.googleIdToApply));
+            if (string.IsNullOrEmpty(player.googleId) && !string.IsNullOrEmpty(TransDataClass.googleIdToApply))
+               yield return (ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, TransDataClass.googleIdToApply));
+        }
+        PopupManager.Instance.HideLoading(1f);
         //dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
     }
     private IEnumerator CreateDatabaseAndFetchPlayerData()
