@@ -144,7 +144,10 @@ public class ServerToAPIManager : MonoBehaviour
                 Debug.LogError("[ServerToAPI] Failed Player Search : " + request.error);
                 Debug.LogError("[ServerToAPI] Response: " + request.downloadHandler.text);
                 if (isFirstTime)
+                {
                     yield return StartCoroutine(AddPlayer());
+                    Debug.Log("[ServerToAPI] ADD NEW PLAYER END");
+                }
             }
         }
     }

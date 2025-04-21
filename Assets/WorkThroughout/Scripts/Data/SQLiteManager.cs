@@ -46,7 +46,7 @@ public class SQLiteManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
 
-            player.deviceId = TransDataClass.deviceIdToApply;
+            player.deviceId = SystemInfo.deviceUniqueIdentifier;
 
             PopupManager.Instance.ShowLoading("데이터 로딩");
 
@@ -268,24 +268,9 @@ public class SQLiteManager : MonoBehaviour
             Debug.Log("[SQL] PC/iOS에서 SQLite DB 복사 완료!");
 #endif
 
-            //using (UnityWebRequest request = UnityWebRequest.Get(streamingDbPath))
-            //{
-            //    yield return request.SendWebRequest();
-
-            //    if (request.result == UnityWebRequest.Result.Success)
-            //    {
-            //        File.WriteAllBytes(persistentDbPath, request.downloadHandler.data);
-            //        Debug.Log("✅ Android에서 SQLite DB 복사 완료!");
-            //        yield break;
-            //    }
-            //    else
-            //    {
-            //        Debug.LogError("❌ Android에서 DB 다운로드 실패: " + request.error);
-            //    }
-            //}
         }
 
-        // 📌 Step 4: `persistentDataPath`에도 DB가 없으면 새로 생성
+        //  Step 4: `persistentDataPath`에도 DB가 없으면 새로 생성
         if (!File.Exists(persistentDbPath))
         {
             Debug.LogWarning("[SQL] DB 파일이 어디에도 없음 → 새로 생성합니다.");
@@ -336,14 +321,14 @@ public class SQLiteManager : MonoBehaviour
             // ✅ 병렬 요청을 위한 플래그 설정
             bool isPlayerStatsLoaded = false;
             bool isLoginDataLoaded = false;
-            bool isMatchRecordsLoaded = false;
+            //bool isMatchRecordsLoaded = false;
             bool isPlayerItemsLoaded = false;
             bool isRankingListLoaded = false;
 
             // ✅ 나머지 데이터를 병렬로 요청
             StartCoroutine(LoadPlayerStatsServerRpc(ClientNetworkManager.Instance, () => isPlayerStatsLoaded = true));
             StartCoroutine(LoadLoginDataServerRpc(ClientNetworkManager.Instance, () => isLoginDataLoaded = true));
-            StartCoroutine(LoadMatchRecordsServerRpc(ClientNetworkManager.Instance, () => isMatchRecordsLoaded = true));
+            //StartCoroutine(LoadMatchRecordsServerRpc(ClientNetworkManager.Instance, () => isMatchRecordsLoaded = true)); // 매치 기록의 경우 처음 시작한 유저는 당연히 없음
             StartCoroutine(LoadPlayerItemsServerRpc(ClientNetworkManager.Instance, () => isPlayerItemsLoaded = true));
             StartCoroutine(LoadRankingListServerRpc(ClientNetworkManager.Instance, () => isRankingListLoaded = true));
 
@@ -351,7 +336,7 @@ public class SQLiteManager : MonoBehaviour
             yield return new WaitUntil(() =>
                 isPlayerStatsLoaded &&
                 isLoginDataLoaded &&
-                isMatchRecordsLoaded &&
+                //isMatchRecordsLoaded &&
                 isPlayerItemsLoaded &&
                 isRankingListLoaded
             );

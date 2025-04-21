@@ -34,7 +34,7 @@ public class LoginManager : MonoBehaviour
 
 
         int isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin",0);
-        int isGuestLogin = PlayerPrefs.GetInt("IsGuestLogin", 0);
+        int isGuestLogin = PlayerPrefs.GetInt("IsGuestLogin", 0);     
 
         Debug.Log("Game Start: Attempting silent login.");
 

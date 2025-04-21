@@ -78,10 +78,10 @@ public class ClientNetworkManager : MonoBehaviour
     public IEnumerator TargetReceivePlayerDataClientRpc(string jsonData)
     {
         
-        var parsed = JsonConvert.DeserializeObject<PlayerData>(jsonData);
-        Debug.Log($"플레이어 데이터 세이브 직전 : {parsed}");
-        SQLiteManager.Instance.SavePlayerData(parsed);
-
+        var parsed = JsonConvert.DeserializeObject<PlayerAddResponse>(jsonData);
+        Debug.Log($"플레이어 데이터 세이브 직전 : {parsed.playerData}");
+        SQLiteManager.Instance.SavePlayerData(parsed.playerData);
+        Debug.Log($"Player Data : {SQLiteManager.Instance.LoadPlayerData()}");
         yield return null;
     }
 
