@@ -32,20 +32,22 @@ public class LoginManager : MonoBehaviour
         guestLoginButton.onClick.AddListener(OnGuestLoginButtonClick);
         googleLoginButton.onClick.AddListener(OnGoogleLoginButtonClick);
 
+
         int isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin",0);
         int isGuestLogin = PlayerPrefs.GetInt("IsGuestLogin", 0);
 
         Debug.Log("Game Start: Attempting silent login.");
-#if UNITY_ANDROID
+
         if (isGoogleLogin == 0 && isGuestLogin == 0)
             loginPanel.SetActive(true);
+#if UNITY_ANDROID
         else if(isGuestLogin == 1 && isGoogleLogin == 1)
             PlayGamesPlatform.Instance.Authenticate(ProcessAutoAuthentication);
         else if (isGoogleLogin == 1)
             PlayGamesPlatform.Instance.Authenticate(ProcessAutoAuthentication);
+#endif
         else if (isGuestLogin == 1)
             toDownCheck();
-#endif
     }
 #if UNITY_ANDROID
     private void ProcessAutoAuthentication(SignInStatus status)

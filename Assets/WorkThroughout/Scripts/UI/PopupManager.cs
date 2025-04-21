@@ -49,6 +49,9 @@ public class PopupManager : MonoBehaviour
 
         activePopup = popup;
         activePopup.SetActive(true);
+        RectTransform rect = activePopup.GetComponent<RectTransform>();
+
+        rect.sizeDelta = new Vector2(rect.sizeDelta.x, Screen.height);
 
         if (popup.tag == "Profile")
         {
@@ -139,6 +142,9 @@ public class PopupManager : MonoBehaviour
         {
             loadingPopup.SetActive(true);
             loadingPopup.GetComponentInChildren<TMP_Text>().text = output;
+            RectTransform rect = loadingPopup.GetComponent<RectTransform>();
+
+            rect.sizeDelta = new Vector2(rect.sizeDelta.x, Screen.height);
         }
     }
     public void ChangeLoadingText(string text)
