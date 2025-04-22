@@ -79,12 +79,19 @@ public class ClientNetworkManager : MonoBehaviour
     {
         
         var parsed = JsonConvert.DeserializeObject<PlayerAddResponse>(jsonData);
-        Debug.Log($"플레이어 데이터 세이브 직전 : {parsed.playerData}");
+        Debug.Log($"플레이어 데이터 세이브 직전 : {parsed.playerData.playerId}");
         SQLiteManager.Instance.SavePlayerData(parsed.playerData);
         Debug.Log($"Player Data : {SQLiteManager.Instance.LoadPlayerData()}");
         yield return null;
     }
 
+    public IEnumerator TargetReceiveAsPlayerDataClientRpc(string jsonData)
+    {
+        var playerData = JsonConvert.DeserializeObject<PlayerData>(jsonData);
+        Debug.Log($"[Client] Player Data Saved as {playerData}");
+        SQLiteManager.Instance.SavePlayerData(playerData);
+        yield return null;
+    }
     // 🔹 플레이어 추가
     public IEnumerator AddPlayer()
     {

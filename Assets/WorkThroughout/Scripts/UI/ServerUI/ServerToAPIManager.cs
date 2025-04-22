@@ -76,7 +76,10 @@ public class ServerToAPIManager : MonoBehaviour
     {
         yield return ClientNetworkManager.Instance.TargetReceivePlayerDataClientRpc(jsonData);
     }
-
+    private IEnumerator TargetReceiveAsPlayerDataClientRpc(string jsonData)
+    {
+        yield return ClientNetworkManager.Instance.TargetReceiveAsPlayerDataClientRpc(jsonData);
+    }
     public IEnumerator DeletePlayer(int playerId)
     {
         string url = $"{apiBaseUrl}/players/{playerId}";
@@ -137,7 +140,8 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text;
-                yield return TargetReceivePlayerDataClientRpc(jsonData);
+                Debug.LogWarning($"Target : {jsonData}");
+                yield return TargetReceiveAsPlayerDataClientRpc(jsonData);
             }
             else
             {
@@ -771,21 +775,5 @@ public class ServerToAPIManager : MonoBehaviour
     public class IsInGameResponse
     {
         public int isInGame;
-    }
-    [System.Serializable]
-    public class PlayerAddResponse
-    {
-        public bool success; // 요청 성공 여부
-        public int playerId; // MySQL에서 자동 생성된 playerId
-        public PlayerData playerData;
-
-        public PlayerAddResponse() { }
-
-        public PlayerAddResponse(bool success, int playerId, PlayerData playerData)
-        {
-            this.success = success;
-            this.playerId = playerId;
-            this.playerData = playerData;
-        }
     }
 }
