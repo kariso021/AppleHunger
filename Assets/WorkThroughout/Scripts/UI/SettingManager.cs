@@ -17,7 +17,7 @@ public class SettingManager : MonoBehaviour
     public Button deleteButton;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         if (deviceIdText != null)
         {

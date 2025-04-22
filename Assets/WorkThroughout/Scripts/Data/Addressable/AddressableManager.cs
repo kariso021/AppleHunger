@@ -55,7 +55,14 @@ public class AddressableManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    void Start()
+    {
+        // 20250318 수정
+        //StartCoroutine(initAddressable());
+        DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadProfileIconFromGroup();
+        DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadMyRankingIconFromGroup();
+        //DataSyncManager.Instance.OnMatchHistoryChanged += () =>
+    }
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         isUIReady = false; // 다음 씬에서 새 UI를 바인딩하기 전까지는 준비 안 됨
@@ -105,15 +112,6 @@ public class AddressableManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
         SceneManager.sceneUnloaded -= OnSceneUnLoaded;
-    }
-
-    void Start()
-    {
-        // 20250318 수정
-        //StartCoroutine(initAddressable());
-        DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadProfileIconFromGroup();
-        DataSyncManager.Instance.OnPlayerProfileChanged += () => LoadMyRankingIconFromGroup();
-        //DataSyncManager.Instance.OnMatchHistoryChanged += () =>
     }
 
     private IEnumerator initAddressable()
