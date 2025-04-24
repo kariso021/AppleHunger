@@ -14,15 +14,33 @@ public class SessionEntryHandler : MonoBehaviour
 
     private IEnumerator CheckAndEnterSession()
     {
-        // 1) 로컬 세션 정보 로드
+        // 1) 로컬 세션 로드
         var session = SQLiteManager.Instance.LoadPlayerSession();
         if (session == null)
         {
-            Debug.LogWarning("[SessionEntry] PlayerSession 없음 → 로비 유지");
+            Debug.Log("[SessionEntry] 로컬에 세션 없음 → 새 세션 생성 및 서버 등록");
+
+            // 1-1) 새 세션 객체 생성 (isInGame 기본 false)
+            session = new PlayerSessionData
+            {
+                playerId = SQLiteManager.Instance.player.playerId,
+                isInGame = false
+            };
+            SQLiteManager.Instance.SavePlayerSession(session);
+
+            // 1-2) 서버에 Upsert 요청
+            yield return StartCoroutine(
+                managers.UpdatePlayerSessionCoroutine(
+                    session.playerId,
+                    session.isInGame
+                )
+            );
+
+            // 첫 등록이니 로비 유지
             yield break;
         }
 
-        // 2) 서버에 isInGame 여부 요청 (코루틴)
+        // 2) 서버에서 isInGame 조회
         bool isInGame = false;
         yield return StartCoroutine(
             managers.GetIsInGameCoroutine(
@@ -31,18 +49,29 @@ public class SessionEntryHandler : MonoBehaviour
             )
         );
 
-        session.isInGame = isInGame;
-        SQLiteManager.Instance.SavePlayerSession(session);
+        // 3) 상태가 변했으면 로컬·서버 모두 갱신
+        if (session.isInGame != isInGame)
+        {
+            session.isInGame = isInGame;
+            SQLiteManager.Instance.SavePlayerSession(session);
 
-        // 3) 결과에 따라 씬 전환
+            yield return StartCoroutine(
+                managers.UpdatePlayerSessionCoroutine(
+                    session.playerId,
+                    session.isInGame
+                )
+            );
+        }
+
+        // 4) In-Game 상태면 씬 전환, 아니면 로비 유지
         if (isInGame)
         {
-            Debug.Log("[SessionEntry] 이미 In-Game 상태 → InGame 씬 로드");
+            Debug.Log("[SessionEntry] In-Game 상태 → InGame 씬 로드");
             SceneManager.LoadScene(inGameSceneName);
         }
         else
         {
-            Debug.Log("[SessionEntry] In-Game 상태 아님 → 로비 유지");
+            Debug.Log("[SessionEntry] In-Game 아님 → 로비 유지");
         }
     }
 }

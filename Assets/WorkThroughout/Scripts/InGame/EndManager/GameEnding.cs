@@ -11,194 +11,166 @@ public class GameEnding : NetworkBehaviour
 {
     public static GameEnding Instance { get; private set; }
 
+    [Header("UI")]
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TextMeshProUGUI resultText;
     [SerializeField] private GameObject extendPanel;
+
+    [Header("Config")]
+    [SerializeField] private int extensionSeconds = 15;
+    [SerializeField] private int extendNoticeDuration = 2;
+
+    public Managers Managers; // DB/API 호출 매니저
+
     private bool hasExtendedOnce = false;
-    private bool resultIsDraw = false;
-    public Managers Managers; // DB 등 외부 매니저
+    private bool hasFinalGameBeenHandled = false;
 
-    private bool hasFinalGameBeenHandled = false; // 최종 게임 종료 처리 여부
-
-    public enum GameResultType
-    {
-        Win,     // 승패 있음
-        Draw,    // 무승부 (연장 후)
-        Extend   // 무승부 (연장 필요)
-    }
+    public enum GameResultType { Win, Draw, Extend }
 
     public static int LastWinnerId { get; private set; }
     public static int LastLoserId { get; private set; }
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject); // 중복 방지
-            return;
-        }
-        Instance = this;
+        if (Instance != null && Instance != this) Destroy(gameObject);
+        else Instance = this;
     }
 
-    private void OnEnable()
-    {
-        GameTimer.OnGameEnded += OnGameEndedHandler;
-    }
+    private void OnEnable() => GameTimer.OnGameEnded += OnGameEndedHandler;
+    private void OnDisable() => GameTimer.OnGameEnded -= OnGameEndedHandler;
 
-    private void OnDisable()
-    {
-        GameTimer.OnGameEnded -= OnGameEndedHandler;
-    }
-
-    // OnGameEndedHandler에서 연장 상태이면 최종 처리 없이 무시함
     private void OnGameEndedHandler()
     {
-        // 만약 현재 GameTimer가 연장 모드라면, 최종 로직을 진행하지 않음
         if (GameTimer.Instance != null && GameTimer.Instance.IsInExtension)
         {
-            Debug.Log("연장 중이므로 OnGameEndedHandler 실행 무시");
+            Debug.Log("연장 중 - 처리 생략");
             return;
         }
-
         StartCoroutine(HandleGameEnd());
     }
 
-    /// <summary>
-    /// 서버에서 게임 종료 처리
-    /// </summary>
     private IEnumerator HandleGameEnd()
     {
-        if (hasFinalGameBeenHandled)
+        if (hasFinalGameBeenHandled) yield break;
+
+        // playerId→score 로 변경
+        var pidScores = ScoreManager.Instance.GetAllScores();
+        var (type, winnerpid, loserpid) = EvaluateScoresByPlayer(pidScores);
+
+        if (type == GameResultType.Extend)
         {
-            yield break;
-        }
-
-        var result = DetermineWinner(out int winnerId, out int loserId, out int winnerRating, out int loserRating);
-
-
-        if (result == GameResultType.Extend)
-        {
-            Debug.Log("게임 연장 처리됨 → 종료 중단");
+            Debug.Log("무승부 연장");
             yield break;
         }
 
         hasFinalGameBeenHandled = true;
-        LastWinnerId = winnerId;
-        LastLoserId = loserId;
 
-        if (result == GameResultType.Draw)
-        {
-            yield return SubmitDrawToDB(winnerId, loserId, winnerRating, loserRating);
-        }
-        else if (result == GameResultType.Win)
-        {
-            yield return SubmitWinnerToDB(winnerId, loserId, winnerRating, loserRating);
-        }
+        // clientId → playerId/rating
+        LastWinnerId = winnerpid;
+        LastLoserId = loserpid;
 
+        var pdm = PlayerDataManager.Instance;
+
+        int winnerRating = pdm.GetPlayerRating(winnerpid);
+        int loserRating = pdm.GetPlayerRating(loserpid);
+        // 세션 false
+        yield return pdm.UpdateAllSessionsFalse();
+     
+
+        // DB 제출 & 보상 계산
+        yield return SubmitResultToDB(type, winnerpid, loserpid, winnerRating, loserRating);
+
+        // 클라이언트 UI 갱신 요청
         NotifyClientsToFetchDataClientRpc();
 
-        //게임세션 false
-        yield return StartCoroutine(UpdateAllSessionsFalse());
-
-
-        ShutdownNetworkObject();
+        // 서버 종료
+        ShutdownNetwork();
     }
 
-    public GameResultType DetermineWinner(
-        out int winnerId,
-        out int loserId,
-        out int winnerRating,
-        out int loserRating)
+    // 점수 비교 후 결과 및 해당 clientIds 반환
+    public (GameResultType type, int winnerPid, int loserPid) EvaluateScoresByPlayer(
+     Dictionary<int, int> scores)
     {
-        winnerId = -1;
-        loserId = -1;
-        winnerRating = 0;
-        loserRating = 0;
-
-        var scores = ScoreManager.Instance.GetScores();
-        var playerDataManager = PlayerDataManager.Instance;
-
-        if (scores.Count == 0)
+        if (scores.Count < 2)
         {
-            Debug.LogWarning("플레이어 없음");
-            return GameResultType.Win;
+            int onlyPid = scores.Keys.FirstOrDefault();
+            return (GameResultType.Win, onlyPid, onlyPid);
         }
 
-        if (scores.Count == 1)
-        {
-            var only = scores.First();
-            winnerId = playerDataManager.GetNumberFromClientID(only.Key);
-            winnerRating = playerDataManager.GetRatingFromClientID(only.Key);
-            return GameResultType.Win;
-        }
-
-        var sorted = scores.OrderByDescending(s => s.Value).ToList();
+        var sorted = scores.OrderByDescending(kv => kv.Value).ToList();
         int topScore = sorted[0].Value;
         int secondScore = sorted[1].Value;
+        int topPid = sorted[0].Key;
+        int secondPid = sorted[1].Key;
 
         if (topScore == secondScore)
         {
-            if (hasExtendedOnce)
+            if (!hasExtendedOnce)
             {
-                resultIsDraw = true;
-                Debug.Log("연장 후 무승부 처리");
-                winnerId = playerDataManager.GetNumberFromClientID(sorted[0].Key);
-                loserId = playerDataManager.GetNumberFromClientID(sorted[1].Key);
-                winnerRating = playerDataManager.GetRatingFromClientID(sorted[0].Key);
-                loserRating = playerDataManager.GetRatingFromClientID(sorted[1].Key);
-                return GameResultType.Draw;
+                hasExtendedOnce = true;
+                StartCoroutine(ExtendGameTime());
+                return (GameResultType.Extend, topPid, secondPid);
             }
-
-            hasExtendedOnce = true;
-            Debug.Log("무승부 → 15초 연장");
-            StartCoroutine(HandleGameTimeExtension());
-            return GameResultType.Extend;
+            // 연장 후에도 동점 → 무승부
+            return (GameResultType.Draw, topPid, secondPid);
         }
 
-        resultIsDraw = false;
-        winnerId = playerDataManager.GetNumberFromClientID(sorted[0].Key);
-        loserId = playerDataManager.GetNumberFromClientID(sorted[1].Key);
-        winnerRating = playerDataManager.GetRatingFromClientID(sorted[0].Key);
-        loserRating = playerDataManager.GetRatingFromClientID(sorted[1].Key);
-        return GameResultType.Win;
+        // 승패 확정
+        return (GameResultType.Win, topPid, secondPid);
     }
 
-    //-------------------------------------- 게임시간 15초 연장  ---------------------------------------
-    private IEnumerator HandleGameTimeExtension()
+    private IEnumerator ExtendGameTime()
     {
-
+        // 서버→클라 연장 알림
         NotifyClientsToExtendGameTimeClientRpc();
 
+        // 클라이언트 조작 제한
         foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-        {
             if (client.PlayerObject.TryGetComponent(out PlayerController pc))
-            {
                 pc.RestrictDragOnlyClientRpc();
-            }
-        }
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(extendNoticeDuration);
     }
 
     [ClientRpc]
     private void NotifyClientsToExtendGameTimeClientRpc()
+        => StartCoroutine(ShowExtendPanel());
+
+    private IEnumerator ShowExtendPanel()
     {
-        StartCoroutine(ShowExtendMessageCoroutine());
+        extendPanel.SetActive(true);
+        yield return new WaitForSeconds(extendNoticeDuration);
+        extendPanel.SetActive(false);
     }
 
-    private IEnumerator ShowExtendMessageCoroutine()
+    // DB 제출＋보상 계산 공통화
+    private IEnumerator SubmitResultToDB(
+        GameResultType type,
+        int winId, int loseId,
+        int winRating, int loseRating)
     {
-        if (extendPanel != null)
-            extendPanel.SetActive(true);
+        if (type == GameResultType.Draw)
+        {
+            Debug.Log("무승부 처리");
+            int gold = UnityEngine.Random.Range(50, 141);
+            yield return StartCoroutine(Managers.UpdateCurrencyAndRating(winId, gold, 0));
+            yield return StartCoroutine(Managers.UpdateCurrencyAndRating(loseId, gold, 0));
+            ShowGameOverScreenClientRpc(winId, loseId, 0, gold, gold);
+        }
+        else // Win
+        {
+            Debug.Log("승패 처리");
+            yield return StartCoroutine(Managers.AddMatchResult(winId, loseId));
+            int winGold = UnityEngine.Random.Range(100, 191);
+            int loseGold = UnityEngine.Random.Range(0, 91);
+            int delta = CalculateRatingDelta(winRating, loseRating);
 
-        yield return new WaitForSeconds(2f);
-
-        if (extendPanel != null)
-            extendPanel.SetActive(false);
+            yield return StartCoroutine(Managers.UpdateCurrencyAndRating(winId, winGold, delta));
+            yield return StartCoroutine(Managers.UpdateCurrencyAndRating(loseId, loseGold, -delta));
+            ShowGameOverScreenClientRpc(winId, loseId, delta, winGold, loseGold);
+        }
     }
-    //---------------------------------------------------------------------------------------------
 
-    /// 게임 결과 UI 표시 (클라이언트)
     [ClientRpc]
     private void ShowGameOverScreenClientRpc(
         int winnerPlayerId,
@@ -209,120 +181,46 @@ public class GameEnding : NetworkBehaviour
     {
         gameOverPanel.SetActive(true);
 
-        int myId = SQLiteManager.Instance.player.playerId;
-        int myRating = SQLiteManager.Instance.player.rating;
-        int myCurrency = SQLiteManager.Instance.player.currency;
+        var player = SQLiteManager.Instance.player;
+        bool isWinner = player.playerId == winnerPlayerId && winnerPlayerId != loserPlayerId;
+        bool isLoser = player.playerId == loserPlayerId && winnerPlayerId != loserPlayerId;
+        bool isDraw = winnerPlayerId == loserPlayerId && player.playerId == winnerPlayerId;
 
-        string result;
-        int finalRating = myRating;
-        int finalGold = myCurrency;
+        string title;
+        if (isWinner) title = "🏆 Winner!";
+        else if (isLoser) title = "❌ Loser...";
+        else if (isDraw) title = "🤝 Draw!";
+        else title = "Unknown";
 
-        bool isWinner = (myId == winnerPlayerId && winnerPlayerId != loserPlayerId);
-        bool isLoser = (myId == loserPlayerId && winnerPlayerId != loserPlayerId);
-        bool isDraw = (winnerPlayerId == loserPlayerId && myId == winnerPlayerId);
+        int finalRating = player.rating + (isWinner ? ratingDelta : isDraw ? 0 : -ratingDelta);
+        int finalGold = player.currency + (isWinner ? winnerGold : isLoser ? loserGold : winnerGold);
 
-        if (isWinner)
-        {
-            result = "🏆 Winner!";
-            finalRating += ratingDelta;
-            finalGold += winnerGold;
-        }
-        else if (isLoser)
-        {
-            result = "❌ Loser...";
-            finalRating -= ratingDelta;
-            finalGold += loserGold;
-        }
-        else if (isDraw)
-        {
-            result = "Draw!";
-            finalRating += ratingDelta;
-            finalGold += winnerGold;
-        }
-        else
-        {
-            result = "Unknown";
-        }
+        string ratingLine = $"Rating: {player.rating} → {finalRating}  ({(ratingDelta >= 0 ? "+" : "")}{ratingDelta})";
+        string goldLine = $"Gold:   {player.currency} → {finalGold}  (+{(isLoser ? loserGold : winnerGold)})";
 
-        string ratingLine = $"Rating: {myRating} → {finalRating}  ({(ratingDelta >= 0 ? "+" : "")}{(isDraw ? ratingDelta : (isWinner ? ratingDelta : -ratingDelta))})";
-        string goldLine = $"Gold: {myCurrency} → {finalGold}  (+{(isDraw ? winnerGold : (isWinner ? winnerGold : (isLoser ? loserGold : 0)))})";
-
-        resultText.text = $"{result}\n{ratingLine}\n{goldLine}";
-    }
-
-    ///------------------------------ 서버로 결과 전송 -----------------------------------
-    private IEnumerator SubmitWinnerToDB(int winnerID, int loserID, int winnerRating, int loserRating)
-    {
-        Debug.Log("서버에 승자 제출");
-
-
-        //문제인 DB 결과제출
-        yield return StartCoroutine(Managers.AddMatchResult(winnerID, loserID));
-
-        int winnerGold = 100 + UnityEngine.Random.Range(0, 91);
-        int loserGold = UnityEngine.Random.Range(0, 91);
-        int ratingDelta = CalculateRatingDelta(winnerRating, loserRating);
-
-        yield return StartCoroutine(Managers.UpdateCurrencyAndRating(winnerID, winnerGold, ratingDelta));
-        yield return StartCoroutine(Managers.UpdateCurrencyAndRating(loserID, loserGold, -ratingDelta));
-
-        ShowGameOverScreenClientRpc(winnerID, loserID, ratingDelta, winnerGold, loserGold);
-    }
-
-    private IEnumerator SubmitDrawToDB(int ID1, int ID2, int ID1Rating, int ID2Rating)
-    {
-        Debug.Log("🤝 무승부 → 서버에 결과 제출");
-
-        int DrawGold = 50 + UnityEngine.Random.Range(0, 91);
-
-        yield return StartCoroutine(Managers.UpdateCurrencyAndRating(ID1, DrawGold, 0));
-        yield return StartCoroutine(Managers.UpdateCurrencyAndRating(ID2, DrawGold, 0));
-
-        ShowGameOverScreenClientRpc(ID1, ID2, DrawGold, DrawGold, DrawGold);
+        resultText.text = $"{title}\n{ratingLine}\n{goldLine}";
     }
 
     [ClientRpc]
     private void NotifyClientsToFetchDataClientRpc()
     {
-        Debug.Log("클라에서 DB 데이터 업데이트 요청 성공");
-        StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(SQLiteManager.Instance.player.playerId));
-        StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(SQLiteManager.Instance.player.playerId));
-        StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", SQLiteManager.Instance.player.playerId.ToString(), false));
+        var pid = SQLiteManager.Instance.player.playerId;
+        StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(pid));
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(pid));
+        StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", pid.ToString(), false));
     }
 
-    private int CalculateRatingDelta(int winnerRating, int loserRating)
+    private int CalculateRatingDelta(int w, int l)
     {
-        int ratingGap = Math.Abs(winnerRating - loserRating);
-
-        if (ratingGap >= 200) return 10;
-        if (ratingGap >= 100) return 15;
-        if (ratingGap >= 0) return 20;
-
-        return 30;
+        int gap = Math.Abs(w - l);
+        if (gap >= 200) return 10;
+        if (gap >= 100) return 15;
+        return 20;
     }
 
-    private void ShutdownNetworkObject()
+    private void ShutdownNetwork()
     {
         Debug.Log("서버 종료");
         NetworkManager.Singleton.Shutdown();
-    }
-
-    //--------------------------------------------------------------------------------세션 false 로 만드는 부분
-
-    private IEnumerator UpdateAllSessionsFalse()
-    {
-        var mappings = PlayerDataManager.Instance.GetAllMappings();
-        foreach (var kv in mappings)
-        {
-            int playerId = kv.Value;
-
-            // 1) API 서버에 isInGame=false 업데이트
-            yield return StartCoroutine(
-                Managers.UpdatePlayerSessionCoroutine(playerId, false)
-            );
-
-            // 2) 로컬 DB 에서도 세션 초기화
-            SQLiteManager.Instance.ResetPlayerSession(playerId);
-        }
     }
 }

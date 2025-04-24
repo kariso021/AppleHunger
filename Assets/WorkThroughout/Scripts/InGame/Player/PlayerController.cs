@@ -38,6 +38,8 @@ public class PlayerController : NetworkBehaviour
     public Image flashImage;
     private CanvasGroup flashCanvasGroup;
 
+    private int myPlayerId;
+
 
 
     private void Awake()
@@ -106,7 +108,7 @@ public class PlayerController : NetworkBehaviour
 
         // 등록 로직은 PlayerRegister가 자체적으로 처리
         OnPlayerInitialized?.Invoke(OwnerClientId);
-
+        myPlayerId = SQLiteManager.Instance.player.playerId;
         if (localDragBox != null)
         {
             localDragBoxRenderer = localDragBox.GetComponent<SpriteRenderer>();
@@ -168,7 +170,7 @@ public class PlayerController : NetworkBehaviour
                     appleIds.Add(netObj.NetworkObjectId);
                 }
             }
-            RequestAppleRemovalServerRpc(appleIds.ToArray(), currentSum, OwnerClientId);
+            RequestAppleRemovalServerRpc(appleIds.ToArray(), currentSum, myPlayerId);
             ResetAppleColors();
         }
         else
@@ -258,7 +260,7 @@ public class PlayerController : NetworkBehaviour
 
 
     [ServerRpc(RequireOwnership = false)]
-    private void RequestAppleRemovalServerRpc(ulong[] appleIds, int sum, ulong clientId)
+    private void RequestAppleRemovalServerRpc(ulong[] appleIds, int sum, int playerId)
     {
         if (sum != 10) return;
 
@@ -279,8 +281,9 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        // clientId 기준으로 점수 처리
-        ScoreManager.Instance.AddScore(clientId, appleCount, appleScoreValue);
+        // playerID 기준으로 점수 처리
+        ScoreManager.Instance.AddScore(playerId, appleCount, appleScoreValue);
+        Debug.Log($"Server: {playerId}의 점수 업데이트");
     }
 
     //TrigerFlashImage

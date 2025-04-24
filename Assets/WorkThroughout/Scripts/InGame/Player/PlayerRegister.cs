@@ -33,9 +33,14 @@ public class PlayerRegister : NetworkBehaviour
 
         // 2) 로컬 세션 로드 & 재접속 모드 판단
         var session = SQLiteManager.Instance.LoadPlayerSession();
-        if (session != null && session.isConnected)
+        if (session != null && session.isInGame)
         {
-            Debug.Log("[PlayerRegister] 재접속 모드 → 초기 등록 스킵");
+            // PDM에 재접속 요청
+            PlayerDataManager.Instance.RequestReconnectServerRpc(session.playerId);
+
+            // 다시 준비 완료 처리해서 SyncAllClients 트리거
+            //isReconnect true
+            PlayerDataManager.Instance.NotifyPlayerReadyServerRpc(true);
             yield break;
         }
 
@@ -47,11 +52,14 @@ public class PlayerRegister : NetworkBehaviour
 
         if (SQLiteManager.Instance?.player != null)
         {
-            playerId = SQLiteManager.Instance.player.playerId;
-            rating = SQLiteManager.Instance.player.rating;
-            iconKey = SQLiteManager.Instance.player.profileIcon;
-            nickName = SQLiteManager.Instance.player.playerName;
+
+
+        playerId = SQLiteManager.Instance.player.playerId;
+        rating = SQLiteManager.Instance.player.rating;
+        iconKey = SQLiteManager.Instance.player.profileIcon;
+        nickName = SQLiteManager.Instance.player.playerName;
         }
+        
         else
         {
             Debug.LogWarning("SQLiteManager null → 기본값으로 등록 진행");
@@ -59,30 +67,29 @@ public class PlayerRegister : NetworkBehaviour
 
         try
         {
+
+
             // 4) 서버에 프로필/번호/레이팅/닉네임 등록
             PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
-            PlayerDataManager.Instance.RegisterPlayerNickNameServerRpc(nickName);
-            PlayerDataManager.Instance.RegisterPlayerProfileServerRpc(iconKey);
+            PlayerDataManager.Instance.RegisterPlayerNicknameServerRpc(nickName);
+            PlayerDataManager.Instance.RegisterPlayerIconServerRpc(iconKey);
 
-            // 5) 점수 초기화 (clientId 기준)
-            ScoreManager.Instance.RequestAddScoreServerRpc(
-                NetworkManager.Singleton.LocalClientId, 0, 0);
+            // 5) 점수 초기화 (playerId 기준)
+            int myPlayerId = SQLiteManager.Instance.player.playerId;
+            ScoreManager.Instance.RequestAddScoreServerRpc(myPlayerId, 0, 0);
 
             Debug.Log($"✅ Player 등록 완료 - ID:{playerId}, Rating:{rating}, Icon:{iconKey}");
 
             // 6) 서버에 준비 완료 알림
-            PlayerDataManager.Instance.NotifyPlayerReadyServerRpc();
+            //isReconnect false
+            PlayerDataManager.Instance.NotifyPlayerReadyServerRpc(false);
 
 
             // 게임에 처음 등장하는것을 알리는 rpc 호출
-            PlayerDataManager.Instance.SetClientInGameServerRpc(true);
+            PlayerDataManager.Instance.UpdateClientSessionServerRpc(true);
 
             // ============================================
-            // 7) 로컬 세션에 isConnected = true 저장
-            session = session ?? new PlayerSessionData { playerId = playerId };
-            session.isConnected = true;
-            SQLiteManager.Instance.SavePlayerSession(session);
 
             // 8) API 서버에 isInGame = true 로 업데이트 (코루틴)
             if (managers != null)

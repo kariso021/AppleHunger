@@ -13,7 +13,7 @@ public class EmotionUIHandler : MonoBehaviour
         PlayEmotionLocally(emotion);
 
         //네트워크
-        PlayerDataManager.Instance.SendEmotionServerRpc(emotion, NetworkManager.Singleton.LocalClientId);
+        PlayerDataManager.Instance.SendEmotionServerRpc(emotion);
     }
 
     private void PlayEmotionLocally(EmtionType emotion)

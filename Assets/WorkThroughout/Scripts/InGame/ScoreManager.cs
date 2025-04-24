@@ -6,14 +6,15 @@ public class ScoreManager : NetworkBehaviour
 {
     public static ScoreManager Instance { get; private set; }
 
-    // clientId 기준 점수 및 콤보/타이머 저장
-    private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
-    private Dictionary<ulong, float> lastCollectTime = new Dictionary<ulong, float>();
-    private Dictionary<ulong, int> comboCounts = new Dictionary<ulong, int>();
+    // playerId 기준 점수, 콤보, 타이머 저장
+    private Dictionary<int, int> playerScores = new Dictionary<int, int>();
+    private Dictionary<int, float> lastCollectTime = new Dictionary<int, float>();
+    private Dictionary<int, int> comboCounts = new Dictionary<int, int>();
 
-    [SerializeField] private float comboDuration = 2f;
-    [SerializeField] private float comboScoreMultiplier = 0.2f;
-    [SerializeField] private int maxCombo = 5;
+    [Header("Combo Settings")]
+    [SerializeField] private float comboDuration = 2f;   // 콤보 유지 시간
+    [SerializeField] private float comboScoreMultiplier = 0.2f; // 콤보당 추가 배수
+    [SerializeField] private int maxCombo = 5;    // 최대 콤보 수
 
     private void Awake()
     {
@@ -21,102 +22,104 @@ public class ScoreManager : NetworkBehaviour
         else Destroy(gameObject);
     }
 
-    public override void OnNetworkSpawn()
+    /// <summary>
+    /// 클라이언트가 사과를 먹을 때 호출하는 RPC.
+    /// playerId를 넘겨 줍니다.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestAddScoreServerRpc(int playerId, int appleCount, int appleScoreValue)
     {
         if (!IsServer) return;
-        PlayerController.OnAppleCollected += HandleAppleCollected;
-    }
-
-    private void OnDestroy()
-    {
-        if (IsServer) PlayerController.OnAppleCollected -= HandleAppleCollected;
-    }
-
-    private void HandleAppleCollected(int appleCount, int appleScoreValue, ulong clientId)
-    {
-        AddScore(clientId, appleCount, appleScoreValue);
+        AddScore(playerId, appleCount, appleScoreValue);
     }
 
     /// <summary>
-    /// 서버에서 점수 계산 후 저장 및 클라 UI 업데이트
+    /// 서버에서 콤보/타이머 로직을 처리하고 점수를 갱신합니다.
     /// </summary>
-    public void AddScore(ulong clientId, int appleCount, int appleScoreValue)
+    public void AddScore(int playerId, int appleCount, int appleScoreValue)
     {
-        if (!IsServer) return;
-
         float now = Time.time;
-        if (!playerScores.ContainsKey(clientId))
-            playerScores[clientId] = 0;
 
-        // 콤보 타이머
-        if (!lastCollectTime.ContainsKey(clientId) || now - lastCollectTime[clientId] > comboDuration)
-            comboCounts[clientId] = 1;
+        // 초기화
+        if (!playerScores.ContainsKey(playerId))
+            playerScores[playerId] = 0;
+        if (!lastCollectTime.ContainsKey(playerId))
+            lastCollectTime[playerId] = 0f;
+        if (!comboCounts.ContainsKey(playerId))
+            comboCounts[playerId] = 0;
+
+        // 콤보 타이머: 마지막 수집 시점으로부터 comboDuration 초 이내라면 콤보 유지
+        if (now - lastCollectTime[playerId] <= comboDuration)
+        {
+            comboCounts[playerId] = Mathf.Min(comboCounts[playerId] + 1, maxCombo);
+        }
         else
-            comboCounts[clientId] = Mathf.Min(comboCounts[clientId] + 1, maxCombo);
+        {
+            comboCounts[playerId] = 1;
+        }
 
-        lastCollectTime[clientId] = now;
+        lastCollectTime[playerId] = now;
 
+        // 점수 계산
         int baseScore = appleCount * appleScoreValue;
-        float multiplier = 1f + (comboCounts[clientId] - 1) * comboScoreMultiplier;
+        float multiplier = 1f + (comboCounts[playerId] - 1) * comboScoreMultiplier;
         int finalScore = Mathf.FloorToInt(baseScore * multiplier);
 
-        playerScores[clientId] += finalScore;
-        UpdateScoreClientRpc(clientId, playerScores[clientId]);
+        // 누적 점수 업데이트
+        playerScores[playerId] += finalScore;
+        Debug.Log($"[ScoreManager] 점수 추가: {playerId} = {finalScore} (콤보)");
+
+        // 모든 클라이언트에 브로드캐스트
+        UpdateScoreClientRpc(playerId, playerScores[playerId]);
+    }
+
+    /// <summary>
+    /// 모든 클라이언트에서 playerId에 해당하는 UI를 업데이트합니다.
+    /// </summary>
+    [ClientRpc]
+    private void UpdateScoreClientRpc(int playerId, int newScore)
+    {
+        Debug.Log($"[ScoreManager] 점수 업데이트: {playerId} = {newScore}");
+        PlayerUI.Instance.UpdateScoreUIByPlayerId(playerId, newScore);
+    }
+
+    /// <summary>
+    /// 재접속 시 clientId 대신 playerId로만 관리하므로 이관 로직이 필요 없습니다.
+    /// </summary>
+    public Dictionary<int, int> GetAllScores()
+    {
+        return new Dictionary<int, int>(playerScores);
+    }
+
+    //점수 싱크로나이징
+
+    public void SyncAllScoresToClient(ulong clientId)
+    {
+        foreach (var kv in playerScores)
+        {
+            // TargetClientIds 로 한 명에게만 보냄
+            SyncScoreClientRpc(
+                kv.Key,
+                kv.Value,
+                new ClientRpcParams
+                {
+                    Send = new ClientRpcSendParams
+                    {
+                        TargetClientIds = new[] { clientId }
+                    }
+                }
+            );
+        }
     }
 
     [ClientRpc]
-    private void UpdateScoreClientRpc(ulong clientId, int newScore)
+    private void SyncScoreClientRpc(
+        int playerId,
+        int score,
+        ClientRpcParams rpcParams = default
+    )
     {
-        PlayerUI.Instance.UpdateScoreUI(clientId, newScore);
-    }
-
-    /// <summary>
-    /// 재접속 시 oldCid 데이터를 newCid로 이관
-    /// </summary>
-    public void HandleReconnect(ulong oldCid, ulong newCid)
-    {
-        if (!IsServer) return;
-
-        // 점수 이관
-        if (playerScores.TryGetValue(oldCid, out var score))
-        {
-            playerScores.Remove(oldCid);
-            playerScores[newCid] = score;
-            UpdateScoreClientRpc(newCid, score);
-        }
-        // 콤보/타이머 이관
-        if (lastCollectTime.TryGetValue(oldCid, out var t))
-        {
-            lastCollectTime.Remove(oldCid);
-            lastCollectTime[newCid] = t;
-        }
-        if (comboCounts.TryGetValue(oldCid, out var c))
-        {
-            comboCounts.Remove(oldCid);
-            comboCounts[newCid] = c;
-        }
-    }
-
-    /// <summary>
-    /// 현재 저장된 모든 clientId→점수 사전 복사본
-    /// </summary>
-    public Dictionary<ulong, int> GetScores()
-    {
-        return new Dictionary<ulong, int>(playerScores);
-    }
-
-    // 초기 점수 등록용 RPC (필요 시 호출)
-    [ServerRpc(RequireOwnership = false)]
-    public void InitializePlayerScoreServerRpc(ulong clientId)
-    {
-        if (!playerScores.ContainsKey(clientId))
-            playerScores[clientId] = 0;
-    }
-
-    // 클라이언트에서 점수 추가 요청용 RPC
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestAddScoreServerRpc(ulong clientId, int appleCount, int appleScoreValue)
-    {
-        AddScore(clientId, appleCount, appleScoreValue);
+        // 클라이언트는 기존 UpdateScoreUIByPlayerId 로 화면만 덮어씁니다.
+        PlayerUI.Instance.UpdateScoreUIByPlayerId(playerId, score);
     }
 }

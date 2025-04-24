@@ -1,39 +1,34 @@
 ﻿using UnityEngine;
 using Unity.Netcode;
 using System;
+using System.Collections.Generic;
 
 public class GameTimer : NetworkBehaviour
 {
     private NetworkVariable<float> remainingTime = new NetworkVariable<float>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    [SerializeField] private float totalGameTime = 60f; // 기본 게임 시간
+    [SerializeField] private float totalGameTime = 60f;
+    [SerializeField] private float extensionNoticeDuration = 2f;
+
     private float startTime;
-    private float endTime;  // 일반 게임 종료 시각 (startTime + totalGameTime)
+    private float endTime;
     private bool isGameEnded = false;
     private bool isDrawGame = false;
 
-    // 연장 타이머 관련 변수
     private bool isInExtension = false;
     private float extensionDuration = 0f;
     private float extensionStartTime = 0f;
 
     public static event Action OnGameEnded;
     public static event Action<float> OnTimerUpdated;
-
     public static GameTimer Instance { get; private set; }
-
-    // 외부에서 연장 상태를 읽을 수 있도록 프로퍼티 추가
     public bool IsInExtension => isInExtension;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        if (Instance != null && Instance != this) Destroy(gameObject);
+        else Instance = this;
     }
 
     public override void OnNetworkSpawn()
@@ -47,72 +42,50 @@ public class GameTimer : NetworkBehaviour
             isInExtension = false;
         }
         if (IsClient)
-        {
             remainingTime.OnValueChanged += HandleTimerUpdated;
-        }
     }
 
     public override void OnNetworkDespawn()
     {
         if (IsClient)
-        {
             remainingTime.OnValueChanged -= HandleTimerUpdated;
-        }
     }
 
     private void Update()
     {
-        if (!IsServer)
-            return;
+        if (!IsServer) return;
 
-        float currentTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-        float newRemainingTime = 0f;
+        float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+        float newTime = isInExtension
+            ? Mathf.Max(0, extensionDuration - (now - extensionStartTime))
+            : Mathf.Max(0, endTime - now);
 
-        if (isInExtension)
-        {
-            newRemainingTime = Mathf.Max(0, extensionDuration - (currentTime - extensionStartTime));
-        }
-        else
-        {
-            newRemainingTime = Mathf.Max(0, (endTime - currentTime));
-        }
+        if (Mathf.Abs(newTime - remainingTime.Value) > 0.1f)
+            remainingTime.Value = newTime;
 
-        if (Mathf.Abs(newRemainingTime - remainingTime.Value) > 0.1f)
-        {
-            remainingTime.Value = newRemainingTime;
-        }
-
-
-        // 남은 시간이 0이 되었고 아직 게임 종료 처리가 안 되었으면 실행
-        if (newRemainingTime <= 0 && !isGameEnded)
+        if (newTime <= 0 && !isGameEnded)
         {
             if (isInExtension)
             {
-                // 연장 시간이 다 소진된 경우 연장 모드 종료 후 최종 게임 처리
                 isInExtension = false;
                 HandleGameEndLogic();
             }
             else
-            {
                 HandleGameEndLogic();
-            }
         }
     }
 
+    // 게임 종료 로직: 연장/승패 판별을 GameEnding의 EvaluateScores로 대체
     private void HandleGameEndLogic()
     {
-        var result = GameEnding.Instance.DetermineWinner(
-            out int winnerId,
-            out int loserId,
-            out int winnerRating,
-            out int loserRating
-        );
+        var scores = ScoreManager.Instance.GetAllScores();
+        var (type, winnerpid, loserpid) = GameEnding.Instance.EvaluateScoresByPlayer(scores);
 
-        switch (result)
+        switch (type)
         {
             case GameEnding.GameResultType.Extend:
-                Debug.Log("무승부 → 연장됨, isGameEnded 유지");
-                ExtendTime(17f);
+                Debug.Log("연장 모드 시작");
+                ExtendTime(totalGameTime * 0.25f);
                 break;
 
             case GameEnding.GameResultType.Draw:
@@ -132,32 +105,28 @@ public class GameTimer : NetworkBehaviour
         }
     }
 
-    private void HandleTimerUpdated(float oldTime, float newTime)
+    private void HandleTimerUpdated(float oldVal, float newVal)
     {
-        OnTimerUpdated?.Invoke(newTime);
+        OnTimerUpdated?.Invoke(newVal);
     }
 
-    /// <summary>
-    /// 연장 타이머를 시작하거나 추가하는 함수
-    /// </summary>
+    // 연장 시간 설정
     public void ExtendTime(float extraSeconds)
     {
-        if (!IsServer)
-            return;
+        if (!IsServer) return;
 
-        float currentTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-
+        float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
         if (!isInExtension)
         {
             isInExtension = true;
             extensionDuration = extraSeconds;
-            extensionStartTime = currentTime;
+            extensionStartTime = now;
         }
         else
         {
-            float remainingExtension = extensionDuration - (currentTime - extensionStartTime);
-            extensionDuration = remainingExtension + extraSeconds;
-            extensionStartTime = currentTime;
+            float left = extensionDuration - (now - extensionStartTime);
+            extensionDuration = left + extraSeconds;
+            extensionStartTime = now;
         }
     }
 }

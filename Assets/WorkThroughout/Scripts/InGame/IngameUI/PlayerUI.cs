@@ -29,8 +29,8 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI myRatingText;
     [SerializeField] private TextMeshProUGUI opponentRatingText;
 
-    private Dictionary<ulong, int> playerScores = new Dictionary<ulong, int>();
-    private ulong myClientId;
+    private Dictionary<int, int> playerScores = new Dictionary<int, int>();
+    private int myPlayerId;
 
     public static PlayerUI Instance { get; private set; }
 
@@ -56,8 +56,6 @@ public class PlayerUI : MonoBehaviour
 
     private void SetPlayerId(ulong clientId)
     {
-        myClientId = NetworkManager.Singleton.LocalClientId;
-        // 서버에서 할당된 내 player number, rating, icon, nickname 등을 초기 표시
         UploadProfileImageSelf();
         UploadNickNameSelf();
         UploadRatingSelf();
@@ -65,26 +63,24 @@ public class PlayerUI : MonoBehaviour
     }
 
     // ---------------- Score ----------------
-    public void UpdateScoreUI(ulong clientId, int newScore)
+    public void UpdateScoreUIByPlayerId(int playerId, int newScore)
     {
-        playerScores[clientId] = newScore;
-        RefreshScoreUI();
-    }
+        // 로컬 플레이어 ID 가져오기
+        int localId = SQLiteManager.Instance.player.playerId;
 
-    private void RefreshScoreUI()
-    {
-        if (playerScores.TryGetValue(myClientId, out var myScore))
-            myScoreText.text = $"My Score: {myScore}";
-
-        foreach (var kv in playerScores)
+        // playerId가 내 ID와 같으면 내 점수, 아니면 상대 점수 업데이트
+        if (playerId == localId)
         {
-            if (kv.Key != myClientId)
-            {
-                opponentScoreText.text = $"Opponent Score: {kv.Value}";
-                break;
-            }
+            myScoreText.text = $"My Score: {newScore}";
+            Debug.Log($"[PlayerUI] 내 점수 업데이트: {newScore}");
+        }
+        else
+        {
+            opponentScoreText.text = $"Opponent Score: {newScore}";
+            Debug.Log($"[PlayerUI] 상대 점수 업데이트: {newScore}");
         }
     }
+
 
     // ---------------- Timer ----------------
     private void UpdateTimerUI(float remainingTime)
@@ -111,10 +107,6 @@ public class PlayerUI : MonoBehaviour
     }
 
     // ---------------- Self Setters for Reconnect ----------------
-    public void SetMyNumber(int number)
-    {
-        myNumberText.text = number.ToString();
-    }
 
     public void SetMyRating(int rating)
     {
