@@ -42,6 +42,8 @@ public class SessionEntryHandler : MonoBehaviour
 
         // 2) 서버에서 isInGame 조회
         bool isInGame = false;
+
+   
         yield return StartCoroutine(
             managers.GetIsInGameCoroutine(
                 session.playerId,
@@ -63,7 +65,7 @@ public class SessionEntryHandler : MonoBehaviour
             );
         }
 
-        // 4) In-Game 상태면 씬 전환, 아니면 로비 유지
+        // 4) In-Game 상태면 씬 전환, 아니면 로비 유지 그리고 isConnected 부분 false 로 만들기
         if (isInGame)
         {
             Debug.Log("[SessionEntry] In-Game 상태 → InGame 씬 로드");
@@ -72,6 +74,10 @@ public class SessionEntryHandler : MonoBehaviour
         else
         {
             Debug.Log("[SessionEntry] In-Game 아님 → 로비 유지");
+            //로컬데이터의 inconnceted 부분 false로 바꿔줘야함
+            SQLiteManager.Instance.playerSession.isConnected = false;
+            SQLiteManager.Instance.SavePlayerSession(
+                SQLiteManager.Instance.playerSession);
         }
     }
 }

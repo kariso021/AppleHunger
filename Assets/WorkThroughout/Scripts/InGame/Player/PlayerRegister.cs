@@ -17,7 +17,7 @@ public class PlayerRegister : NetworkBehaviour
 
     private IEnumerator RegisterPlayer()
     {
-        // 1) PlayerDataManager 스폰 대기
+        // 1) PlayerDataManager 준비 대기
         float timeout = 5f, timer = 0f;
         while ((PlayerDataManager.Instance == null || !PlayerDataManager.Instance.IsSpawned) && timer < timeout)
         {
@@ -31,87 +31,60 @@ public class PlayerRegister : NetworkBehaviour
             yield break;
         }
 
-        // 2) 로컬 세션 로드 & 재접속 모드 판단
+        // 2) 로컬 세션 로드
         var session = SQLiteManager.Instance.LoadPlayerSession();
-        if (session != null && session.isInGame)
+        bool isReconnect = session != null && session.isConnected;
+        int playerId;
+        int rating;
+        string iconKey;
+        string nickName;
+
+        if (isReconnect)
         {
-            // PDM에 재접속 요청
-            PlayerDataManager.Instance.RequestReconnectServerRpc(session.playerId);
-
-            // 다시 준비 완료 처리해서 SyncAllClients 트리거
-            //isReconnect true
-            PlayerDataManager.Instance.NotifyPlayerReadyServerRpc(true);
-            yield break;
+            // 재접속: DB에 남은 playerId만 사용
+            playerId = session.playerId;
+            Debug.Log($"🔄 Reconnect 모드 - playerId: {playerId}");
         }
-
-        // 3) 신규 매칭 모드: DB 에서 플레이어 정보 가져오기
-        int playerId = 1;
-        int rating = 1000;
-        string iconKey = "101";
-        string nickName = "Player";
-
-        if (SQLiteManager.Instance?.player != null)
-        {
-
-
-        playerId = SQLiteManager.Instance.player.playerId;
-        rating = SQLiteManager.Instance.player.rating;
-        iconKey = SQLiteManager.Instance.player.profileIcon;
-        nickName = SQLiteManager.Instance.player.playerName;
-        }
-        
         else
         {
-            Debug.LogWarning("SQLiteManager null → 기본값으로 등록 진행");
-        }
+            // 신규 접속: SQLite에서 정보 읽어오거나 기본값 사용
+            if (SQLiteManager.Instance?.player != null)
+            {
+                playerId = SQLiteManager.Instance.player.playerId;
+                rating = SQLiteManager.Instance.player.rating;
+                iconKey = SQLiteManager.Instance.player.profileIcon;
+                nickName = SQLiteManager.Instance.player.playerName;
+            }
+            else
+            {
+                Debug.LogWarning("SQLiteManager null → 기본값으로 등록 진행");
+                playerId = 1;
+                rating = 1000;
+                iconKey = "101";
+                nickName = "Player";
+            }
 
-        try
-        {
-
-
-            // 4) 서버에 프로필/번호/레이팅/닉네임 등록
-            PlayerDataManager.Instance.RegisterPlayerNumberServerRpc(playerId);
+            // 3) 서버에 신규 프로필/번호/레이팅/닉네임 등록
+            PlayerDataManager.Instance.RegisterPlayerIDServerRpc(playerId);
             PlayerDataManager.Instance.RegisterPlayerRatingServerRpc(rating);
             PlayerDataManager.Instance.RegisterPlayerNicknameServerRpc(nickName);
             PlayerDataManager.Instance.RegisterPlayerIconServerRpc(iconKey);
 
-            // 5) 점수 초기화 (playerId 기준)
-            int myPlayerId = SQLiteManager.Instance.player.playerId;
-            ScoreManager.Instance.RequestAddScoreServerRpc(myPlayerId, 0, 0);
+            // 4) 점수 초기화
+            ScoreManager.Instance.RequestAddScoreServerRpc(playerId, 0, 0);
 
-            Debug.Log($"✅ Player 등록 완료 - ID:{playerId}, Rating:{rating}, Icon:{iconKey}");
-
-            // 6) 서버에 준비 완료 알림
-            //isReconnect false
-            PlayerDataManager.Instance.NotifyPlayerReadyServerRpc(false);
-
-
-            // 게임에 처음 등장하는것을 알리는 rpc 호출
-            PlayerDataManager.Instance.UpdateClientSessionServerRpc(true);
-
-            // ============================================
-
-            // 8) API 서버에 isInGame = true 로 업데이트 (코루틴)
-            if (managers != null)
-            {
-                StartCoroutine(
-                    managers.UpdatePlayerSessionCoroutine(
-                        playerId,
-                        true,
-                        success => Debug.Log("[PlayerRegister] playerSession 업데이트 " +
-                                            (success ? "성공" : "실패"))
-                    )
-                );
-            }
-            else
-            {
-                Debug.LogWarning("Managers 참조가 할당되지 않았습니다!");
-            }
-            // ============================================
+            Debug.Log($"✅ 신규 Player 등록 완료 - ID:{playerId}, Rating:{rating}, Icon:{iconKey}");
         }
-        catch (Exception ex)
-        {
-            Debug.LogError($"❌ 등록 중 예외 발생: {ex}");
-        }
+
+        // 5) 재접속 또는 신규 모두에서 준비 완료 알림
+        PlayerDataManager.Instance.NotifyPlayerReadyServerRpc(isReconnect);
+
+        // 6) 클라이언트 세션 업데이트 표시
+        PlayerDataManager.Instance.UpdateClientSessionServerRpc(isReconnect);
+
+        //IsConnected 
+        SQLiteManager.Instance.playerSession.isConnected = true;
+        SQLiteManager.Instance.SavePlayerSession(
+            SQLiteManager.Instance.playerSession);
     }
 }

@@ -96,7 +96,7 @@ public class PlayerDataManager : NetworkBehaviour
     #region Server RPCs - Registration
 
     [ServerRpc(RequireOwnership = false)]
-    public void RegisterPlayerNumberServerRpc(int playerId, ServerRpcParams rpc = default)
+    public void RegisterPlayerIDServerRpc(int playerId, ServerRpcParams rpc = default)
     {
         var cid = rpc.Receive.SenderClientId;
         if (!_statesByPlayer.TryGetValue(playerId, out var state))

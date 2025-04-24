@@ -208,6 +208,13 @@ public class GameEnding : NetworkBehaviour
         StartCoroutine(ClientNetworkManager.Instance.GetMatchRecords(pid));
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerStats(pid));
         StartCoroutine(ClientNetworkManager.Instance.GetPlayerData("playerId", pid.ToString(), false));
+
+
+
+        //IsConnected false로 바꿔줘야함
+        SQLiteManager.Instance.playerSession.isConnected = false;
+        SQLiteManager.Instance.SavePlayerSession(
+            SQLiteManager.Instance.playerSession);
     }
 
     private int CalculateRatingDelta(int w, int l)
