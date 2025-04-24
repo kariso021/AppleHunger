@@ -9,6 +9,11 @@ public class LobbyManager : MonoBehaviour
 
     static bool isFirstEnter = true;
 
+    private void Awake()
+    {
+        
+    }
+
     private void Start()
     {
         if (isFirstEnter)

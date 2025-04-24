@@ -1,0 +1,21 @@
+# ninja log v5
+212	445	7670067933226280	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	8c431ca0bbb0e558
+0	902	7670067937763183	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	2a9d5fc299a0d5b
+447	949	7670067936619890	C:/Users/Hyunjae/Documents/GitHub/AppleHunger/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/504x3h16/obj/armeabi-v7a/libswappywrapper.so	c929cd650897c08d
+56	810	7670067936804418	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	4456ad234ccdc903
+149	869	7670067937443976	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	d584656ea2c4f580
+25	821	7670067936930286	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	a0663a7139807217
+119	823	7670067936990301	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	f879c60173b67670
+180	903	7670067937808194	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	49fe5dc0f64e57c6
+86	928	7670067938044725	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	8aaab1af44f50df3
+928	1346	7670067940757261	C:/Users/Hyunjae/Documents/GitHub/AppleHunger/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/504x3h16/obj/armeabi-v7a/libgame.so	1798d6393b9812d6
+166	385	7670079972888462	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	8c431ca0bbb0e558
+25	664	7670079975634288	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	4456ad234ccdc903
+4	701	7670079975996026	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	a0663a7139807217
+70	741	7670079976417401	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	d584656ea2c4f580
+115	780	7670079976802436	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	f879c60173b67670
+140	807	7670079977072986	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	49fe5dc0f64e57c6
+48	849	7670079977461383	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	2a9d5fc299a0d5b
+92	852	7670079977512198	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	8aaab1af44f50df3
+386	878	7670079976307584	C:/Users/Hyunjae/Documents/GitHub/AppleHunger/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/504x3h16/obj/armeabi-v7a/libswappywrapper.so	c929cd650897c08d
+853	1320	7670079980830636	C:/Users/Hyunjae/Documents/GitHub/AppleHunger/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/504x3h16/obj/armeabi-v7a/libgame.so	1798d6393b9812d6

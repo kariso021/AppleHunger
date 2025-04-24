@@ -8,7 +8,6 @@ using UnityEngine.UI;
 public class CurrencyManager : MonoBehaviour
 {
     public GameObject currecnyLayout;
-    public Image currencyIcon;
     public TMP_Text currencyText;
 
     private static bool isFirst = true;
@@ -16,7 +15,6 @@ public class CurrencyManager : MonoBehaviour
     {
         if (currecnyLayout != null)
         {
-            currencyIcon = currecnyLayout.GetComponentInChildren<Image>();
             currencyText = currecnyLayout.GetComponentInChildren<TMP_Text>();
 
             DataSyncManager.Instance.OnPlayerProfileChanged += DelayedCurrencyUpdate;

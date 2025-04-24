@@ -76,7 +76,10 @@ public class ServerToAPIManager : MonoBehaviour
     {
         yield return ClientNetworkManager.Instance.TargetReceivePlayerDataClientRpc(jsonData);
     }
-
+    private IEnumerator TargetReceiveAsPlayerDataClientRpc(string jsonData)
+    {
+        yield return ClientNetworkManager.Instance.TargetReceiveAsPlayerDataClientRpc(jsonData);
+    }
     public IEnumerator DeletePlayer(int playerId)
     {
         string url = $"{apiBaseUrl}/players/{playerId}";
@@ -137,7 +140,8 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text;
-                yield return TargetReceivePlayerDataClientRpc(jsonData);
+                Debug.LogWarning($"Target : {jsonData}");
+                yield return TargetReceiveAsPlayerDataClientRpc(jsonData);
             }
             else
             {

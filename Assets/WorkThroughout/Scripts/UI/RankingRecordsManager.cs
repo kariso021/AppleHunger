@@ -15,35 +15,6 @@ public class RankingRecordsManager : MonoBehaviour
 
     // 동일 등수에 대한 표기
     int recordCount = 0;
-
-    //private void Awake()
-    //{
-    //    SceneManager.sceneLoaded += OnSceneLoaded;
-    //}
-    //void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    //{
-    //    StartCoroutine(DelayedAssignUIReferences());
-    //}
-
-    //private IEnumerator DelayedAssignUIReferences()
-    //{
-    //    yield return new WaitForSeconds(0.1f); // 1프레임 대기 (혹은 WaitForSeconds(0.1f))
-
-    //    myRankingData =
-    //           GameObject.Find("MyRankingDataGameObject");
-    //    rankingDataListHolder =
-    //        GameObject.Find("RankingDataListHolderGameObject");
-    //    rankProfilePopupGameObject =
-    //        GameObject.Find("RankProfilePopupPanel");
-
-    //    Debug.Log("RANKING MANAGER UI 요소 재할당 완료!");
-    //}
-
-    //private void OnDestroy()
-    //{
-    //    SceneManager.sceneLoaded -= OnSceneLoaded;
-    //}
-
     private void Start()
     {
         // ✅ 랭킹 변경 이벤트 구독 (자동 갱신)

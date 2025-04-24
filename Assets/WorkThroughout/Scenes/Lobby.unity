@@ -23625,7 +23625,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currecnyLayout: {fileID: 1107525296}
-  currencyIcon: {fileID: 0}
   currencyText: {fileID: 0}
 --- !u!114 &1366320884
 MonoBehaviour:
