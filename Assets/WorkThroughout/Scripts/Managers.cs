@@ -113,7 +113,7 @@ public class Managers : MonoBehaviour
 
             bool success = request.result == UnityWebRequest.Result.Success;
             if (success)
-                Debug.Log("[ServerToAPI] playerSession 업데이트 성공: " + request.downloadHandler.text);
+                Debug.Log("[ServerToAPI] playerSession 업데이트 성공: " + request.downloadHandler.text + "playerID 는 " +(playerId).ToString());
             else
                 Debug.LogError($"[ServerToAPI] playerSession 업데이트 실패: {request.responseCode} / {request.error}");
 
