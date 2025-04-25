@@ -173,7 +173,6 @@ public class PlayerDataManager : NetworkBehaviour
         {
             var pid = kv.Key;
             var st = kv.Value;
-            if (st.ClientId == 0) continue; // 오프라인 플레이어 스킵
 
             // rpcParams 없이 호출하면 모든 클라이언트에게 전송됩니다.
             UpdatePlayerStateClientRpc(

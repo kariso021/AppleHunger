@@ -39,6 +39,32 @@ public class GameEnding : NetworkBehaviour
     private void OnEnable() => GameTimer.OnGameEnded += OnGameEndedHandler;
     private void OnDisable() => GameTimer.OnGameEnded -= OnGameEndedHandler;
 
+    //------------------------------------------player둘다 나갔을시 방 폭파 로직
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkDespawn();
+        if(IsServer)
+            NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // 남아 있는 연결된 클라이언트 수
+        int remaining = NetworkManager.Singleton.ConnectedClientsList.Count;
+        if (remaining == 0)
+        {
+            // 세션 모두 false 처리 (DB/API 호출)
+            StartCoroutine(PlayerDataManager.Instance.UpdateAllSessionsFalse());
+            // 서버 셧다운
+            ShutdownNetwork();
+        }
+    }
+
+    private void HandleClientDisconnect(ulong obj)
+    {
+        throw new NotImplementedException();
+    }
+
     private void OnGameEndedHandler()
     {
         if (GameTimer.Instance != null && GameTimer.Instance.IsInExtension)
