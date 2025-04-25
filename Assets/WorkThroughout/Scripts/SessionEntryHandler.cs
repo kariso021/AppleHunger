@@ -16,34 +16,31 @@ public class SessionEntryHandler : MonoBehaviour
     {
         // 1) 로컬 세션 로드
         var session = SQLiteManager.Instance.LoadPlayerSession();
+
+        // 1-1) 세션이 없으면 새로 생성
         if (session == null)
         {
-            Debug.Log("[SessionEntry] 로컬에 세션 없음 → 새 세션 생성 및 서버 등록");
-
-            // 1-1) 새 세션 객체 생성 (isInGame 기본 false)
+            Debug.Log("[SessionEntry] 로컬 세션 없음 → 새 세션 생성 및 서버 등록");
             session = new PlayerSessionData
             {
                 playerId = SQLiteManager.Instance.player.playerId,
-                isInGame = false
+                isInGame = false,
+                isConnected = false
             };
             SQLiteManager.Instance.SavePlayerSession(session);
 
-            // 1-2) 서버에 Upsert 요청
+            // 서버에 Upsert 요청
             yield return StartCoroutine(
                 managers.UpdatePlayerSessionCoroutine(
                     session.playerId,
                     session.isInGame
                 )
             );
-
-            // 첫 등록이니 로비 유지
             yield break;
         }
 
         // 2) 서버에서 isInGame 조회
         bool isInGame = false;
-
-   
         yield return StartCoroutine(
             managers.GetIsInGameCoroutine(
                 session.playerId,
@@ -51,35 +48,20 @@ public class SessionEntryHandler : MonoBehaviour
             )
         );
 
-        // 3) 상태가 변했으면 로컬·서버 모두 갱신
-        if (session.isInGame != isInGame)
-        {
-            session.isInGame = isInGame;
-            SQLiteManager.Instance.SavePlayerSession(session);
+        // 3) 로컬에 연결 상태 반영
+        session.isInGame = isInGame;
+        SQLiteManager.Instance.SavePlayerSession(session);
+        Debug.Log($"[SessionEntry] isConnected: {session.isInGame}");
 
-            yield return StartCoroutine(
-                managers.UpdatePlayerSessionCoroutine(
-                    session.playerId,
-                    session.isInGame
-                )
-            );
-        }
-
-        // 4) In-Game 상태면 씬 전환, 아니면 로비 유지 그리고 isConnected 부분 false 로 만들기
+        // 4) InGame 씬 전환 또는 로비 유지
         if (isInGame)
         {
-            Debug.Log("[SessionEntry] In-Game 상태 → InGame 씬 로드");
+            Debug.Log("[SessionEntry] In-Game 상태 → 씬 전환");
             SceneManager.LoadScene(inGameSceneName);
         }
         else
         {
-            Debug.Log("[SessionEntry] In-Game 아님 → 로비 유지");
-            //로컬데이터의 inconnceted 부분 false로 바꿔줘야함
-            if (SQLiteManager.Instance.playerSession == null) Debug.Log("[SessionEntry]이게 널이라는데요");
-            SQLiteManager.Instance.playerSession.isConnected = false;
-            Debug.Log($"[SessionEntry] isConnected : {SQLiteManager.Instance.playerSession.isConnected}");
-            SQLiteManager.Instance.SavePlayerSession(
-                SQLiteManager.Instance.playerSession);
+            Debug.Log("[SessionEntry] 로비 유지");
         }
     }
 }
