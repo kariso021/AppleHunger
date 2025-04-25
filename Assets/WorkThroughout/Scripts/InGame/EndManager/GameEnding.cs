@@ -42,27 +42,31 @@ public class GameEnding : NetworkBehaviour
     //------------------------------------------player둘다 나갔을시 방 폭파 로직
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkDespawn();
-        if(IsServer)
+        base.OnNetworkSpawn();  // 잘못된 base 호출 수정
+        if (IsServer)
+        {
+            // 클라이언트 끊김 콜백 등록
             NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+        }
     }
 
     public override void OnNetworkDespawn()
     {
-        // 남아 있는 연결된 클라이언트 수
-        int remaining = NetworkManager.Singleton.ConnectedClientsList.Count;
-        if (remaining == 0)
+        if (IsServer)
         {
-            // 세션 모두 false 처리 (DB/API 호출)
-            StartCoroutine(PlayerDataManager.Instance.UpdateAllSessionsFalse());
-            // 서버 셧다운
-            ShutdownNetwork();
+            // 콜백 해제해서 메모리 누수 방지
+            NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
         }
+        base.OnNetworkDespawn();
     }
 
-    private void HandleClientDisconnect(ulong obj)
+    private void HandleClientDisconnect(ulong clientId)
     {
-        throw new NotImplementedException();
+        if (NetworkManager.Singleton.ConnectedClientsList.Count == 0)
+        {
+            StartCoroutine(PlayerDataManager.Instance.UpdateAllSessionsFalse());
+            ShutdownNetwork();
+        }
     }
 
     private void OnGameEndedHandler()
