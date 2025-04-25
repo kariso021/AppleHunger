@@ -15,7 +15,7 @@ public class SettingManager : MonoBehaviour
     public Button creditButton;
     public Button supportButton;
     public Button deleteButton;
-
+    public Button closeButton;
     // Start is called before the first frame update
     void Awake()
     {
@@ -32,6 +32,8 @@ public class SettingManager : MonoBehaviour
         CopyTextToClipboard());
         creditButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
+        closeButton.onClick.AddListener(() =>
+        PopupManager.Instance.ClosePopup());
     }
     void CopyTextToClipboard()
     {

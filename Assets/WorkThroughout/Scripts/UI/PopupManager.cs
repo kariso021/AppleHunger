@@ -49,9 +49,9 @@ public class PopupManager : MonoBehaviour
 
         activePopup = popup;
         activePopup.SetActive(true);
-        RectTransform rect = activePopup.GetComponent<RectTransform>();
+        //RectTransform rect = activePopup.GetComponent<RectTransform>();
 
-        rect.sizeDelta = new Vector2(rect.sizeDelta.x, Screen.height);
+        //rect.sizeDelta = new Vector2(rect.sizeDelta.x, Screen.height);
 
         if (popup.tag == "Profile")
         {

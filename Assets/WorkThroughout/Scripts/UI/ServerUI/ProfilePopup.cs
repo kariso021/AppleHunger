@@ -16,6 +16,15 @@ public class ProfilePopup : MonoBehaviour
     public TMP_Text collectionIconText;
     public TMP_Text collectionBoardText;
 
+    [Header("Button")]
+    [SerializeField] private Button closeButton;
+
+    private void Awake()
+    {
+        closeButton.onClick.AddListener(() =>
+        PopupManager.Instance.ClosePopup());
+    }
+
     /// <summary>
     /// 프로필에 대한 세부 정보를 보여주는 팝업 정보를 설정하는 함수.
     /// </summary>

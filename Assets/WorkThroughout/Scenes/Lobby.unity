@@ -5043,6 +5043,9 @@ MonoBehaviour:
   myRankingData: {fileID: 5320291107234084853}
   rankingDataListHolder: {fileID: 1845519829}
   rankProfilePopupGameObject: {fileID: 1352948978}
+  first: {fileID: 0}
+  second: {fileID: 0}
+  third: {fileID: 0}
 --- !u!114 &305469488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11772,6 +11775,7 @@ MonoBehaviour:
   resultText: {fileID: 1494886814}
   placeHolderText: {fileID: 639137481}
   warningText: {fileID: 886175891}
+  closeButton: {fileID: 694365859}
 --- !u!4 &750765224
 Transform:
   m_ObjectHideFlags: 0
@@ -13634,6 +13638,7 @@ MonoBehaviour:
   winrateText: {fileID: 1225156162}
   collectionIconText: {fileID: 1029663174}
   collectionBoardText: {fileID: 1764995060}
+  closeButton: {fileID: 1893051726}
 --- !u!1 &866059370
 GameObject:
   m_ObjectHideFlags: 0
@@ -14776,6 +14781,7 @@ MonoBehaviour:
   creditButton: {fileID: 1973465284}
   supportButton: {fileID: 1906357545}
   deleteButton: {fileID: 1446222875}
+  closeButton: {fileID: 1801749045}
 --- !u!1 &927621960
 GameObject:
   m_ObjectHideFlags: 0
@@ -16353,6 +16359,7 @@ MonoBehaviour:
   resultText: {fileID: 1494886814}
   placeHolderText: {fileID: 639137481}
   warningText: {fileID: 886175891}
+  closeButton: {fileID: 694365859}
 --- !u!1 &1017650226
 GameObject:
   m_ObjectHideFlags: 0
@@ -23556,11 +23563,7 @@ MonoBehaviour:
   rankingButton: {fileID: 2097265984}
   settingsButton: {fileID: 606217549}
   collectionButton: {fileID: 277318380}
-  profileCloseButton: {fileID: 1893051726}
-  rankProfileCloseButton: {fileID: 1038885131}
   creditCloseButton: {fileID: 1774505452}
-  settingCloseButton: {fileID: 1801749045}
-  nameChangeCloseButton: {fileID: 694365859}
   nameChangeButton: {fileID: 1669291941}
   playerAdd: {fileID: 1775891431}
   playerGet: {fileID: 1630849172}
@@ -27738,6 +27741,7 @@ MonoBehaviour:
   winrateText: {fileID: 1315488748}
   collectionIconText: {fileID: 1538939633}
   collectionBoardText: {fileID: 850352852}
+  closeButton: {fileID: 1038885131}
 --- !u!114 &1624052395
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,6 +12,10 @@ public class RankingRecordsManager : MonoBehaviour
     private int maxRankRecords = 50; // 🔹 최대 랭킹 표시 개수
     private Dictionary<int, RankingData> rankingObjects = new Dictionary<int, RankingData>(); // 🔹 기존 오브젝트 저장
 
+    [Header("Top3")]
+    [SerializeField] private GameObject first;
+    [SerializeField] private GameObject second;
+    [SerializeField] private GameObject third;
 
     // 동일 등수에 대한 표기
     int recordCount = 0;
@@ -21,12 +25,52 @@ public class RankingRecordsManager : MonoBehaviour
         DataSyncManager.Instance.OnPlayerRankingChanged += UpdateRankRecords;
         
     }
+    private void SetTop3Rankers(List<PlayerRankingData> playerRankList)
+    {
+        if (playerRankList.Count > 0)
+        {
+            first.GetComponent<RankingData>().SetRankingData(
+                playerRankList[0].playerId,
+                playerRankList[0].playerName,
+                playerRankList[0].rating,
+                playerRankList[0].rankPosition,
+                playerRankList[0].profileIcon);
+            AddressableManager.Instance.LoadImageFromGroup(playerRankList[0].profileIcon,
+                first.GetComponent<RankingData>().iconImage);
+        }
+
+        if (playerRankList.Count > 1)
+        {
+            second.GetComponent<RankingData>().SetRankingData(
+                playerRankList[1].playerId,
+                playerRankList[1].playerName,
+                playerRankList[1].rating,
+                playerRankList[1].rankPosition,
+                playerRankList[1].profileIcon);
+            AddressableManager.Instance.LoadImageFromGroup(playerRankList[1].profileIcon,
+                second.GetComponent<RankingData>().iconImage);
+        }
+
+        if (playerRankList.Count > 2)
+        {
+            third.GetComponent<RankingData>().SetRankingData(
+                playerRankList[2].playerId,
+                playerRankList[2].playerName,
+                playerRankList[2].rating,
+                playerRankList[2].rankPosition,
+                playerRankList[2].profileIcon);
+            AddressableManager.Instance.LoadImageFromGroup(playerRankList[2].profileIcon,
+                third.GetComponent<RankingData>().iconImage);
+        }
+    }
 
     // ✅ 랭킹 UI 업데이트
     public void CreateRankRecords()
     {
         List<PlayerRankingData> playerRankList = SQLiteManager.Instance.LoadRankings();
         if (playerRankList.Count == 0) return;
+
+        SetTop3Rankers(playerRankList);
 
         // 🔹 기존 UI 숨기기 (재사용을 위해)
         foreach (var item in rankingObjects.Values)
@@ -36,11 +80,14 @@ public class RankingRecordsManager : MonoBehaviour
 
         int recordCount = 0;
 
-        foreach (var rankData in playerRankList)
+        for(int i = 3; i < playerRankList.Count;i++)
         {
             if (recordCount >= maxRankRecords) break; // 최대 개수 제한
 
+            var rankData = playerRankList[i];
             RankingData rankingData;
+
+            if (rankData.rankPosition <= 3) continue;
 
             // 🔹 기존 오브젝트 재사용 (playerId 기준)
             if (rankingObjects.TryGetValue(rankData.playerId, out rankingData))
@@ -74,7 +121,7 @@ public class RankingRecordsManager : MonoBehaviour
                 AddressableManager.Instance.rankingIconObj.Add(rankingData.gameObject);
             }
 
-            int displayRank = recordCount + 1;
+            int displayRank = i + 1;
             // 🔹 데이터 설정
             rankingData.SetRankingData(
                 rankData.playerId,

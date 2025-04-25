@@ -27,11 +27,7 @@ public class ButtonController : MonoBehaviour
     public Button collectionButton;
 
     [Header("Close Buttons")]
-    public Button profileCloseButton;
-    public Button rankProfileCloseButton;
     public Button creditCloseButton;
-    public Button settingCloseButton;
-    public Button nameChangeCloseButton;
     [Header("Popup Buttons")]
     public Button nameChangeButton;
     [Header("Debug Buttons")]
@@ -135,16 +131,10 @@ public class ButtonController : MonoBehaviour
         NavManager.Instance.NavigateTo("Collection"));
 
         // Close Buttons
-        profileCloseButton.onClick.AddListener(() =>
-        PopupManager.Instance.ClosePopup());
-        rankProfileCloseButton.onClick.AddListener(() =>
-        PopupManager.Instance.ClosePopup());
+
         creditCloseButton.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
-        settingCloseButton.onClick.AddListener(() =>
-        PopupManager.Instance.ClosePopup());
-        nameChangeCloseButton.onClick.AddListener(() =>
-        PopupManager.Instance.ClosePopup());
+
 
         // Popup Buttons
         nameChangeButton.onClick.AddListener(() =>

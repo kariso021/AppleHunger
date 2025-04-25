@@ -233,6 +233,7 @@ public class MatchMakerClient : MonoBehaviour
             isInGame = true
         });
 
+
         StartCoroutine(managers.UpdatePlayerSessionCoroutine(
             SQLiteManager.Instance.player.playerId,
             true,

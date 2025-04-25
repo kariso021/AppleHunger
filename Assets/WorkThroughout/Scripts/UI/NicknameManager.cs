@@ -14,9 +14,15 @@ public class NicknameManager : MonoBehaviour
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private TMP_Text placeHolderText;
     [SerializeField] private TMP_Text warningText;
+    [SerializeField] private Button closeButton;
 
     private HashSet<string> forbiddenWords;
     private bool isChangingNickname = false;
+    private void Awake()
+    {
+        closeButton.onClick.AddListener(() =>
+        PopupManager.Instance.ClosePopup());
+    }
     private void Start()
     {
         confirmButton.onClick.AddListener(OnClick_ChangeNickname);

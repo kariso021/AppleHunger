@@ -471,7 +471,6 @@ public class ServerToAPIManager : MonoBehaviour
         string url = $"{apiBaseUrl}/loginRecords";
         string jsonData = JsonConvert.SerializeObject(new LoginUpdateRequest(playerId, ipAddress));
         // JsonUtility는 명시적인 클래스 구조를 필요로 하기때문에 별도의 DTO(Data Transfer Object) 클래스 생성해서 넘겨줌
-
         using (UnityWebRequest request = new UnityWebRequest(url, "PUT"))
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);

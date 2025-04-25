@@ -101,6 +101,7 @@ public class SQLiteManager : MonoBehaviour
             if (string.IsNullOrEmpty(player.googleId) && !string.IsNullOrEmpty(TransDataClass.googleIdToApply))
                yield return (ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, TransDataClass.googleIdToApply));
         }
+        yield return ClientNetworkManager.Instance.UpdateLogin(SQLiteManager.Instance.player.playerId);
         PopupManager.Instance.HideLoading(1f);
         //dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
     }
@@ -376,9 +377,6 @@ public class SQLiteManager : MonoBehaviour
         yield return StartCoroutine(clientNetworkManager.GetRankingList());
         onComplete();
     }
-
-
-
     #endregion
 
 
@@ -401,6 +399,7 @@ public class SQLiteManager : MonoBehaviour
         items = LoadPlayerItems();
         rankings = LoadRankings();
         myRankingData = LoadMyRankingData();
+        playerSession = LoadPlayerSession();
 
         Debug.Log($"[SQL]플레이어 데이터 불러오기 완료: {player?.playerName ?? "없음"}");
         if (stats != null) Debug.Log($"[SQL] 플레이어 스탯 불러오기 완료: id = {stats.playerId} , total = {stats.totalGames} , wins = {stats.wins}");

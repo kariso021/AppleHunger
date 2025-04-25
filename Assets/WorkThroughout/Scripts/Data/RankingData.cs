@@ -16,8 +16,8 @@ public class RankingData : MonoBehaviour
     private void Start()
     {
         // 원본은 InChildren 빼야함
-        if (gameObject.tag == "Profile" || GetComponent<Button>() == null) return;
-        GetComponent<Button>().onClick.AddListener(() =>
+        if (gameObject.tag == "Profile" || GetComponentInChildren<Button>() == null) return;
+        GetComponentInChildren<Button>().onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(
             FindAnyObjectByType<RankingRecordsManager>().rankProfilePopupGameObject, playerId));
     }

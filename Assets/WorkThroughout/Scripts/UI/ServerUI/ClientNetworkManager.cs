@@ -181,9 +181,10 @@ public class ClientNetworkManager : MonoBehaviour
     // 로그인 정보 업데이트 to DB
     public IEnumerator UpdateLogin(int playerId)
     {
-
         if (ServerToAPIManager.Instance != null)
+        {
             yield return ServerToAPIManager.Instance.UpdateLoginTime(playerId, "::1");
+        }
     }
     // 🔹 로그인 요청
     public IEnumerator GetLogin(int playerId)

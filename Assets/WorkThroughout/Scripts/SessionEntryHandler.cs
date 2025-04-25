@@ -75,7 +75,9 @@ public class SessionEntryHandler : MonoBehaviour
         {
             Debug.Log("[SessionEntry] In-Game 아님 → 로비 유지");
             //로컬데이터의 inconnceted 부분 false로 바꿔줘야함
+            if (SQLiteManager.Instance.playerSession == null) Debug.Log("[SessionEntry]이게 널이라는데요");
             SQLiteManager.Instance.playerSession.isConnected = false;
+            Debug.Log($"[SessionEntry] isConnected : {SQLiteManager.Instance.playerSession.isConnected}");
             SQLiteManager.Instance.SavePlayerSession(
                 SQLiteManager.Instance.playerSession);
         }
