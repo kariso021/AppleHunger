@@ -79,9 +79,7 @@ public class PlayerRegister : NetworkBehaviour
         // 5) 재접속 또는 신규 모두에서 준비 완료 알림
         PlayerDataManager.Instance.NotifyPlayerReadyServerRpc(isReconnect);
 
-        // 6) 클라이언트 세션 업데이트 표시
-        PlayerDataManager.Instance.UpdateClientSessionServerRpc(isReconnect);
-
+        
         //IsConnected 
         SQLiteManager.Instance.playerSession.isConnected = true;
         SQLiteManager.Instance.SavePlayerSession(

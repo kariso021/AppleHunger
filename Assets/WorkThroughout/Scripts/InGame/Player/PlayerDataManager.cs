@@ -249,14 +249,7 @@ public class PlayerDataManager : NetworkBehaviour
 
     #region Session API
 
-    [ServerRpc(RequireOwnership = false)]
-    public void UpdateClientSessionServerRpc(bool inGame, ServerRpcParams rpc = default)
-    {
-        if (TryGetStateByClient(rpc.Receive.SenderClientId, out var pid, out _, out _, out _))
-        {
-            StartCoroutine(managers.UpdatePlayerSessionCoroutine(pid, inGame));
-        }
-    }
+
 
     public IEnumerator UpdateAllSessionsFalse()
     {
