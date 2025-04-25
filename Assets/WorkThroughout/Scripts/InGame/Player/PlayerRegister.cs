@@ -43,7 +43,7 @@ public class PlayerRegister : NetworkBehaviour
         {
             // 재접속: DB에 남은 playerId만 사용
             playerId = session.playerId;
-            Debug.Log($"🔄 Reconnect 모드 - playerId: {playerId}");
+            PlayerDataManager.Instance.RequestReconnectServerRpc(playerId);
         }
         else
         {
