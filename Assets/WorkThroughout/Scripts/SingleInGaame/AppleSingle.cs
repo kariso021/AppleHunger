@@ -15,7 +15,7 @@ public class AppleSingle : MonoBehaviour
     public int Value => value;
     public int ScoreValue => scoreValue;
 
-    private void Start()
+    private void Awake()
     {
         // 1~9 ·£´ý °ª ¼³Á¤
         value = Random.Range(1, 10);

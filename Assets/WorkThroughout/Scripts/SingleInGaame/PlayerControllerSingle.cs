@@ -78,7 +78,6 @@ public class PlayerControllerSingle : MonoBehaviour
         if (isDragRestricted) return;
         dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
         isDragging = false;
-        Debug.Log("클릭 시도 진행");
     }
 
     private void OnFingerMove(Finger finger)
@@ -215,6 +214,9 @@ public class PlayerControllerSingle : MonoBehaviour
     {
         isDragRestricted = true;
 
+        // 플래시 이미지 활성화
+        flashImage.gameObject.SetActive(true);
+
         float half = 0.25f;
         float t = 0f;
 
@@ -234,7 +236,12 @@ public class PlayerControllerSingle : MonoBehaviour
         }
         flashCanvasGroup.alpha = 0f;
 
+        // 잠시 대기
         yield return new WaitForSeconds(1f);
+
+        // 플래시 이미지 비활성화
+        flashImage.gameObject.SetActive(false);
+
         isDragRestricted = false;
     }
 }

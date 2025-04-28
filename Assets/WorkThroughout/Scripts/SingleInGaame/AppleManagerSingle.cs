@@ -1,3 +1,4 @@
+ï»¿using UnityEditor.Rendering;
 using UnityEngine;
 
 public class AppleManagerSingle : MonoBehaviour
@@ -25,7 +26,7 @@ public class AppleManagerSingle : MonoBehaviour
 
     private void Start()
     {
-        // ±×¸®µå ÃÊ±âÈ­
+        // ê·¸ë¦¬ë“œ ì´ˆê¸°í™”
         appleValues = new int[gridHeight, gridWidth];
         appleGrid = new AppleSingle[gridHeight, gridWidth];
         SpawnApplesInGrid();
@@ -58,7 +59,7 @@ public class AppleManagerSingle : MonoBehaviour
     }
 
     /// <summary>
-    /// »ç°ú Á¦°Å
+    /// ì‚¬ê³¼ ì œê±°
     /// </summary>
     public void RemoveApple(AppleSingle apple)
     {
@@ -67,7 +68,7 @@ public class AppleManagerSingle : MonoBehaviour
 
         if (appleGrid[y, x] != apple)
         {
-            Debug.LogWarning($"À§Ä¡ ºÒÀÏÄ¡: appleGrid[{y},{x}] != ´ë»ó »ç°ú");
+            Debug.LogWarning($"ìœ„ì¹˜ ë¶ˆì¼ì¹˜: appleGrid[{y},{x}] != ëŒ€ìƒ ì‚¬ê³¼");
             return;
         }
 
@@ -79,7 +80,7 @@ public class AppleManagerSingle : MonoBehaviour
 
         if (!HasCombinationLeft())
         {
-            Debug.Log("Á¶ÇÕ ºÒ°¡ ¡æ ±×¸®µå ¸®¼Â");
+            Debug.Log("ì¡°í•© ë¶ˆê°€ â†’ ê·¸ë¦¬ë“œ ë¦¬ì…‹");
             ResetGrid();
         }
     }
@@ -99,30 +100,21 @@ public class AppleManagerSingle : MonoBehaviour
             }
         }
 
-        // Å¸ÀÌ¸Ó 2ÃÊ ¸ØÃß±â
-        GameTimerSingle.Instance.PauseTimerForSeconds(2f);
-
-        // ¾Ë¸² ÆĞ³Î 2ÃÊ º¸¿©ÁÖ±â
         PlayerUISingle.Instance.ShowNotifyPanelForSeconds(2f);
+        GameTimerSingle.Instance.PauseTimerForSeconds(2f);
 
 
         SpawnApplesInGrid();
     }
 
     /// <summary>
-    /// 10 ÇÕ°è Á¶ÇÕÀÌ ³²¾ÆÀÖ´ÂÁö °Ë»ç
+    /// 10 í•©ê³„ ì¡°í•©ì´ ë‚¨ì•„ìˆëŠ”ì§€ ê²€ì‚¬
     /// </summary>
     private bool HasCombinationLeft()
     {
-        // µğ¹ö±× ·Î±×
-        Debug.Log("Apple Grid »óÅÂ (Top¡æBottom):");
-        for (int y = gridHeight - 1; y >= 0; y--)
-        {
-            string line = "";
-            for (int x = 0; x < gridWidth; x++)
-                line += appleValues[y, x] + " ";
-            Debug.Log(line);
-        }
+        //ë””ë²„ê·¸ ì²´í¬ìš©ë„
+        //DebugCheckGridValues();
+
         return CheckSum10(appleValues);
     }
 
@@ -143,13 +135,13 @@ public class AppleManagerSingle : MonoBehaviour
             }
         }
 
-        // ºÎºĞ Á÷»ç°¢Çü ÇÕ °Ë»ç
+        // ë¶€ë¶„ ì§ì‚¬ê°í˜• í•© ê²€ì‚¬
         for (int r1 = 0; r1 < rows; r1++)
             for (int c1 = 0; c1 < cols; c1++)
                 for (int r2 = r1; r2 < rows; r2++)
                     for (int c2 = c1; c2 < cols; c2++)
                     {
-                        if (r1 == r2 && c1 == c2) continue; // ´ÜÀÏ Ä­ Á¦¿Ü
+                        if (r1 == r2 && c1 == c2) continue; // ë‹¨ì¼ ì¹¸ ì œì™¸
 
                         int sum = ps[r2, c2]
                             - (r1 > 0 ? ps[r1 - 1, c2] : 0)
@@ -160,4 +152,40 @@ public class AppleManagerSingle : MonoBehaviour
                     }
         return false;
     }
+
+    private void DebugCheckGridValues()
+    {
+        // 1) appleGrid ì—ì„œ ì½ì–´ì˜¨ ê°’ vs appleValues ë¹„êµ
+        for (int y = 0; y < gridHeight; y++)
+        {
+            for (int x = 0; x < gridWidth; x++)
+            {
+                int gridVal = appleGrid[y, x] != null
+                    ? appleGrid[y, x].Value
+                    : 0;
+                int arrVal = appleValues[y, x];
+                if (gridVal != arrVal)
+                {
+                    Debug.LogWarning(
+                        $"[Mismatch] ìœ„ì¹˜ ({y},{x}) â†’ " +
+                        $"gridVal={gridVal}, appleValues={arrVal}"
+                    );
+                }
+            }
+        }
+
+        // 2) appleValues ì „ì²´ ì¶œë ¥ (Top â†’ Bottom)
+        Debug.Log("â–¶ appleValues (Top â†’ Bottom):");
+        for (int y = gridHeight - 1; y >= 0; y--)
+        {
+            string line = "";
+            for (int x = 0; x < gridWidth; x++)
+            {
+                line += appleValues[y, x] + " ";
+            }
+            Debug.Log(line.TrimEnd());
+        }
+    }
+
+
 }
