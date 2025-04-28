@@ -78,6 +78,7 @@ public class PlayerControllerSingle : MonoBehaviour
         if (isDragRestricted) return;
         dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
         isDragging = false;
+        Debug.Log("클릭 시도 진행");
     }
 
     private void OnFingerMove(Finger finger)

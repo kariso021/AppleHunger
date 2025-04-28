@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -66,6 +67,8 @@ public class ButtonController : MonoBehaviour
 
 
         multiPlayButton.onClick.AddListener(() => LoadInGameScene());
+
+        singlePlayButton.onClick.AddListener(() => LoadSingleGameScene());
 
         // Ranking Panel Buttons
         myRankProfileButton.onClick.AddListener(() =>
@@ -181,6 +184,10 @@ public class ButtonController : MonoBehaviour
         SQLiteManager.Instance.LoadAllData());
     }
 
+    private void LoadSingleGameScene()
+    {
+        SceneManager.LoadScene("TestInGame");
+    }
 
     private void LoadInGameScene()
     {

@@ -40,34 +40,58 @@ public class GameEnding : NetworkBehaviour
     private void OnDisable() => GameTimer.OnGameEnded -= OnGameEndedHandler;
 
     //------------------------------------------player둘다 나갔을시 방 폭파 로직
+    // 첫 클라이언트가 한 번이라도 연결된 적 있는지 표시
+    private bool _hasClientEverConnected = false;
+
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();  // 잘못된 base 호출 수정
-        if (IsServer)
-        {
-            // 클라이언트 끊김 콜백 등록
-            NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
-        }
+        base.OnNetworkSpawn();
+        if (!IsServer) return;
+
+        // 최초 연결 감지용
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        // 실제 디스커넥트 감지용
+        NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
     }
 
     public override void OnNetworkDespawn()
     {
         if (IsServer)
         {
-            // 콜백 해제해서 메모리 누수 방지
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
         }
         base.OnNetworkDespawn();
     }
 
+    private void OnClientConnected(ulong clientId)
+    {
+        // 첫 연결이 발생한 순간에만 true로 바꿔서
+        // 이후 HandleClientDisconnect에서 동작하도록 함
+        _hasClientEverConnected = true;
+    }
+
     private void HandleClientDisconnect(ulong clientId)
     {
+        // 최초 연결 전에는 무시
+        if (!_hasClientEverConnected)
+            return;
+
+        // 남은 클라이언트가 없을 때만 셧다운
         if (NetworkManager.Singleton.ConnectedClientsList.Count == 0)
-        {
-            StartCoroutine(PlayerDataManager.Instance.UpdateAllSessionsFalse());
-            ShutdownNetwork();
-        }
+            StartCoroutine(ShutdownAfterSessionUpdate());
     }
+
+    private IEnumerator ShutdownAfterSessionUpdate()
+    {
+        // 세션 false 처리 완료 대기
+        yield return PlayerDataManager.Instance.UpdateAllSessionsFalse();
+        // DB 갱신 후 서버 셧다운
+        ShutdownNetwork();
+    }
+
+
+    //--------------------------------------------------------------------------------------------------------
 
     private void OnGameEndedHandler()
     {

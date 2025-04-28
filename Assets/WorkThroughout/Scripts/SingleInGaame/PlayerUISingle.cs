@@ -1,6 +1,8 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEditor.Rendering;
+using System.Collections;
 
 public class PlayerUISingle : MonoBehaviour
 {
@@ -19,6 +21,10 @@ public class PlayerUISingle : MonoBehaviour
     [SerializeField] private TextMeshProUGUI nicknameText;
     [SerializeField] private TextMeshProUGUI ratingText;
 
+    [SerializeField] private GameObject notifyPanel;
+
+    public GameObject EmoticonPanel;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -27,25 +33,31 @@ public class PlayerUISingle : MonoBehaviour
 
     private void Start()
     {
-        // 프로필 초기 표시
-        var player = SQLiteManager.Instance.player;
-        AddressableManager.Instance.LoadImageFromGroup(player.profileIcon, profileImage);
-        nicknameText.text = player.playerName;
-        ratingText.text = $"R: {player.rating}";
+        EmoticonPanel.SetActive(false);
 
         // 초기 점수·콤보 표시
         UpdateScoreUI(ScoreManagerSingle.Instance.TotalScore,
                       ScoreManagerSingle.Instance.ComboCount);
-    }
 
+        // 프로필 초기 표시
+        if (SQLiteManager.Instance != null)
+        {
+            var player = SQLiteManager.Instance.player;
+            AddressableManager.Instance.LoadImageFromGroup(player.profileIcon, profileImage);
+            nicknameText.text = player.playerName;
+            ratingText.text = $"R: {player.rating}";
+        }
+
+
+    }
     private void OnEnable()
     {
-        GameTimer.OnTimerUpdated += UpdateTimerUI;
+        GameTimerSingle.OnTimerUpdated += UpdateTimerUI;
     }
 
     private void OnDisable()
     {
-        GameTimer.OnTimerUpdated -= UpdateTimerUI;
+        GameTimerSingle.OnTimerUpdated -= UpdateTimerUI;
     }
 
     /// <summary>
@@ -66,5 +78,19 @@ public class PlayerUISingle : MonoBehaviour
             timerSlider.value = remainingTime / 60f;
         if(timerText != null)
             timerText.text = $"{Mathf.FloorToInt(remainingTime)}";
+    }
+
+    public void ShowNotifyPanelForSeconds(float seconds)
+    {
+        if (notifyPanel == null) return;
+
+        StartCoroutine(NotifyRoutine(seconds));
+    }
+
+    private IEnumerator NotifyRoutine(float seconds)
+    {
+        notifyPanel.SetActive(true);
+        yield return new WaitForSeconds(seconds);
+        notifyPanel.SetActive(false);
     }
 }

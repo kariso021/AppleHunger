@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEditor.Rendering;
 
 public class GameTimerSingle : MonoBehaviour
 {
@@ -30,6 +31,10 @@ public class GameTimerSingle : MonoBehaviour
     /// </summary>
     public static event Action OnGameEnded;
 
+
+    private bool isPaused = false;
+    private float pauseTimer = 0f;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -46,6 +51,16 @@ public class GameTimerSingle : MonoBehaviour
     private void Update()
     {
         if (isGameEnded) return;
+
+        if (isPaused)
+        {
+            pauseTimer -= Time.deltaTime;
+            if (pauseTimer <= 0f)
+            {
+                isPaused = false;
+            }
+            return; // 멈춰있는 동안 시간 감소 안 시킴
+        }
 
         // 남은 시간 감소
         remainingTime -= Time.deltaTime;
@@ -79,4 +94,11 @@ public class GameTimerSingle : MonoBehaviour
     /// 남은 시간을 가져옵니다.
     /// </summary>
     public float GetRemainingTime() => remainingTime;
+
+    //------------------------------------PauseTiemr
+    public void PauseTimerForSeconds(float seconds)
+    {
+        isPaused = true;
+        pauseTimer = seconds;
+    }
 }

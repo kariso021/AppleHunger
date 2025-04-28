@@ -98,6 +98,14 @@ public class AppleManagerSingle : MonoBehaviour
                 }
             }
         }
+
+        // 타이머 2초 멈추기
+        GameTimerSingle.Instance.PauseTimerForSeconds(2f);
+
+        // 알림 패널 2초 보여주기
+        PlayerUISingle.Instance.ShowNotifyPanelForSeconds(2f);
+
+
         SpawnApplesInGrid();
     }
 

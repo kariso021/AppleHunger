@@ -93,6 +93,8 @@ public class MatchMakerClient : MonoBehaviour
             // (A) 대기 UI
             waitingCanvas?.SetActive(true);
 
+            Debug.Log($"session 제대로 작동되고 있나 보자{session.serverIp},{(ushort)session.serverPort}");
+
             // (B) 캐시된 IP/Port로 설정
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             transport.SetConnectionData(session.serverIp, (ushort)session.serverPort);
@@ -328,7 +330,6 @@ public class MatchMakerClient : MonoBehaviour
 
         // oldCid → newCid 매핑 갱신
         int playerId = SQLiteManager.Instance.player.playerId;
-        PlayerDataManager.Instance.RequestReconnectServerRpc(playerId);
 
         // 이제 클라이언트는 바로 게임룸에 들어가게 됩니다.
     }
