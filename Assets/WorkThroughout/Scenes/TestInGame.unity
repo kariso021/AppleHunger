@@ -303,7 +303,7 @@ MonoBehaviour:
   applePrefab: {fileID: 5749813513355723202, guid: 76a827f05f0c5bb4a9ac908bb577df6d, type: 3}
   gridWidth: 5
   gridHeight: 6
-  spacing: 1.1
+  spacing: 1
 --- !u!1001 &449628426
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1236,8 +1236,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridWidth: 5
-  gridHeight: 6
-  spacing: 1.1
+  gridHeight: 10
+  spacing: 1
 --- !u!1 &1447801369
 GameObject:
   m_ObjectHideFlags: 0
