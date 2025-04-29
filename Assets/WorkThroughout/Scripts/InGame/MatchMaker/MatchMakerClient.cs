@@ -98,7 +98,7 @@ public class MatchMakerClient : MonoBehaviour
             // (B) 캐시된 IP/Port로 설정
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             transport.SetConnectionData(session.serverIp, (ushort)session.serverPort);
-
+            
             // (C) 클라이언트 시작
             NetworkManager.Singleton.StartClient();
 
@@ -233,10 +233,6 @@ public class MatchMakerClient : MonoBehaviour
 
         SQLiteManager.Instance.SavePlayerSession(SQLiteManager.Instance.playerSession);
 
-
-        Debug.Log("SQLLite 저장전");
-        Debug.Log(SQLiteManager.Instance.playerSession.serverIp);
-        Debug.Log(SQLiteManager.Instance.playerSession.serverPort);
 
         StartCoroutine(managers.UpdatePlayerSessionCoroutine(
             SQLiteManager.Instance.player.playerId,

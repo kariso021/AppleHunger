@@ -161,10 +161,6 @@ public class PlayerDataManager : NetworkBehaviour
                 _readyClients.Clear();
             }
         }
-        else
-        {
-            SyncAllClients();
-        }
     }
 
     private void SyncAllClients()
@@ -240,6 +236,8 @@ public class PlayerDataManager : NetworkBehaviour
 
         //여기에 점수 동기화 먼저
         ScoreManager.Instance.SyncAllScoresToClient(newCid);
+
+        SyncAllClients();
 
     }
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
+using UnityEditor.Rendering;
 
 public class PlayerRegister : NetworkBehaviour
 {
@@ -33,7 +34,12 @@ public class PlayerRegister : NetworkBehaviour
 
         // 2) 로컬 세션 로드
         var session = SQLiteManager.Instance.LoadPlayerSession();
-        bool isReconnect = session != null && session.isConnected;
+
+        Debug.Log("isconnected 여부와 isIngame여부");
+        Debug.Log(session.isConnected);
+        Debug.Log(session.isInGame);
+        //여기서 false로 나옴
+        bool isReconnect = SQLiteManager.Instance.playerSession.isConnected;
         int playerId;
         int rating;
         string iconKey;
@@ -41,9 +47,12 @@ public class PlayerRegister : NetworkBehaviour
 
         if (isReconnect)
         {
+            Debug.Log("재접속 모드 Register에서 실행중");
             // 재접속: DB에 남은 playerId만 사용
             playerId = session.playerId;
             PlayerDataManager.Instance.RequestReconnectServerRpc(playerId);
+
+            yield return null;
         }
         else
         {
@@ -79,10 +88,13 @@ public class PlayerRegister : NetworkBehaviour
         // 5) 재접속 또는 신규 모두에서 준비 완료 알림
         PlayerDataManager.Instance.NotifyPlayerReadyServerRpc(isReconnect);
 
-        
+
         //IsConnected 
-        SQLiteManager.Instance.playerSession.isConnected = true;
-        SQLiteManager.Instance.SavePlayerSession(
-            SQLiteManager.Instance.playerSession);
+        var playersession = SQLiteManager.Instance.playerSession;
+        playersession.isConnected = true;
+        SQLiteManager.Instance.SavePlayerSession(playersession);
+        var playersessiontemp= SQLiteManager.Instance.LoadPlayerSession();
+        Debug.Log(playersessiontemp.isConnected);
+
     }
 }
