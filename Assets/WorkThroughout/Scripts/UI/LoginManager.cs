@@ -3,7 +3,9 @@ using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 #endif
 using System.Collections;
+using System.IO;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,11 +20,32 @@ public class LoginManager : MonoBehaviour
     private DownManager downManager;
     private void Awake()
     {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
         PlayGamesPlatform.DebugLogEnabled = true;
         PlayGamesPlatform.Activate();
+
+        if (PlayerPrefs.GetInt("IsFirstLogin", 0) == 0)
+        {
+            Debug.Log("[Login] First launch detected. Resetting PlayerPrefs...");
+
+            //  최초 실행임 → 초기화
+            PlayerPrefs.SetInt("IsFirstLogin", 1);
+            PlayerPrefs.SetInt("IsGoogleLogin", 0);
+            PlayerPrefs.SetInt("IsGuestLogin", 0);
+            PlayerPrefs.Save();
+
+            string rawDbPath = Path.Combine(Application.persistentDataPath, "game_data.db").Replace("\\", "/");
+
+            //  기존 DB 삭제도 여기서 같이 수행
+            if (File.Exists(rawDbPath))
+            {
+                File.Delete(rawDbPath);
+                Debug.Log($"[Login] Deleted old DB file at {rawDbPath}");
+            }
+        }
         // 로딩패널 하나 setactive true 로
 #endif
+        Debug.Log($"Goolge {PlayerPrefs.GetInt("IsGoogleLogin")}");
     }
 
     private void Start()
@@ -34,7 +57,8 @@ public class LoginManager : MonoBehaviour
 
 
         int isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin",0);
-        int isGuestLogin = PlayerPrefs.GetInt("IsGuestLogin", 0);     
+        int isGuestLogin = PlayerPrefs.GetInt("IsGuestLogin", 0);
+
 
         Debug.Log("Game Start: Attempting silent login.");
 
@@ -52,13 +76,11 @@ public class LoginManager : MonoBehaviour
             Debug.Log($"[Login] google? {isGoogleLogin} , guest? {isGuestLogin}");
             if (isGoogleLogin == 0 && isGuestLogin == 0)
                 loginPanel.SetActive(true);
-#if UNITY_ANDROID
             else
                 toDownCheck();
-#endif
         }
     }
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
     private void ProcessAutoAuthentication(SignInStatus status)
     {
         if (status == SignInStatus.Success)
@@ -88,11 +110,11 @@ public class LoginManager : MonoBehaviour
         Debug.Log("Google login button clicked.");
 
         DisableLoginButtons();
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
         PlayGamesPlatform.Instance.Authenticate(ProcessManualAuthentication);
 #endif
     }
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
     private void ProcessManualAuthentication(SignInStatus status)
     {
         if (status == SignInStatus.Success)

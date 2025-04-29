@@ -28,10 +28,12 @@ public class AndroidInputManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape)) // Android 뒤로가기
         {
+            Debug.Log("[Android] return input");
             if (PopupManager.Instance != null && PopupManager.Instance.activePopup != null)
             {
                 // 팝업이 열려 있으면 팝업 닫기
                 PopupManager.Instance.ClosePopup();
+                Debug.Log("[Android] return input to CLOSE POPUP");
             }
             else
             {
@@ -39,6 +41,7 @@ public class AndroidInputManager : MonoBehaviour
                 PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
                 PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "정말 게임을 종료하시겠습니까?";
 
+                Debug.Log("[Android] return input to SHOW POPUPnsfhe");
                 //if (Time.time - lastBackPressedTime < backPressInterval)
                 //{
                 //    // 2초 이내 두 번째 누름 → 게임 종료
