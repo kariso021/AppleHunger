@@ -227,14 +227,16 @@ public class MatchMakerClient : MonoBehaviour
     {
         Debug.Log($"[클라이언트] Ticket Assigned : {assignment.Ip} : {assignment.Port}");
 
-        SQLiteManager.Instance.SavePlayerSession(new PlayerSessionData
-        {
-            playerId = SQLiteManager.Instance.player.playerId,
-            serverIp = assignment.Ip,
-            serverPort = (int)assignment.Port,
-            isInGame = true
-        });
+        SQLiteManager.Instance.playerSession.serverIp = assignment.Ip;
+        SQLiteManager.Instance.playerSession.serverPort = (int)assignment.Port;
+        SQLiteManager.Instance.playerSession.isInGame = true;
 
+        SQLiteManager.Instance.SavePlayerSession(SQLiteManager.Instance.playerSession);
+
+
+        Debug.Log("SQLLite 저장전");
+        Debug.Log(SQLiteManager.Instance.playerSession.serverIp);
+        Debug.Log(SQLiteManager.Instance.playerSession.serverPort);
 
         StartCoroutine(managers.UpdatePlayerSessionCoroutine(
             SQLiteManager.Instance.player.playerId,

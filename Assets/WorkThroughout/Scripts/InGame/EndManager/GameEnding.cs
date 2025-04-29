@@ -95,6 +95,13 @@ public class GameEnding : NetworkBehaviour
 
     private void OnGameEndedHandler()
     {
+
+        if (NetworkManager.Singleton.ConnectedClientsList.Count == 0)
+        {
+            Debug.Log("[GameEnding] No clients connected → Skip HandleGameEnd");
+            return;
+        }
+
         if (GameTimer.Instance != null && GameTimer.Instance.IsInExtension)
         {
             Debug.Log("연장 중 - 처리 생략");
