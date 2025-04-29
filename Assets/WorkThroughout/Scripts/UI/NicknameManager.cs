@@ -1,20 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class NicknameManager : MonoBehaviour
 {
+    [Header("Config")]
     [SerializeField] private TMP_InputField nicknameInputField;
     [SerializeField] private Button confirmButton;
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private TMP_Text placeHolderText;
     [SerializeField] private TMP_Text warningText;
+    [SerializeField] private TMP_Text titleText;
     [SerializeField] private Button closeButton;
+
+    private int cost = 10000;
 
     private HashSet<string> forbiddenWords;
     private bool isChangingNickname = false;
@@ -28,6 +30,8 @@ public class NicknameManager : MonoBehaviour
         confirmButton.onClick.AddListener(OnClick_ChangeNickname);
         placeHolderText.text = SQLiteManager.Instance.player.playerName;
         forbiddenWords = ForbiddenWordsLoader.LoadForbiddenWords();
+
+        titleText.text = "닉네임 변경";
     }
 
 
@@ -35,7 +39,28 @@ public class NicknameManager : MonoBehaviour
     public void OnClick_ChangeNickname()
     {
         if (isChangingNickname) return;
+        var isCanAttempt = canNAttemptChange();
+        if (!isCanAttempt) return;
         StartCoroutine(ChangeNicknameCoroutine());
+    }
+
+    private bool canNAttemptChange()
+    {
+        if (SQLiteManager.Instance.player.currency < cost)
+        {
+            var pm = PopupManager.Instance;
+
+            if (pm != null)
+            {
+                pm.ShowPopup(pm.warningPopup);
+                pm.warningPopup.GetComponent<ModalPopup>().btn_confirm.gameObject.SetActive(false);
+                pm.warningPopup.GetComponent<ModalPopup>().btn_cancel.GetComponentInChildren<TMP_Text>().text = "확인";
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     private IEnumerator ChangeNicknameCoroutine()
@@ -53,7 +78,8 @@ public class NicknameManager : MonoBehaviour
 
         // 닉네임 중복 확인
         bool isDuplicate = false;
-        yield return StartCoroutine(ServerToAPIManager.Instance.CheckNicknameDuplicate(newNickname, (result) => {
+        yield return StartCoroutine(ServerToAPIManager.Instance.CheckNicknameDuplicate(newNickname, (result) =>
+        {
             isDuplicate = result;
         }));
 
@@ -73,6 +99,7 @@ public class NicknameManager : MonoBehaviour
 
         isChangingNickname = false;
         confirmButton.interactable = true;
+
     }
 
     private bool IsValidNickname(string nickname, out string message)

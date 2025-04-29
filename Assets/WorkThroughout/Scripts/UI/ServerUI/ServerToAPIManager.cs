@@ -241,10 +241,10 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
-    public IEnumerator UpdatePlayerGoogleId(string deviceId, string googleId)
+    public IEnumerator UpdatePlayerGoogleId(int playerId, string googleId) 
     {
         string url = $"{apiBaseUrl}/players/updateGoogleId";
-        string json = JsonConvert.SerializeObject(new GoogleIdUpdateRequest(deviceId,googleId));
+        string json = JsonConvert.SerializeObject(new GoogleIdUpdateRequest(playerId,googleId));
         byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
 
         UnityWebRequest request = new UnityWebRequest(url, "PUT");
@@ -755,12 +755,12 @@ public class ServerToAPIManager : MonoBehaviour
     [System.Serializable]
     public class GoogleIdUpdateRequest
     {
-        public string deviceId;
+        public int playerId;
         public string googleId;
 
-        public GoogleIdUpdateRequest(string deviceId, string googleId)
+        public GoogleIdUpdateRequest(int playerId, string googleId)
         {
-            this.deviceId = deviceId;
+            this.playerId = playerId;
             this.googleId = googleId;
         }
     }

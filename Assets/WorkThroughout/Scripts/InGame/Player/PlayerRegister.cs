@@ -81,8 +81,9 @@ public class PlayerRegister : NetworkBehaviour
 
         
         //IsConnected 
-        SQLiteManager.Instance.playerSession.isConnected = true;
-        SQLiteManager.Instance.SavePlayerSession(
-            SQLiteManager.Instance.playerSession);
+        //SQLiteManager.Instance.playerSession.isConnected = true;
+        session.isConnected = true;
+        SQLiteManager.Instance.SavePlayerSession(session);
+        Debug.Log($"Session : {session.isConnected} , Loaded : {SQLiteManager.Instance.LoadPlayerSession().isConnected}");
     }
 }

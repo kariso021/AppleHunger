@@ -17,12 +17,13 @@ public class SQLiteManager : MonoBehaviour
     private static SQLiteManager instance;
     public static SQLiteManager Instance => instance;
 
+    [Header("Debug")]
     // =========================== 나중에 꼭 지워야 한다 ===============================/
     public bool isDummy = false;
     // =================================================================================
     private string dbName = "game_data.db";
     private string dbPath;
-
+    [Header("References")]
     public PlayerData player;
     public List<PlayerRankingData> rankings = new List<PlayerRankingData>();
     public Dictionary<int, PlayerRankingData> rankDictionary = new Dictionary<int, PlayerRankingData>();
@@ -38,7 +39,10 @@ public class SQLiteManager : MonoBehaviour
     public event Action OnInitializeComplete;
     //
     public bool isSqlExist = false;
-
+    private bool isGoogleLogin;
+    [Header("Login Key")]
+    public string lookupKey;
+    public string lookupValue;
     private void Awake()
     {
         if (instance == null)
@@ -71,7 +75,14 @@ public class SQLiteManager : MonoBehaviour
     {
         // =========================== 나중에 꼭 지워야 한다 ===============================/
         string rawDbPath = !isDummy ? Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/") : Path.Combine(Application.persistentDataPath, "game_data_dummy.db").Replace("\\", "/");
-        // =================================================================================
+        // =================================================================================      
+        isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin", 0) == 1;
+        lookupKey = isGoogleLogin ? "googleId" : "deviceId";
+        lookupValue = isGoogleLogin
+            ? TransDataClass.googleIdToApply
+            : SystemInfo.deviceUniqueIdentifier;
+
+
         dbPath = rawDbPath;  // SQLite 연결을 위해 여전히 사용
         Debug.Log($"[SQL] SQLite DB 경로: {dbPath}");
 
@@ -85,7 +96,7 @@ public class SQLiteManager : MonoBehaviour
             yield return loadAllDataAwait();
 
             if (player.googleId == null && TransDataClass.googleIdToApply != null)
-                StartCoroutine(ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, TransDataClass.googleIdToApply));
+                StartCoroutine(ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.playerId, lookupValue));
 
             saveRankDataToDictionary();
 
@@ -99,7 +110,7 @@ public class SQLiteManager : MonoBehaviour
             LoadAllData();
 
             if (string.IsNullOrEmpty(player.googleId) && !string.IsNullOrEmpty(TransDataClass.googleIdToApply))
-               yield return (ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.deviceId, TransDataClass.googleIdToApply));
+               yield return (ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.playerId, TransDataClass.googleIdToApply));
         }
         yield return ClientNetworkManager.Instance.UpdateLogin(SQLiteManager.Instance.player.playerId);
         PopupManager.Instance.HideLoading(1f);
@@ -302,38 +313,28 @@ public class SQLiteManager : MonoBehaviour
             Debug.Log("[SQL] 서버에서 플레이어 데이터 요청 중...");
 
             yield return ClientNetworkManager.Instance.GetPlayerData(
-                "deviceId", SystemInfo.deviceUniqueIdentifier, true);
-            //// googleId가 존재한다면 → 서버에 업데이트 요청
-            //if (!string.IsNullOrEmpty(TransDataClass.googleIdToApply))
-            //{
-            //    SQLiteManager.Instance.player.googleId = TransDataClass.googleIdToApply;
-            //    yield return ClientNetworkManager.Instance.UpdatePlayerData();
-            //}
+                lookupKey, lookupValue, true);  
 
-            // ✅ 먼저 플레이어 데이터를 받아옴
-            //yield return ClientNetworkManager.Instance.GetPlayerData(player.googleId == null ? "deviceId" : "googleId", player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId, true);
-
-
-            // ✅ 플레이어 ID가 `0`이 아닐 때까지 기다림
+            // 플레이어 ID가 `0`이 아닐 때까지 기다림
             yield return new WaitUntil(() => SQLiteManager.Instance.LoadPlayerData().playerId != 0);
-            // ✅ player.playerId가 설정된 후에 나머지 요청을 병렬 실행
+            // player.playerId가 설정된 후에 나머지 요청을 병렬 실행
             Debug.Log($"[SQL] 플레이어 ID 확인: {SQLiteManager.Instance.LoadPlayerData().playerId}");
 
-            // ✅ 병렬 요청을 위한 플래그 설정
+            // 병렬 요청을 위한 플래그 설정
             bool isPlayerStatsLoaded = false;
             bool isLoginDataLoaded = false;
             //bool isMatchRecordsLoaded = false;
             bool isPlayerItemsLoaded = false;
             bool isRankingListLoaded = false;
 
-            // ✅ 나머지 데이터를 병렬로 요청
+            // 나머지 데이터를 병렬로 요청
             StartCoroutine(LoadPlayerStatsServerRpc(ClientNetworkManager.Instance, () => isPlayerStatsLoaded = true));
             StartCoroutine(LoadLoginDataServerRpc(ClientNetworkManager.Instance, () => isLoginDataLoaded = true));
             //StartCoroutine(LoadMatchRecordsServerRpc(ClientNetworkManager.Instance, () => isMatchRecordsLoaded = true)); // 매치 기록의 경우 처음 시작한 유저는 당연히 없음
             StartCoroutine(LoadPlayerItemsServerRpc(ClientNetworkManager.Instance, () => isPlayerItemsLoaded = true));
             StartCoroutine(LoadRankingListServerRpc(ClientNetworkManager.Instance, () => isRankingListLoaded = true));
 
-            // ✅ 모든 요청이 끝날 때까지 대기
+            // 모든 요청이 끝날 때까지 대기
             yield return new WaitUntil(() =>
                 isPlayerStatsLoaded &&
                 isLoginDataLoaded &&
@@ -422,8 +423,8 @@ public class SQLiteManager : MonoBehaviour
         {
             Debug.Log("[SQL] 플레이어 데이터가 비어있음...재요청");
             yield return ClientNetworkManager.Instance.GetPlayerData(
-                player.googleId == null ? "deviceId" : "googleId",
-                player.googleId == null ? SystemInfo.deviceUniqueIdentifier : player.googleId,
+                lookupKey,
+                lookupValue,
                 false);
             LoadAllData();
         }
@@ -732,7 +733,7 @@ public class SQLiteManager : MonoBehaviour
         using (var connection = new SQLiteConnection(dbPath))
         {
             var command = connection.CreateCommand(@"
-            SELECT playerId, ticketId, serverIp, serverPort, isInGame, timestamp
+            SELECT playerId, ticketId, serverIp, serverPort, isInGame, isConnected, timestamp
             FROM playerSession
             WHERE playerId = ?;", player.playerId);
 
