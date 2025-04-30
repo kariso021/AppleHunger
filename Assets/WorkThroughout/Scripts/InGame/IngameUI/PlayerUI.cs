@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Unity.Netcode;
+using System.Collections;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -28,6 +29,9 @@ public class PlayerUI : MonoBehaviour
     [Header("Rating UI")]
     [SerializeField] private TextMeshProUGUI myRatingText;
     [SerializeField] private TextMeshProUGUI opponentRatingText;
+
+    [Header("NoitfyResetPanel")]
+    [SerializeField] private GameObject notifyResetPanel;
 
     private Dictionary<int, int> playerScores = new Dictionary<int, int>();
     private int myPlayerId;
@@ -142,5 +146,21 @@ public class PlayerUI : MonoBehaviour
     public void SetOpponentRating(int rating)
     {
         opponentRatingText.text = $"R: {rating}";
+    }
+
+    //-----------------Notify Reset Panel ----------------
+
+    //
+    public void ToggleNotifyResetPanel(float seconds)
+    {
+        StartCoroutine(NotifyResetCoroutine(seconds));
+    }
+
+    // 2) 실제 코루틴
+    private IEnumerator NotifyResetCoroutine(float seconds)
+    {
+        notifyResetPanel.SetActive(true);
+        yield return new WaitForSeconds(seconds);
+        notifyResetPanel.SetActive(false);
     }
 }

@@ -14,6 +14,8 @@ public class PopupManager : MonoBehaviour
     public GameObject nicknamePopup;
     public GameObject loadingPopup;
     public GameObject settingPopup;
+    public GameObject warningPopup;
+    public GameObject topPopup;
 
     public GameObject activePopup = null; // 현재 활성화된 팝업 저장
     private Action pendingOnComplete; // 콜백 저장

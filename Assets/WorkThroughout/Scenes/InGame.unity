@@ -2754,7 +2754,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58043c05a9ef0494bb00da3947e53309, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  totalGameTime: 60
+  totalGameTime: 300
   extensionNoticeDuration: 2
 --- !u!1 &1054297947
 GameObject:
@@ -2976,6 +2976,7 @@ MonoBehaviour:
   opponentNicknameText: {fileID: 852442223}
   myRatingText: {fileID: 310018447}
   opponentRatingText: {fileID: 1804188119}
+  notifyResetPanel: {fileID: 1820780179}
 --- !u!4 &1090054328
 Transform:
   m_ObjectHideFlags: 0
@@ -3953,7 +3954,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1544002600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3961,7 +3962,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1544002599}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c21a47cb0787c964a88e3e28acf2766d, type: 3}
   m_Name: 

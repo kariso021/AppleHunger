@@ -118,9 +118,9 @@ public class ClientNetworkManager : MonoBehaviour
         yield return ServerToAPIManager.Instance.UpdateNicknameOnServer(nickname);
     }
 
-    public IEnumerator UpdatePlayerGoogleId(string deviceId, string googleId)
+    public IEnumerator UpdatePlayerGoogleId(int playerId, string googleId)
     {
-        yield return ServerToAPIManager.Instance.UpdatePlayerGoogleId(deviceId, googleId);
+        yield return ServerToAPIManager.Instance.UpdatePlayerGoogleId(playerId, googleId);
     }
     #endregion
     #region Player Items

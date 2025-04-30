@@ -39,18 +39,17 @@ public class GameEnding : NetworkBehaviour
     private void OnEnable() => GameTimer.OnGameEnded += OnGameEndedHandler;
     private void OnDisable() => GameTimer.OnGameEnded -= OnGameEndedHandler;
 
-    //------------------------------------------player둘다 나갔을시 방 폭파 로직
-    // 첫 클라이언트가 한 번이라도 연결된 적 있는지 표시
+    // ------------------------------------------
+    // player 둘 다 나갔을 때 방 폭파 로직 (오직 서버 전용)
+    // ------------------------------------------
     private bool _hasClientEverConnected = false;
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        if (!IsServer) return;
+        if (!IsServer) return;    // 서버가 아니면 아래 로직 진입하지 않음
 
-        // 최초 연결 감지용
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-        // 실제 디스커넥트 감지용
         NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
     }
 
@@ -66,26 +65,53 @@ public class GameEnding : NetworkBehaviour
 
     private void OnClientConnected(ulong clientId)
     {
-        // 첫 연결이 발생한 순간에만 true로 바꿔서
-        // 이후 HandleClientDisconnect에서 동작하도록 함
         _hasClientEverConnected = true;
+        Debug.Log($"[ClientConnected] ClientId: {clientId}");
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (client.ClientId == clientId)
+            {
+                Debug.Log($"[ClientDisconnected] ClientId: {client.ClientId}");
+                break;
+            }
+        }
     }
 
     private void HandleClientDisconnect(ulong clientId)
     {
-        // 최초 연결 전에는 무시
-        if (!_hasClientEverConnected)
+        // 서버에서만 동작하도록 추가 체크
+        if (!IsServer || !_hasClientEverConnected)
             return;
 
-        // 남은 클라이언트가 없을 때만 셧다운
-        if (NetworkManager.Singleton.ConnectedClientsList.Count == 0)
+        Debug.Log(NetworkManager.Singleton.ConnectedClientsList.Count);
+
+        foreach(var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (client.ClientId == clientId)
+            {
+                Debug.Log($"[ClientDisconnected] ClientId: {client.ClientId}");
+                break;
+            }
+        }
+
+        // 남은 클라이언트가 없으면 셧다운 나갈때 기점으로 몇명인지 보여주는거라서 1이하가 맞음
+        if (NetworkManager.Singleton.ConnectedClientsList.Count <= 1)
+        {
+            Debug.Log("Shutdown발동함");
+            GameTimer.Instance.StopForEndTimer();
             StartCoroutine(ShutdownAfterSessionUpdate());
+        }
     }
 
     private IEnumerator ShutdownAfterSessionUpdate()
     {
+        // 서버 전용 보강
+        if (!IsServer)
+            yield break;
+
         // 세션 false 처리 완료 대기
         yield return PlayerDataManager.Instance.UpdateAllSessionsFalse();
+
         // DB 갱신 후 서버 셧다운
         ShutdownNetwork();
     }

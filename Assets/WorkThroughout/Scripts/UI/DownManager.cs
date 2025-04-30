@@ -39,12 +39,12 @@ public class DownManager : MonoBehaviour
         {
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
-                Debug.Log("✅ Addressables 초기화 성공");
+                Debug.Log("Addressables 초기화 성공");
                 isInitialized = true;
             }
             else
             {
-                Debug.LogError("❌ Addressables 초기화 실패");
+                Debug.LogError("Addressables 초기화 실패");
                 if (handle.OperationException != null)
                     Debug.LogError($"예외: {handle.OperationException.Message}");
             }
@@ -57,26 +57,17 @@ public class DownManager : MonoBehaviour
             yield return null;
     }
 
-    public void OnDownloadCheck()
-    {
-        waitMessage.SetActive(true);
-        downMessage.SetActive(false);
-        StartCoroutine(EnsureInitAndCheckUpdate());
-    }
-
-    IEnumerator EnsureInitAndCheckUpdate()
-    {
-        while (!isInitialized)
-        {
-            Debug.Log("⏳ Addressables 초기화 대기 중...");
-            yield return null;
-        }
-
-        yield return CheckUpdateFiles();
-    }
-
     public IEnumerator CheckUpdateFiles()
     {
+        if (Application.internetReachability == NetworkReachability.NotReachable) // not connect internet
+        {
+            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 게임을 재실행해주세요.";
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
+            Debug.Log("[Network] Network is not available");
+
+            yield break;
+        }
         var labels = new List<string> { iconLabel.labelString, boardLabel.labelString, emojiLabel.labelString };
 
         patchSize = 0;
@@ -104,7 +95,7 @@ public class DownManager : MonoBehaviour
         }
 
         if (patchSize > 0)
-        {
+        {            
             waitMessage.SetActive(false);
             downMessage.SetActive(true);
             sizeInfoText.text = GetFileSize(patchSize);
@@ -114,13 +105,30 @@ public class DownManager : MonoBehaviour
             downSlider.value = 1f;
             downValText.text = "100%";
             yield return new WaitForSeconds(1f);
-            SceneManager.LoadScene("Lobby");
+            SceneManager.LoadScene("TestLobby");
         }
     }
 
     public void Button_Download()
     {
-        StartCoroutine(DownloadAll());
+        if (Application.internetReachability == NetworkReachability.NotReachable) // not connect internet
+        {
+            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 게임을 재실행해 로그인을 시도해주세요.";
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
+            Debug.Log("[Network] Network is not available");
+        }
+        else if (Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork) // lte,3g
+        {
+            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "데이터로 연결되어 있습니다. 정말 다운받으시겠습니까?";
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => StartCoroutine(DownloadAll()));
+            Debug.Log("[Network] Network is available");
+            return;
+        }
+        else
+            StartCoroutine(DownloadAll());
     }
 
     IEnumerator DownloadAll()
@@ -133,7 +141,7 @@ public class DownManager : MonoBehaviour
             yield return DownloadWithRetry(label, 3);
         }
 
-        SceneManager.LoadScene("Lobby");
+        SceneManager.LoadScene("TestLobby");
     }
 
     IEnumerator DownloadWithRetry(string label, int maxRetry)
@@ -151,12 +159,12 @@ public class DownManager : MonoBehaviour
                 if (handle.Status == AsyncOperationStatus.Succeeded)
                 {
                     patchMap[label] = handle.GetDownloadStatus().TotalBytes;
-                    Debug.Log($"✅ 다운로드 성공: {label}");
+                    Debug.Log($"[Down] 다운로드 성공: {label}");
                     success = true;
                 }
                 else
                 {
-                    Debug.LogWarning($"❗ 다운로드 실패: {label} (시도 {attempt + 1}/{maxRetry})");
+                    Debug.LogWarning($"[Down] 다운로드 실패: {label} (시도 {attempt + 1}/{maxRetry})");
                 }
 
                 Addressables.Release(handle);
@@ -175,7 +183,7 @@ public class DownManager : MonoBehaviour
 
         if (!success)
         {
-            Debug.LogError($"❌ {label} 다운로드 실패 - 최대 재시도 도달");
+            Debug.LogError($"[Down] {label} 다운로드 실패 - 최대 재시도 도달");
         }
     }
 

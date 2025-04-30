@@ -22,6 +22,12 @@ public class GameTimer : NetworkBehaviour
 
     public static event Action OnGameEnded;
     public static event Action<float> OnTimerUpdated;
+
+    private bool isPaused;                // 타이머 일시 정지 여부
+    private bool isIndefinitePause;       // 무한 정지 모드 플래그
+    private float pauseEndTime;           // 일시 정지 종료 시각 (서버 타임 기준)
+
+
     public static GameTimer Instance { get; private set; }
     public bool IsInExtension => isInExtension;
 
@@ -55,24 +61,31 @@ public class GameTimer : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+        // ■ 일시/무한 정지 중이면 타이머 동작 스킵
+        if (isPaused)
+        {
+            if (isIndefinitePause)
+                return;
+
+            // 일시 정지 모드 종료 시점 도달했으면 해제
+            float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+            if (now >= pauseEndTime)
+                ResumeTimer();
+            else
+                return;
+        }
+
+        // ■ 평상시 타이머 갱신
+        float nowTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
         float newTime = isInExtension
-            ? Mathf.Max(0, extensionDuration - (now - extensionStartTime))
-            : Mathf.Max(0, endTime - now);
+            ? Mathf.Max(0, extensionDuration - (nowTime - extensionStartTime))
+            : Mathf.Max(0, endTime - nowTime);
 
         if (Mathf.Abs(newTime - remainingTime.Value) > 0.1f)
             remainingTime.Value = newTime;
 
         if (newTime <= 0 && !isGameEnded)
-        {
-            if (isInExtension)
-            {
-                isInExtension = false;
-                HandleGameEndLogic();
-            }
-            else
-                HandleGameEndLogic();
-        }
+            HandleGameEndLogic();
     }
 
     // 게임 종료 로직: 연장/승패 판별을 GameEnding의 EvaluateScores로 대체
@@ -129,4 +142,24 @@ public class GameTimer : NetworkBehaviour
             extensionStartTime = now;
         }
     }
+
+    public void StopForEndTimer()
+    {
+        isPaused = true;
+        isIndefinitePause = true;
+    }
+
+    public void PauseTimer(float seconds)
+    {
+        isPaused = true;
+        isIndefinitePause = false;
+        pauseEndTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + seconds;
+    }
+
+    public void ResumeTimer()
+    {
+        isPaused = false;
+        isIndefinitePause = false;
+    }
+
 }

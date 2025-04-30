@@ -36,17 +36,20 @@ public class AndroidInputManager : MonoBehaviour
             else
             {
                 // 팝업이 없을 때 → 종료 로직
-                if (Time.time - lastBackPressedTime < backPressInterval)
-                {
-                    // 2초 이내 두 번째 누름 → 게임 종료
-                    Application.Quit();
-                }
-                else
-                {
-                    // 첫 번째 누름 → Toast로 경고 문구 띄우기
-                    AndroidToast.ShowToast("뒤로가기 버튼을 한 번 더 누르면 종료됩니다.");
-                    lastBackPressedTime = Time.time;
-                }
+                PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
+                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "정말 게임을 종료하시겠습니까?";
+
+                //if (Time.time - lastBackPressedTime < backPressInterval)
+                //{
+                //    // 2초 이내 두 번째 누름 → 게임 종료
+                //    Application.Quit();
+                //}
+                //else
+                //{
+                //    // 첫 번째 누름 → Toast로 경고 문구 띄우기
+                //    AndroidToast.ShowToast("뒤로가기 버튼을 한 번 더 누르면 종료됩니다.");
+                //    lastBackPressedTime = Time.time;
+                //}
             }
         }
     }

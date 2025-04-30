@@ -38,16 +38,25 @@ public class LoginManager : MonoBehaviour
 
         Debug.Log("Game Start: Attempting silent login.");
 
-        if (isGoogleLogin == 0 && isGuestLogin == 0)
-            loginPanel.SetActive(true);
+        // 인터넷 연결 여부 확인
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            // 인터넷 연결이 안되어있다면?
+            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 로그인을 시도해주세요.";
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
+            Debug.Log("[Network] Network is not available at login");
+        }
+        else
+        {
+            Debug.Log($"[Login] google? {isGoogleLogin} , guest? {isGuestLogin}");
+            if (isGoogleLogin == 0 && isGuestLogin == 0)
+                loginPanel.SetActive(true);
 #if UNITY_ANDROID
-        else if(isGuestLogin == 1 && isGoogleLogin == 1)
-            PlayGamesPlatform.Instance.Authenticate(ProcessAutoAuthentication);
-        else if (isGoogleLogin == 1)
-            PlayGamesPlatform.Instance.Authenticate(ProcessAutoAuthentication);
+            else
+                toDownCheck();
 #endif
-        else if (isGuestLogin == 1)
-            toDownCheck();
+        }
     }
 #if UNITY_ANDROID
     private void ProcessAutoAuthentication(SignInStatus status)
@@ -99,34 +108,9 @@ public class LoginManager : MonoBehaviour
         }
         else
         {
-            AndroidToast.ShowToast("구글 로그인 실패! 로그인 페이지로 이동합니다.");
+            AndroidToast.ShowToast("구글 로그인 실패! 다시 시도해 주세요.");
             Debug.LogWarning($"Manual Google login failed or canceled: {status}");
             EnableLoginButtons();
-        }
-    }
-    private IEnumerator WaitUntilAuthenticated()
-    {
-        float timeout = 5f;
-        float elapsed = 0f;
-
-        while (!PlayGamesPlatform.Instance.localUser.authenticated && elapsed < timeout)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (PlayGamesPlatform.Instance.localUser.authenticated)
-        {
-            Debug.Log("Silent login success after waiting");
-            // 로딩 패널 false
-            toDownCheck();
-        }
-        else
-        {
-            Debug.Log("Silent login failed after timeout");
-            EnableLoginButtons();
-            // 로딩 패널 false
-            loginPanel.SetActive(true);
         }
     }
 

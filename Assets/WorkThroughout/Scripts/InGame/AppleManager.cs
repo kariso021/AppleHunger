@@ -87,6 +87,7 @@ public class AppleManager : NetworkBehaviour
             if (!CanAnyAppleBeRemoved())
             {
                 Debug.Log("No combinations left. Resetting apples.");
+                WhenResetAndDoNotify(2f);
                 ResetAppleGrid();
             }
         }
@@ -114,6 +115,21 @@ public class AppleManager : NetworkBehaviour
 
         SpawnApplesInGrid();
     }
+
+    //Reset될때 NotifyPanel 띄우고 게임시간 정지하는 부분
+    private void WhenResetAndDoNotify(float seconds)
+    {
+        if(!IsServer) return;
+        GameTimer.Instance.PauseTimer(seconds);
+        NotifyResetPanelClientRpc(seconds); // NotifyPanel 띄우기
+    }
+
+    [ClientRpc]
+    public void NotifyResetPanelClientRpc(float seconds)
+    { 
+        PlayerUI.Instance.ToggleNotifyResetPanel(seconds); // NotifyPanel 띄우기    
+    }
+
 
     private bool CanAnyAppleBeRemoved()
     {
