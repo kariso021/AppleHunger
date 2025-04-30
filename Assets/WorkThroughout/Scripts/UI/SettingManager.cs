@@ -3,7 +3,7 @@ using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using System.IO;
 using System.Xml.Linq;
-# endif
+#endif
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -36,9 +36,7 @@ public class SettingManager : MonoBehaviour
         PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
         closeButton.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
-<<<<<<< HEAD
-#if UNITY_ANDROID
-=======
+
 #if UNITY_ANDROID && !UNITY_EDITOR
 >>>>>>> 9af6de811e931683e8ebac7f365b14a51ea089df
         loginButton.onClick.AddListener(() =>
