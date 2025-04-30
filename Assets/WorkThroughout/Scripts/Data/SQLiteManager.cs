@@ -82,9 +82,10 @@ public class SQLiteManager : MonoBehaviour
             ? TransDataClass.googleIdToApply
             : SystemInfo.deviceUniqueIdentifier;
 
+        Debug.Log($"[Test] key : {lookupKey} , value : {lookupValue} , isGoogleLogin? {isGoogleLogin}");
 
         dbPath = rawDbPath;  // SQLite 연결을 위해 여전히 사용
-        Debug.Log($"[SQL] SQLite DB 경로: {dbPath}");
+        Debug.Log($"[SQL] SQLite DB 경로: {dbPath}");   
 
         // Step 1: SQLite DB가 존재하는지 확인
         if (File.Exists(rawDbPath))

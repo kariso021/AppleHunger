@@ -20394,7 +20394,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   deviceIdText: {fileID: 101709329}
   copyButton: {fileID: 849776}
-  loginButton: {fileID: 172839538}
+  loginButton: {fileID: 1922277594}
   creditButton: {fileID: 1973465284}
   supportButton: {fileID: 1906357545}
   deleteButton: {fileID: 1446222875}
@@ -26782,7 +26782,7 @@ MonoBehaviour:
   nicknamePopup: {fileID: 1017549640}
   loadingPopup: {fileID: 1122263518}
   settingPopup: {fileID: 756893482}
-  warningPopup: {fileID: 0}
+  warningPopup: {fileID: 1544196491}
   topPopup: {fileID: 0}
   activePopup: {fileID: 0}
 --- !u!114 &1366320881
@@ -30637,6 +30637,8 @@ MonoBehaviour:
     unlockIcons: 0
     unlockBoards: 0
   isSqlExist: 0
+  lookupKey: 
+  lookupValue: 
 --- !u!1 &1606530509
 GameObject:
   m_ObjectHideFlags: 0
@@ -35719,6 +35721,17 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1922277594 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7830682755727361641, guid: 0ed1fe49115074b418f731cabcd23652, type: 3}
+  m_PrefabInstance: {fileID: 1099948817}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1936231108
 GameObject:
   m_ObjectHideFlags: 0

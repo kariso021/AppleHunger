@@ -94,6 +94,8 @@ public class DownManager : MonoBehaviour
                 yield return null;
         }
 
+        Debug.Log($"[Down] patch size : {patchSize}");
+
         if (patchSize > 0)
         {            
             waitMessage.SetActive(false);
