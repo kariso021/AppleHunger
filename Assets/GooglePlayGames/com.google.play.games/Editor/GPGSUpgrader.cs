@@ -47,7 +47,7 @@ namespace GooglePlayGames.Editor
             if (!GPGSUtil.AndroidManifestExists())
             {
                 isChanged = true;
-                GPGSUtil.GenerateAndroidManifest();
+                //GPGSUtil.GenerateAndroidManifest();
             }
 
             if (isChanged)

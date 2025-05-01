@@ -196,7 +196,7 @@ namespace GooglePlayGames.Editor
             }
 
             // Generate AndroidManifest.xml
-            GPGSUtil.GenerateAndroidManifest();
+            //GPGSUtil.GenerateAndroidManifest();
 
             // refresh assets, and we're done
             AssetDatabase.Refresh();

@@ -64,6 +64,8 @@ public class DownManager : MonoBehaviour
             PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
             PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 게임을 재실행해주세요.";
             PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
+            PopupManager.Instance.warningPopup.GetComponent <ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => Application.Quit());
             Debug.Log("[Network] Network is not available");
 
             yield break;
@@ -118,6 +120,8 @@ public class DownManager : MonoBehaviour
             PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
             PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 게임을 재실행해 로그인을 시도해주세요.";
             PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => Application.Quit());
             Debug.Log("[Network] Network is not available");
         }
         else if (Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork) // lte,3g

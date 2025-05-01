@@ -79,7 +79,7 @@ public class SQLiteManager : MonoBehaviour
         isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin", 0) == 1;
         lookupKey = isGoogleLogin ? "googleId" : "deviceId";
         lookupValue = isGoogleLogin
-            ? TransDataClass.googleIdToApply
+            ? PlayerPrefs.GetString("GoogleId"," ")
             : SystemInfo.deviceUniqueIdentifier;
 
         Debug.Log($"[Test] key : {lookupKey} , value : {lookupValue} , isGoogleLogin? {isGoogleLogin}");
@@ -334,7 +334,6 @@ public class SQLiteManager : MonoBehaviour
             //StartCoroutine(LoadMatchRecordsServerRpc(ClientNetworkManager.Instance, () => isMatchRecordsLoaded = true)); // 매치 기록의 경우 처음 시작한 유저는 당연히 없음
             StartCoroutine(LoadPlayerItemsServerRpc(ClientNetworkManager.Instance, () => isPlayerItemsLoaded = true));
             StartCoroutine(LoadRankingListServerRpc(ClientNetworkManager.Instance, () => isRankingListLoaded = true));
-
             // 모든 요청이 끝날 때까지 대기
             yield return new WaitUntil(() =>
                 isPlayerStatsLoaded &&

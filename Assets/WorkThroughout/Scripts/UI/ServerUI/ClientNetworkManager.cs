@@ -1,10 +1,11 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements.Experimental;
-
+using appleHunger;
 public class ClientNetworkManager : MonoBehaviour
 {
     private static ClientNetworkManager instance;
@@ -64,9 +65,12 @@ public class ClientNetworkManager : MonoBehaviour
     #endregion
     #region Player Data
     // 🔹 플레이어 데이터 요청
-    public IEnumerator GetPlayerData(string idType, string idValue,bool isFirstTime)
+    public IEnumerator GetPlayerData(string idType, string idValue,bool isFirstTime,Action<bool> onComplete = null)
     {
-        yield return ServerToAPIManager.Instance.GetPlayer(idType, idValue,isFirstTime);
+        if(onComplete != null)
+            yield return ServerToAPIManager.Instance.GetPlayer(idType, idValue,isFirstTime, onComplete);
+        else
+            yield return ServerToAPIManager.Instance.GetPlayer(idType, idValue, isFirstTime);
     }
 
     // 0403 임시
@@ -121,6 +125,11 @@ public class ClientNetworkManager : MonoBehaviour
     public IEnumerator UpdatePlayerGoogleId(int playerId, string googleId)
     {
         yield return ServerToAPIManager.Instance.UpdatePlayerGoogleId(playerId, googleId);
+    }
+
+    public IEnumerator AddAuthMapping(string deviceId, string googleId)
+    {
+        yield return ServerToAPIManager.Instance.AddAuthMapping(deviceId, googleId);
     }
     #endregion
     #region Player Items
@@ -278,34 +287,4 @@ public class ClientNetworkManager : MonoBehaviour
         Debug.Log($"[Client] Get Session player is in Game? : {isInGame}");
     }
     #endregion
-}
-
-[System.Serializable]
-public class LoginResponse
-{
-    public bool success;
-    public LoginData records;
-}
-
-[System.Serializable]
-public class PlayerStatsResponse
-{
-    public bool success;
-    public PlayerStatsData playerStats;
-}
-
-[System.Serializable]
-public class RankingDataResponse
-{
-    public bool success;
-    public PlayerRankingData[] topRankings;
-}
-
-[System.Serializable]
-public class PurchaseResponse
-{
-    public bool success;
-    public string message;
-    public int remainingCurrency;
-    public string error;
 }

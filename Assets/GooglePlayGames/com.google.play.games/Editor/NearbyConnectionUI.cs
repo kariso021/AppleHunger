@@ -128,7 +128,7 @@ namespace GooglePlayGames.Editor
                 GPGSUtil.EnsureDirExists("Assets/Plugins/Android");
 
                 // Generate AndroidManifest.xml
-                GPGSUtil.GenerateAndroidManifest();
+                //GPGSUtil.GenerateAndroidManifest();
 
                 GPGSProjectSettings.Instance.Set(GPGSUtil.NEARBYSETUPDONEKEY, true);
                 GPGSProjectSettings.Instance.Save();
