@@ -331,4 +331,88 @@ public class MatchMakerClient : MonoBehaviour
 
         // 이제 클라이언트는 바로 게임룸에 들어가게 됩니다.
     }
+
+
+    //------------------------------------------------------------------재접속 매핑 갱신
+
+    // --- Coroutine for double-check and reconnect ---
+    private IEnumerator ValidateAndReconnect(PlayerSessionData session)
+    {
+        const float checkInterval = 2f;
+        bool firstCheck = false, secondCheck = false;
+
+        // 1차 확인
+        yield return new WaitForSeconds(checkInterval);
+        yield return CheckSessionInGame(session, result => firstCheck = result);
+
+        // 2차 확인
+        yield return new WaitForSeconds(checkInterval);
+        yield return CheckSessionInGame(session, result => secondCheck = result);
+
+        if (firstCheck && secondCheck)
+        {
+            // 방이 여전히 유효 → 실제 재접속
+            waitingCanvas?.SetActive(true);
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            transport.SetConnectionData(session.serverIp, (ushort)session.serverPort);
+            NetworkManager.Singleton.StartClient();
+            NetworkManager.Singleton.OnClientConnectedCallback += OnReconnected;
+        }
+        else
+        {
+            // 방 소멸 처리
+            ShowRoomDestroyedAndReturnLobby();
+        }
+    }
+
+    // 2) 서버에 isInGame 상태 물어보는 헬퍼
+    private IEnumerator CheckSessionInGame(
+     PlayerSessionData localSession,
+     Action<bool> resultCallback)
+    {
+        // 서버에서 받아올 isInGame 상태
+        bool serverInGame = false;
+
+        // 1) 서버에 세션 업데이트 요청
+        //    • localSession.isInGame 값을 그대로 넘기지만,
+        //      managers.LatestSession 에 서버 응답이 채워집니다.
+        yield return managers.UpdatePlayerSessionCoroutine(
+            localSession.playerId,            // 플레이어 ID
+            localSession.isInGame,            // 반드시 bool 인자 필요
+            updateSuccess =>                  // 요청 성공 여부 콜백
+            {
+                if (updateSuccess)
+                {
+                    // 2) 서버 응답으로 갱신된 LatestSession에서 읽어오기
+                    serverInGame = SQLiteManager.Instance.LoadPlayerSession().isInGame;
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        $"[CheckSession] playerId={localSession.playerId} 세션 조회 실패");
+                }
+            }
+        );
+
+        // 3) 최종 결과 전달
+        resultCallback(serverInGame);
+    }
+
+    // 3) 방 소멸 UI + 로비 복귀
+    private void ShowRoomDestroyedAndReturnLobby()
+    {
+        waitingCanvas?.SetActive(false);
+        matchResultText.text = "매칭된 방이 소멸되었습니다.";
+        // 잠깐 메시지 보여주고
+        StartCoroutine(DelayedReturnLobby());
+    }
+
+    private IEnumerator DelayedReturnLobby()
+    {
+        yield return new WaitForSeconds(2f);
+        if (NetworkManager.Singleton.IsClient)
+            NetworkManager.Singleton.Shutdown();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
+    }
+
 }
