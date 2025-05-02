@@ -358,11 +358,6 @@ public class MatchMakerClient : MonoBehaviour
             NetworkManager.Singleton.StartClient();
             NetworkManager.Singleton.OnClientConnectedCallback += OnReconnected;
         }
-        else
-        {
-            // 방 소멸 처리
-            ShowRoomDestroyedAndReturnLobby();
-        }
     }
 
     // 2) 서버에 isInGame 상태 물어보는 헬퍼
@@ -398,21 +393,5 @@ public class MatchMakerClient : MonoBehaviour
         resultCallback(serverInGame);
     }
 
-    // 3) 방 소멸 UI + 로비 복귀
-    private void ShowRoomDestroyedAndReturnLobby()
-    {
-        waitingCanvas?.SetActive(false);
-        matchResultText.text = "매칭된 방이 소멸되었습니다.";
-        // 잠깐 메시지 보여주고
-        StartCoroutine(DelayedReturnLobby());
-    }
-
-    private IEnumerator DelayedReturnLobby()
-    {
-        yield return new WaitForSeconds(2f);
-        if (NetworkManager.Singleton.IsClient)
-            NetworkManager.Singleton.Shutdown();
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
-    }
 
 }
