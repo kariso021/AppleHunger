@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.ddukddakgames.applehungerTest">
+
+  <application
+      android:allowBackup="false"
+      android:fullBackupContent="false"
+      tools:replace="android:allowBackup,android:fullBackupContent">
+  </application>
+
+</manifest>
