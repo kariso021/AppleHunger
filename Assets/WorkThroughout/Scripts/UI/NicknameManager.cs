@@ -55,6 +55,7 @@ public class NicknameManager : MonoBehaviour
                 pm.ShowPopup(pm.warningPopup);
                 pm.warningPopup.GetComponent<ModalPopup>().btn_confirm.gameObject.SetActive(false);
                 pm.warningPopup.GetComponent<ModalPopup>().btn_cancel.GetComponentInChildren<TMP_Text>().text = "확인";
+                pm.warningPopup.GetComponent<ModalPopup>().config.text = "닉네임 변경에 필요한 재화가 충분치 않습니다.";
             }
 
             return false;

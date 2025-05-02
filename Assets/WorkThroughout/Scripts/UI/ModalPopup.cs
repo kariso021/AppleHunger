@@ -18,8 +18,6 @@ public class ModalPopup : MonoBehaviour
     {
         btn_cancel.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
-        btn_confirm.onClick.AddListener(() =>
-        Application.Quit());
 
         title.text = "°æ°í";
     }

@@ -40,7 +40,8 @@ public class AndroidInputManager : MonoBehaviour
                 // 팝업이 없을 때 → 종료 로직
                 PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
                 PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "정말 게임을 종료하시겠습니까?";
-
+                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => Application.Quit());
                 Debug.Log("[Android] return input to SHOW POPUPnsfhe");
                 //if (Time.time - lastBackPressedTime < backPressInterval)
                 //{
@@ -56,6 +57,25 @@ public class AndroidInputManager : MonoBehaviour
             }
         }
     }
+
+    public void RestartApp()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+    using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+    using (var currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+    using (var packageManager = currentActivity.Call<AndroidJavaObject>("getPackageManager"))
+    {
+        string packageName = currentActivity.Call<string>("getPackageName");
+        AndroidJavaObject launchIntent = packageManager.Call<AndroidJavaObject>("getLaunchIntentForPackage", packageName);
+        launchIntent.Call<AndroidJavaObject>("addFlags", 0x10000000); // FLAG_ACTIVITY_NEW_TASK
+
+        currentActivity.Call("startActivity", launchIntent);
+
+        currentActivity.Call("finishAffinity"); // 현재 액티비티 스택 종료
+    }
+#endif
+    }
+
 }
 
 public static class AndroidToast

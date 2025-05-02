@@ -18,26 +18,19 @@ public class SessionEntryHandler : MonoBehaviour
         var session = SQLiteManager.Instance.LoadPlayerSession();
 
         //// 1-1) 세션이 없으면 새로 생성
-        //if (session == null)
-        //{
-        //    Debug.Log("[SessionEntry] 로컬 세션 없음 → 새 세션 생성 및 서버 등록");
-        //    session = new PlayerSessionData
-        //    {
-        //        playerId = SQLiteManager.Instance.player.playerId,
-        //        isInGame = false,
-        //        isConnected = false
-        //    };
-        //    SQLiteManager.Instance.SavePlayerSession(session);
+        if (session == null)
+        {
+            Debug.Log("[SessionEntry] 로컬 세션 없음 → 새 세션 생성 및 서버 등록");
+            session = new PlayerSessionData
+            {
+                playerId = SQLiteManager.Instance.player.playerId,
+                isInGame = false,
+                isConnected = false
+            };
+            SQLiteManager.Instance.SavePlayerSession(session);
 
-        //    // 서버에 Upsert 요청
-        //    yield return StartCoroutine(
-        //        managers.UpdatePlayerSessionCoroutine(
-        //            session.playerId,
-        //            session.isInGame
-        //        )
-        //    );
-        //    yield break;
-        //}
+            yield break;
+        }
 
         // 2) 서버에서 isInGame 조회
         bool isInGame = false;

@@ -9,6 +9,7 @@ using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using appleHunger;
 public class ServerToAPIManager : MonoBehaviour
 {
     private string apiBaseUrl = "https://applehunger.site";
@@ -42,7 +43,7 @@ public class ServerToAPIManager : MonoBehaviour
         string url = $"{apiBaseUrl}/players";
 
         PlayerData newPlayer = new PlayerData(SQLiteManager.Instance.player.deviceId,
-            SQLiteManager.Instance.player.googleId, $"User_{UnityEngine.Random.Range(0, 9999)}",
+            TransDataClass.googleIdToApply != null ? TransDataClass.googleIdToApply : "", $"User_{UnityEngine.Random.Range(0, 9999)}",
             "101",
             "201",
             1200, 500);
@@ -126,13 +127,14 @@ public class ServerToAPIManager : MonoBehaviour
     // 플레이어 정보 가져오기(By playerId), id는 나중에 googleId,guestId를 db에 추가해서 그걸로
     // 사용할 예정
     /// <summary>
-    /// player의 google 혹은 device Id를 이용해 정보를 조회하는 함수. 만약 정보가 없다면 플레이어가 새로운 계정인 것으로 간주하여 새 플레이어 생성
+    /// player의 google 혹은 device Id를 이용해 정보를 조회하는 함수. isFirstTime 의 bool 값 여부를 통해 신규 유저 생성 가능. onComplete로 bool값 리턴도 가능.
     /// </summary>
     /// <param name="idType"></param>
     /// <param name="idValue"></param>
-    public IEnumerator GetPlayer(string idType, string idValue, bool isFirstTime) // 
+    public IEnumerator GetPlayer(string idType, string idValue, bool isFirstTime)
     {
         string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
+
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
@@ -140,13 +142,26 @@ public class ServerToAPIManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string jsonData = request.downloadHandler.text;
-                Debug.LogWarning($"Target : {jsonData}");
+                Debug.LogWarning($"[GetPlayer] Received Data: {jsonData}");
+
+                // 서버에서 받은 플레이어 데이터 파싱
+                PlayerData player = JsonConvert.DeserializeObject<PlayerData>(jsonData);
+
+                // 🔸 최초 Google 로그인 시, auth_mappings에 deviceId 등록
+                if (!string.IsNullOrEmpty(player.googleId) && PlayerPrefs.GetInt("isFirstGoogleLogin", 0) == 0)
+                {
+                    yield return StartCoroutine(AddAuthMapping(SystemInfo.deviceUniqueIdentifier, player.googleId));
+                    PlayerPrefs.SetInt("isFirstGoogleLogin", 1);
+                    PlayerPrefs.Save();
+                }
+
                 yield return TargetReceiveAsPlayerDataClientRpc(jsonData);
             }
             else
             {
                 Debug.LogError("[ServerToAPI] Failed Player Search : " + request.error);
                 Debug.LogError("[ServerToAPI] Response: " + request.downloadHandler.text);
+
                 if (isFirstTime)
                 {
                     yield return StartCoroutine(AddPlayer());
@@ -156,6 +171,44 @@ public class ServerToAPIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// GetPlayer와 동일한 기능을 하나, Action 변수가 추가되고 가져온 데이터를 저장하지 않고 bool값만을 체크한다. Player값이 있으면 true, 없으면 false 를 반환한다.
+    /// </summary>
+    /// <param name="idType"></param>
+    /// <param name="idValue"></param>
+    /// <param name="isFirstTime"></param>
+    /// <param name="onComplete"></param>
+    /// <returns></returns>
+    public IEnumerator GetPlayer(string idType, string idValue, bool isFirstTime, Action<bool> onComplete = null)
+    {
+        string url = $"{apiBaseUrl}/players/search?{idType}={idValue}";
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string jsonData = request.downloadHandler.text;
+                Debug.LogWarning($"Target Non Save : {jsonData}");
+                onComplete?.Invoke(true);
+            }
+            else
+            {
+                Debug.LogError("[ServerToAPI] Failed Player Search : " + request.error);
+                Debug.LogError("[ServerToAPI] Response: " + request.downloadHandler.text);
+                if (isFirstTime)
+                {
+                    yield return StartCoroutine(AddPlayer());
+                    Debug.Log("[ServerToAPI] ADD NEW PLAYER END");
+                    onComplete?.Invoke(true);
+                }
+                else
+                {
+                    onComplete?.Invoke(false);
+                }
+            }
+        }
+    }
     public IEnumerator UpdateNicknameOnServer(string playerName)
     {
         string url = $"{apiBaseUrl}/players/updateNickname";
@@ -263,6 +316,31 @@ public class ServerToAPIManager : MonoBehaviour
             Debug.Log($"[ServerToAPI] Complete Google Id Update: {request.downloadHandler.text}");
             // 이미 SQLiteManager 부분에서 player.googleId 에 값을 넣어둔 상태라 저장만 하면 됨.
             SQLiteManager.Instance.SavePlayerData(SQLiteManager.Instance.player);
+        }
+    }
+
+    public IEnumerator AddAuthMapping(string deviceId, string googleId)
+    {
+        string url = $"{apiBaseUrl}/players/authMappings";
+
+        var postData = new AuthMappingRequest(deviceId, googleId);
+        string jsonData = JsonUtility.ToJson(postData);
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("[ServerToAPI] AddAuthMapping complete.");
+        }
+        else
+        {
+            Debug.LogError($"[ServerToAPI] AddAuthMapping failed: {request.error}");
         }
     }
     #endregion
@@ -680,99 +758,5 @@ public class ServerToAPIManager : MonoBehaviour
     #endregion
 
     // 데이터 구조
-    [System.Serializable]
-    public class LoginRecordData
-    {
-        public int loginId;
-        public int playerId;
-        public string loginTime;
-        public string ipAddress;
-    }
 
-    [System.Serializable]
-    public class LoginRecordList
-    {
-        public List<LoginRecordData> records;
-    }
-    // JSON 파싱을 위한 클래스
-    [System.Serializable]
-    public class MatchHistoryResponse
-    {
-        public bool success;
-        public MatchHistoryData[] matches;
-    }
-
-    [System.Serializable]
-    public class PlayerItemsResponse
-    {
-        public bool success;
-        public PlayerItemData[] items;
-    }
-
-    [System.Serializable]
-    public class LoginUpdateRequest
-    {
-        public int playerId;
-        public string ipAddress;
-
-        public LoginUpdateRequest(int playerId, string ipAddress)
-        {
-            this.playerId = playerId;
-            this.ipAddress = ipAddress;
-        }
-    }
-    [System.Serializable]
-    public class RankingShouldUpdateResponse
-    {
-        public bool shouldUpdate;
-    }
-
-    [System.Serializable]
-    public class NicknameUpdateRequest
-    {
-        public int playerId;
-        public string playerName;
-
-        public NicknameUpdateRequest(int id, string nickname)
-        {
-            playerId = id;
-            playerName = nickname;
-        }
-    }
-    [System.Serializable]
-    public class NicknameDuplicateResponse
-    {
-        public bool isDuplicate;
-    }
-
-    [System.Serializable]
-    public class UnityTokenResponse
-    {
-        public string idToken;
-        public string sessionToken;
-    }
-
-    [System.Serializable]
-    public class GoogleIdUpdateRequest
-    {
-        public int playerId;
-        public string googleId;
-
-        public GoogleIdUpdateRequest(int playerId, string googleId)
-        {
-            this.playerId = playerId;
-            this.googleId = googleId;
-        }
-    }
-    [System.Serializable]
-    public class PlayerSessionRequest
-    {
-        public int playerId;
-        public int isInGame; // bool로 보내고 싶다면 1/0으로 변환해서 넣기
-    }
-    [System.Serializable]
-    public class IsInGameResponse
-    {
-        public int isInGame;
-    }
 }

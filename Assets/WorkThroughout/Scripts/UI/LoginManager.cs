@@ -62,6 +62,7 @@ public class LoginManager : MonoBehaviour
 
         Debug.Log("Game Start: Attempting silent login.");
 
+
         // 인터넷 연결 여부 확인
         if (Application.internetReachability == NetworkReachability.NotReachable)
         {
@@ -69,6 +70,8 @@ public class LoginManager : MonoBehaviour
             PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
             PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 로그인을 시도해주세요.";
             PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() =>Application.Quit());
             Debug.Log("[Network] Network is not available at login");
         }
         else
@@ -125,7 +128,7 @@ public class LoginManager : MonoBehaviour
             TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
 
             PlayerPrefs.SetInt("IsGoogleLogin", 1);
-
+            PlayerPrefs.SetString("GoogleId",TransDataClass.googleIdToApply);
             toDownCheck();
         }
         else

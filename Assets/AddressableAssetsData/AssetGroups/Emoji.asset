@@ -45,6 +45,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 53387ccf087c3964cadf4a4fd94ea8b9
+    m_Address: Emoji_311
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 86b16ecd4210fe74d88b7716b30645a4
     m_Address: Emoji_301
     m_ReadOnly: 0
