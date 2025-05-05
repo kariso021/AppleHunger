@@ -208,7 +208,7 @@ public class AppleManagerSingle : MonoBehaviour
     {
         if (appleDetectSize < 0.75f)
         {
-            appleDetectSize += 0.15f;
+            appleDetectSize += 0.075f;
             var apples = FindObjectsByType<AppleSingle>(FindObjectsSortMode.None);
             foreach(var apple in apples)
             {
@@ -222,7 +222,7 @@ public class AppleManagerSingle : MonoBehaviour
     {
         if (appleDetectSize > 0.15f)
         {
-            appleDetectSize -= 0.15f;
+            appleDetectSize -= 0.075f;
             var apples = FindObjectsByType<AppleSingle>(FindObjectsSortMode.None);
             foreach (var apple in apples)
             {
