@@ -9,7 +9,7 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Netcode;
 using Unity.Networking.Transport.Relay;
 
-public class RelayStart : MonoBehaviour
+public class RelayManager : MonoBehaviour
 {
 
     private async void Start()
