@@ -15,6 +15,17 @@ public class AppleSingle : MonoBehaviour
     public int Value => value;
     public int ScoreValue => scoreValue;
 
+
+    public float detectSize;
+
+    // 20250505 탐지범위
+    public Bounds AppleBounds => new Bounds(
+    transform.position,
+    new Vector3(detectSize, detectSize, 1f)
+    );
+
+
+    
     private void Awake()
     {
         // 1~9 랜덤 값 설정
@@ -22,9 +33,8 @@ public class AppleSingle : MonoBehaviour
         scoreValue = 10;
 
         // UI 업데이트
-        UpdateText();
+        UpdateText(); 
     }
-
     /// <summary>
     /// 값 수동 설정 (필요 시)
     /// </summary>
@@ -50,4 +60,5 @@ public class AppleSingle : MonoBehaviour
         else
             Debug.LogError("numberText가 할당되지 않았습니다! Inspector에서 확인하세요.");
     }
+
 }

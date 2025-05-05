@@ -1,5 +1,7 @@
-﻿using UnityEditor.Rendering;
+﻿using TMPro;
+using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AppleManagerSingle : MonoBehaviour
 {
@@ -14,6 +16,16 @@ public class AppleManagerSingle : MonoBehaviour
     private AppleSingle[,] appleGrid;
     private int[,] appleValues;
 
+
+    // 20250505 추가
+    [Header("Apple Detect Size")]
+    private float appleDetectSize = 0.1f;
+
+    [Header("Temp Buttons")]
+    public Button add;
+    public Button sub;
+    public TMP_Text curText;
+    //
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -30,6 +42,9 @@ public class AppleManagerSingle : MonoBehaviour
         appleValues = new int[gridHeight, gridWidth];
         appleGrid = new AppleSingle[gridHeight, gridWidth];
         SpawnApplesInGrid();
+
+        // temp
+        curText.text = appleDetectSize.ToString();
     }
 
     private void SpawnApplesInGrid()
@@ -49,6 +64,7 @@ public class AppleManagerSingle : MonoBehaviour
 
                 GameObject obj = Instantiate(applePrefab, pos, Quaternion.identity);
                 AppleSingle apple = obj.GetComponent<AppleSingle>();
+                apple.detectSize = appleDetectSize; // 사과 탐지 범위 자율 설정, 20250505
                 if (apple == null) continue;
 
                 appleValues[y, x] = apple.Value;
@@ -187,5 +203,33 @@ public class AppleManagerSingle : MonoBehaviour
         }
     }
 
+    // 20250505
+    public void AddDetectSize()
+    {
+        if (appleDetectSize < 0.75f)
+        {
+            appleDetectSize += 0.15f;
+            var apples = FindObjectsByType<AppleSingle>(FindObjectsSortMode.None);
+            foreach(var apple in apples)
+            {
+                apple.detectSize = appleDetectSize;
+            }
 
+        }
+        curText.text = appleDetectSize.ToString();
+    }
+    public void SubDetectSize()
+    {
+        if (appleDetectSize > 0.15f)
+        {
+            appleDetectSize -= 0.15f;
+            var apples = FindObjectsByType<AppleSingle>(FindObjectsSortMode.None);
+            foreach (var apple in apples)
+            {
+                apple.detectSize = appleDetectSize;
+            }
+
+        }
+        curText.text = appleDetectSize.ToString();
+    }
 }

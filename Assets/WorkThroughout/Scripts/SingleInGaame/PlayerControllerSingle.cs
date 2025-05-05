@@ -30,6 +30,8 @@ public class PlayerControllerSingle : MonoBehaviour
 
     private ScoreManagerSingle scoreManager;
 
+
+
     private void Awake()
     {
         EnhancedTouchSupport.Enable();
@@ -170,7 +172,7 @@ public class PlayerControllerSingle : MonoBehaviour
         for (int i = selectedApples.Count - 1; i >= 0; i--)
         {
             var obj = selectedApples[i];
-            if (obj == null || !bounds.Contains(obj.transform.position))
+            if (obj == null || !bounds.Intersects(obj.GetComponent<AppleSingle>().AppleBounds))
             {
                 var renderer = obj.GetComponent<SpriteRenderer>();
                 renderer.color = originalColors[obj];
@@ -183,7 +185,7 @@ public class PlayerControllerSingle : MonoBehaviour
         // 영역 내 새로 진입한 사과 선택
         foreach (var obj in GameObject.FindGameObjectsWithTag("Apple"))
         {
-            if (bounds.Contains(obj.transform.position) && !selectedApples.Contains(obj))
+            if (bounds.Intersects(obj.GetComponent<AppleSingle>().AppleBounds) && !selectedApples.Contains(obj))
             {
                 var apple = obj.GetComponent<AppleSingle>();
                 if (apple == null) continue;
