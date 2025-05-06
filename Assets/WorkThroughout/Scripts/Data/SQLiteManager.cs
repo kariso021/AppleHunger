@@ -78,9 +78,9 @@ public class SQLiteManager : MonoBehaviour
         // =================================================================================      
         isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin", 0) == 1;
         lookupKey = isGoogleLogin ? "googleId" : "deviceId";
-        lookupValue = isGoogleLogin
-            ? PlayerPrefs.GetString("GoogleId"," ")
-            : SystemInfo.deviceUniqueIdentifier;
+        lookupValue = AESUtil.Encrypt(isGoogleLogin
+            ? PlayerPrefs.GetString("GoogleId")
+            : SystemInfo.deviceUniqueIdentifier);
 
         Debug.Log($"[Test] key : {lookupKey} , value : {lookupValue} , isGoogleLogin? {isGoogleLogin}");
 

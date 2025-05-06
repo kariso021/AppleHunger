@@ -150,7 +150,7 @@ public class ServerToAPIManager : MonoBehaviour
                 // 🔸 최초 Google 로그인 시, auth_mappings에 deviceId 등록
                 if (!string.IsNullOrEmpty(player.googleId) && PlayerPrefs.GetInt("isFirstGoogleLogin", 0) == 0)
                 {
-                    yield return StartCoroutine(AddAuthMapping(SystemInfo.deviceUniqueIdentifier, player.googleId));
+                    yield return StartCoroutine(AddAuthMapping(player.deviceId, player.googleId));
                     PlayerPrefs.SetInt("isFirstGoogleLogin", 1);
                     PlayerPrefs.Save();
                 }

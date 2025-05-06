@@ -83,7 +83,8 @@ public class SettingManager : MonoBehaviour
 
     private IEnumerator loginSuccessProcess()
     {
-        string userGoogleId = PlayGamesPlatform.Instance.GetUserId();
+        string userGoogleId = AESUtil.Encrypt(PlayGamesPlatform.Instance.GetUserId());
+        string userDeviceId = AESUtil.Encrypt(SystemInfo.deviceUniqueIdentifier);
         if (userGoogleId != null)
         {
             bool isSuccess = false;
@@ -107,7 +108,7 @@ public class SettingManager : MonoBehaviour
             if (isSuccess) // 이미 구글 계정이 있는 유저일 때
             {
 
-                yield return ClientNetworkManager.Instance.AddAuthMapping(SystemInfo.deviceUniqueIdentifier, userGoogleId);
+                yield return ClientNetworkManager.Instance.AddAuthMapping(userDeviceId, userGoogleId);
 
                 yield return ClientNetworkManager.Instance.DeletePlayer(SQLiteManager.Instance.player.playerId);
 

@@ -103,7 +103,7 @@ public class LoginManager : MonoBehaviour
     public void OnGuestLoginButtonClick()
     {
         Debug.Log("Guest login selected.");
-        TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
+        TransDataClass.deviceIdToApply = AESUtil.Encrypt(SystemInfo.deviceUniqueIdentifier);
         PlayerPrefs.SetInt("IsGuestLogin", 1);
         toDownCheck();
     }
@@ -124,8 +124,8 @@ public class LoginManager : MonoBehaviour
         {
 
             AndroidToast.ShowToast("구글 로그인 성공! 다운로드 할 파일이 있는지 체크합니다.");
-            TransDataClass.googleIdToApply = PlayGamesPlatform.Instance.GetUserId();
-            TransDataClass.deviceIdToApply = SystemInfo.deviceUniqueIdentifier;
+            TransDataClass.googleIdToApply = AESUtil.Encrypt(PlayGamesPlatform.Instance.GetUserId());
+            TransDataClass.deviceIdToApply = AESUtil.Encrypt(SystemInfo.deviceUniqueIdentifier);
 
             PlayerPrefs.SetInt("IsGoogleLogin", 1);
             PlayerPrefs.SetString("GoogleId",TransDataClass.googleIdToApply);

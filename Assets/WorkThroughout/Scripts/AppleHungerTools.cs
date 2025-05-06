@@ -19,6 +19,11 @@ namespace appleHunger
         }
 
     }
+
+
+
+
+
     // ClientNetworkManager
     [System.Serializable]
     public class LoginResponse
