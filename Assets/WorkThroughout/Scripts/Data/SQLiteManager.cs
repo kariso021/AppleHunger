@@ -50,7 +50,7 @@ public class SQLiteManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject); // 게임이 진행하는 동안엔 삭제가 일어나면 안되므로
 
-            player.deviceId = SystemInfo.deviceUniqueIdentifier;
+            player.deviceId = AESUtil.Encrypt(SystemInfo.deviceUniqueIdentifier);
 
             PopupManager.Instance.ShowLoading("데이터 로딩");
 

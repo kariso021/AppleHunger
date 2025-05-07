@@ -134,7 +134,7 @@ public class SettingManager : MonoBehaviour
             }
             else // 처음으로 구글 계정을 연동한 유저일 때
             {
-                yield return ClientNetworkManager.Instance.UpdatePlayerGoogleId(SQLiteManager.Instance.player.playerId, TransDataClass.googleIdToApply);
+                yield return ClientNetworkManager.Instance.UpdatePlayerGoogleId(SQLiteManager.Instance.player.playerId, userGoogleId);
 
                 PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
                 PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
