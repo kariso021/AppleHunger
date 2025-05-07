@@ -536,7 +536,7 @@ namespace GooglePlayGames.Editor
 
             // Generate AndroidManifest.xml
             string manifestBody = GPGSUtil.ReadEditorTemplate("template-AndroidManifest");
-
+            Debug.LogWarning($"[Generate] {manifestBody}");
             Dictionary<string, string> overrideValues =
                 new Dictionary<string, string>();
 
@@ -566,6 +566,11 @@ namespace GooglePlayGames.Editor
                     GPGSProjectSettings.Instance.Get(ent.Value, overrideValues);
                 manifestBody = manifestBody.Replace(ent.Key, value);
             }
+
+            manifestBody = manifestBody.Replace(
+    "<application",
+    "<application android:allowBackup=\"false\" android:fullBackupContent=\"false\""
+);
 
             GPGSUtil.WriteFile(destFilename, manifestBody);
             GPGSUtil.UpdateGameInfo();
