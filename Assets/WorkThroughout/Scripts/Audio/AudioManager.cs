@@ -74,12 +74,16 @@ public class AudioManager : MonoBehaviour
             PlayBGM(0, 0);     // BGM도 안전하게 재생 가능
             StartCoroutine(LobbySetupCoroutine());
         }
-        else if (scene.name == "InGame")
+        else if (scene.name == "InGame" || scene.name == "TestInGame")
         {
             isInGameScene = true;
             PlayBGM(0, 1); // 게임 씬 BGM
         }
     }
+    /// <summary>
+    ///  로비에서 사운드에 관련된 게임 오브젝트를 찾는 코루틴
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator LobbySetupCoroutine()
     {
         yield return StartCoroutine(delayFindReference());
@@ -89,7 +93,10 @@ public class AudioManager : MonoBehaviour
         //PlayBGM(0, 0);     // BGM도 안전하게 재생 가능
     }
 
-
+    /// <summary>
+    /// 씬 전환 시 Null 방지를 위한 코루틴
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator delayFindReference()
     {
         Slider[] allSliders = Resources.FindObjectsOfTypeAll<Slider>();
@@ -184,6 +191,11 @@ public class AudioManager : MonoBehaviour
         PlayerPrefs.SetFloat(VFX_VOLUME_KEY, vfxVolume);
     }
 
+    /// <summary>
+    /// 만약 오디오 출력하는 Source가 여러개일 경우에 VFX 출력을 위한 함수
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="clipIndex"></param>
     public void PlayVFX(int index, int clipIndex)
     {
         if (index >= 0 && index < vfxSources.Count && vfxSources[index] != null)
@@ -191,7 +203,17 @@ public class AudioManager : MonoBehaviour
             vfxSources[index].PlayOneShot(vfxClipList[clipIndex]);
         }
     }
-
+    /// <summary>
+    /// Sound Manager에 등록된 값중 0번 인덱스에 해당하는 값만 출력
+    /// </summary>
+    /// <param name="clipIndex"></param>
+    public void PlayVFX(int clipIndex)
+    {
+        if (vfxSources.Count > 0 && vfxSources[0] != null)
+        {
+            vfxSources[0].PlayOneShot(vfxClipList[clipIndex]);
+        }
+    }
 
     public void PlayBGM(int index, int clipIndex)
     {

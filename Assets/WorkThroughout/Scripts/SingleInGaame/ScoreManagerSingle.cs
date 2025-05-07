@@ -11,7 +11,7 @@ public class ScoreManagerSingle : MonoBehaviour
     [SerializeField] private int maxCombo = 5;                // ÃÖ´ë ÄÞº¸
 
     private int totalScore = 0;
-    private float lastCollectTime = 0f;
+    public float lastCollectTime = 0f;
     private int comboCount = 0;
 
     public int TotalScore => totalScore;

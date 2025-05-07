@@ -23,7 +23,11 @@ public class PlayerControllerSingle : MonoBehaviour
 
     [Header("Flash Effect")]
     public Image flashImage;
+    public Image restrictTimerSlider;
     private CanvasGroup flashCanvasGroup;
+
+    [Header("Combo UI")]
+    [SerializeField] private ComboUI comboUIgameObj;
 
     private float updateInterval = 0.016f; // 20 FPS
     private float timeSinceLastUpdate = 0f;
@@ -133,6 +137,13 @@ public class PlayerControllerSingle : MonoBehaviour
             // ScoreManager에 수집 정보 전달
             // (싱글 모드용 AddScore(int count, int score) 메서드 필요)
             scoreManager.AddScore(appleCount, appleScore);
+
+            // 20250507 성공시 사운드 추가
+            AudioManager.Instance.PlayVFX(1);
+
+            // 드래그 박스 내부에 콤보 카운트 띄우기
+            comboUIgameObj.gameObject.transform.position = localDragBox.transform.position;
+            comboUIgameObj.ShowComboEffect();
         }
         else
         {
@@ -222,6 +233,8 @@ public class PlayerControllerSingle : MonoBehaviour
         float half = 0.25f;
         float t = 0f;
 
+        StartCoroutine(nameof(RestrictTimerActive));
+
         // 밝아졌다 어두워지기
         while (t < half)
         {
@@ -245,5 +258,27 @@ public class PlayerControllerSingle : MonoBehaviour
         flashImage.gameObject.SetActive(false);
 
         isDragRestricted = false;
+    }
+
+    private IEnumerator RestrictTimerActive()
+    {
+        float elasped = 0f;
+        float duration = 2f;
+
+        restrictTimerSlider.gameObject.SetActive(true);
+
+        restrictTimerSlider.fillAmount = 1f;
+
+        while(elasped < duration)
+        {
+            elasped += Time.deltaTime;
+            float amount = Mathf.Lerp(1f,0f, elasped / duration);
+            restrictTimerSlider.fillAmount = amount;
+            yield return null;
+        }
+
+        restrictTimerSlider.fillAmount = 0f;
+
+        restrictTimerSlider.gameObject.SetActive(false);
     }
 }

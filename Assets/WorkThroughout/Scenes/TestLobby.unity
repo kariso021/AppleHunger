@@ -19697,6 +19697,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 29ea2f42d2faf25419e69f2bfc093d88, type: 3}
   vfxClipList:
   - {fileID: 8300000, guid: 7bcc876dc0ed0ec48a2534c5f24c5755, type: 3}
+  - {fileID: 8300000, guid: 56813f9de4dc7a94e93e7f7393deb784, type: 3}
   bgmSources:
   - {fileID: 1000804434}
   vfxSources:
@@ -23936,7 +23937,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1708709476057579695, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 480.18634
+      value: 786.455
       objectReference: {fileID: 0}
     - target: {fileID: 1708709476057579695, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -24116,7 +24117,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6601295190562455166, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 193.09633
+      value: 499.365
       objectReference: {fileID: 0}
     - target: {fileID: 6601295190562455166, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
       propertyPath: m_AnchoredPosition.y
