@@ -41,9 +41,14 @@ public class ServerToAPIManager : MonoBehaviour
     public IEnumerator AddPlayer()
     {
         string url = $"{apiBaseUrl}/players";
+        string encryptedDeviceId = AESUtil.Encrypt(SQLiteManager.Instance.player.deviceId);
+        string encryptedGoogleId = TransDataClass.googleIdToApply != null ? TransDataClass.googleIdToApply : null;
 
-        PlayerData newPlayer = new PlayerData(SQLiteManager.Instance.player.deviceId,
-            TransDataClass.googleIdToApply != null ? TransDataClass.googleIdToApply : "", $"User_{UnityEngine.Random.Range(0, 9999)}",
+
+        Debug.Log($"[ADD PLAYER] device : {encryptedDeviceId} , google : {encryptedGoogleId}");
+
+        PlayerData newPlayer = new PlayerData(encryptedDeviceId,
+            encryptedGoogleId, $"User_{UnityEngine.Random.Range(0, 9999)}",
             "101",
             "201",
             1200, 500);
