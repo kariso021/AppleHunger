@@ -25,6 +25,7 @@ public class AppleManagerSingle : MonoBehaviour
     public Button add;
     public Button sub;
     public TMP_Text curText;
+
     //
     private void Awake()
     {
@@ -90,8 +91,7 @@ public class AppleManagerSingle : MonoBehaviour
 
         Destroy(apple.gameObject);
         appleGrid[y, x] = null;
-        appleValues[y, x] = 0;
-
+        appleValues[y, x] = 0;  
         Debug.Log($"?? Apple removed at ({x}, {y})");
 
         if (!HasCombinationLeft())

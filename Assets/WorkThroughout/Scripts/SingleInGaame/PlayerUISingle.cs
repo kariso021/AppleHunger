@@ -90,7 +90,24 @@ public class PlayerUISingle : MonoBehaviour
     private IEnumerator NotifyRoutine(float seconds)
     {
         notifyPanel.SetActive(true);
+        StartCoroutine(StopComboTimeWhenNotifyRoutineActive(seconds));
         yield return new WaitForSeconds(seconds);
         notifyPanel.SetActive(false);
+    }
+
+    private IEnumerator StopComboTimeWhenNotifyRoutineActive(float seconds)
+    {
+        float elapsed = 0f;
+        ScoreManagerSingle sms = ScoreManagerSingle.Instance;
+        Debug.Log($"라스트 콜렉트 타임 {sms.lastCollectTime}");
+
+        while(elapsed < seconds)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        sms.lastCollectTime = Time.time;
+        Debug.Log($"라스트 콜렉트 타임 더해버림 {sms.lastCollectTime}");
+
     }
 }

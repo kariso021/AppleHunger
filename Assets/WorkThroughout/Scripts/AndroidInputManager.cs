@@ -35,14 +35,6 @@ public class AndroidInputManager : MonoBehaviour
                 PopupManager.Instance.ClosePopup();
                 Debug.Log("[Android] return input to CLOSE POPUP");
             }
-            else if(SceneManager.GetActiveScene().name == "TestInGame")
-            {
-                PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
-                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "싱글 플레이를 그만두고 로비로 돌아가시겠습니까?";
-                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
-                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => SceneManager.LoadScene("TestLobby"));
-                Debug.Log("[Android] return input to SHOW POPUPnsfhe");
-            }
             else
             {
                 // 팝업이 없을 때 → 종료 로직
@@ -62,6 +54,14 @@ public class AndroidInputManager : MonoBehaviour
                 //    AndroidToast.ShowToast("뒤로가기 버튼을 한 번 더 누르면 종료됩니다.");
                 //    lastBackPressedTime = Time.time;
                 //}
+            }
+            if (SceneManager.GetActiveScene().name == "TestInGame")
+            {
+                PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
+                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "싱글 플레이를 그만두고 로비로 돌아가시겠습니까?";
+                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+                PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => SceneManager.LoadScene("TestLobby"));
+                Debug.Log("[Android] return input to SHOW POPUPnsfhe");
             }
         }
     }
