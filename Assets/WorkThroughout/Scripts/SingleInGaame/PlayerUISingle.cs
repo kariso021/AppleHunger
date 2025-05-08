@@ -21,9 +21,15 @@ public class PlayerUISingle : MonoBehaviour
     [SerializeField] private TextMeshProUGUI nicknameText;
     [SerializeField] private TextMeshProUGUI ratingText;
 
+    [Header("Combo Effect UI")]
+    [SerializeField] private GameObject maxComboEffect;
+    private Coroutine comboEffectCoroutine;
+
     [SerializeField] private GameObject notifyPanel;
 
     public GameObject EmoticonPanel;
+
+
 
     private void Awake()
     {
@@ -58,6 +64,9 @@ public class PlayerUISingle : MonoBehaviour
     private void OnDisable()
     {
         GameTimerSingle.OnTimerUpdated -= UpdateTimerUI;
+
+        if (comboEffectCoroutine != null)
+            StopCoroutine(comboEffectCoroutine);
     }
 
     /// <summary>
@@ -109,5 +118,40 @@ public class PlayerUISingle : MonoBehaviour
         sms.lastCollectTime = Time.time;
         Debug.Log($"라스트 콜렉트 타임 더해버림 {sms.lastCollectTime}");
 
+    }
+    /// <summary>
+    /// 외부에서 콤보 확인 트리거를 날릴 때 호출할 함수
+    /// ScoreManagerSingle 쪽 AddScore 안에서 호출해 주세요
+    /// </summary>
+    public void TryStartComboEffect()
+    {
+        if (ScoreManagerSingle.Instance.ComboCount >= ScoreManagerSingle.Instance.MaxCombo)
+        {
+            if (comboEffectCoroutine == null)
+            {
+                comboEffectCoroutine = StartCoroutine(ComboEffectWatcher());
+            }
+        }
+    }
+
+    private IEnumerator ComboEffectWatcher()
+    {
+        maxComboEffect.SetActive(true);
+
+        while (true)
+        {
+            float elapsedSinceLastCollect = Time.time - ScoreManagerSingle.Instance.lastCollectTime;
+
+            if (elapsedSinceLastCollect > ScoreManagerSingle.Instance.ComboDuration ||
+                ScoreManagerSingle.Instance.ComboCount < ScoreManagerSingle.Instance.MaxCombo)
+            {
+                break;
+            }
+
+            yield return null;
+        }
+
+        maxComboEffect.SetActive(false);
+        comboEffectCoroutine = null;
     }
 }

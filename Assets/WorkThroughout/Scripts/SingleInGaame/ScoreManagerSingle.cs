@@ -16,6 +16,13 @@ public class ScoreManagerSingle : MonoBehaviour
 
     public int TotalScore => totalScore;
     public int ComboCount => comboCount;
+    public int MaxCombo => maxCombo;
+    public float ComboDuration => comboDuration;
+
+    // ÄÞº¸ ÀÌÆåÆ®¿ë
+    public delegate void ComboChangedHandler(int newCombo);
+    public event ComboChangedHandler OnComboChanged;
+
 
     private void Awake()
     {
@@ -55,6 +62,9 @@ public class ScoreManagerSingle : MonoBehaviour
         Debug.Log($"[ScoreManagerSingle] +{finalScore} (ÄÞº¸ x{comboCount}), ÃÑÁ¡: {totalScore}");
 
         UpdateScoreUI();
+
+        // ÄÞº¸ ÀÌÆåÆ® Æ®¸®°Å
+        PlayerUISingle.Instance?.TryStartComboEffect();
     }
 
     /// <summary>
