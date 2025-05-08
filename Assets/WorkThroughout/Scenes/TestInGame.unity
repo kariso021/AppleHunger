@@ -1929,6 +1929,7 @@ MonoBehaviour:
   comboDuration: 2
   comboScoreMultiplier: 0.2
   maxCombo: 5
+  lastCollectTime: 0
 --- !u!114 &1053021166 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8125460860005875701, guid: 21c28d37041cf7949b3f66e00635a704, type: 3}
@@ -2110,7 +2111,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1220399389
 Transform:
   m_ObjectHideFlags: 0

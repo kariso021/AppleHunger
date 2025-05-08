@@ -21,6 +21,7 @@ public class PlayerUI : MonoBehaviour
 
     [Header("Timer UI")]
     [SerializeField] private Slider timerSlider;
+    [SerializeField] private TextMeshProUGUI timerText;
 
     [Header("NickName UI")]
     [SerializeField] private TextMeshProUGUI myNicknameText;
@@ -91,6 +92,8 @@ public class PlayerUI : MonoBehaviour
     {
         if (timerSlider != null)
             timerSlider.value = remainingTime / 60f;
+        if(timerText != null)
+            timerText.text = $"{remainingTime:F0}";
     }
 
     // ---------------- Self Initial Upload ----------------

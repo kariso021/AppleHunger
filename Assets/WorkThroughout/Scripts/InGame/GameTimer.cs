@@ -46,6 +46,8 @@ public class GameTimer : NetworkBehaviour
             remainingTime.Value = totalGameTime;
             isGameEnded = false;
             isInExtension = false;
+            isPaused = true;
+            isIndefinitePause = true;
         }
         if (IsClient)
             remainingTime.OnValueChanged += HandleTimerUpdated;
