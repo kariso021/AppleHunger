@@ -11,6 +11,10 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI myScoreText;
     [SerializeField] private TextMeshProUGUI opponentScoreText;
 
+
+
+
+
     [Header("Player Number UI")]
     [SerializeField] private TextMeshProUGUI myNumberText;
     [SerializeField] private TextMeshProUGUI opponentNumberText;
@@ -45,6 +49,8 @@ public class PlayerUI : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
+
+   
     }
 
     private void OnEnable()
@@ -92,7 +98,7 @@ public class PlayerUI : MonoBehaviour
     {
         if (timerSlider != null)
             timerSlider.value = remainingTime / 60f;
-        if(timerText != null)
+        if (timerText != null)
             timerText.text = $"{remainingTime:F0}";
     }
 
@@ -166,4 +172,8 @@ public class PlayerUI : MonoBehaviour
         yield return new WaitForSeconds(seconds);
         notifyResetPanel.SetActive(false);
     }
+
+
+
+    //------------------------------------------------------------ 콤보관련
 }

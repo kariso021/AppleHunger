@@ -1,7 +1,13 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/WorkThroughout/UI/InGame/Prefab/GameModeCanvas.prefab.meta
 guid: 4f9bb1e8dd17c2e42a5eb12b275ad9bf
 PrefabImporter:
+========
+guid: 8c04d9068cfc66947b41cb22ab884261
+NativeFormatImporter:
+>>>>>>>> 605bd4e1d35dc899412315850a209ec353677379:Assets/WorkThroughout/Animations/New Animation.anim.meta
   externalObjects: {}
+  mainObjectFileID: 7400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 

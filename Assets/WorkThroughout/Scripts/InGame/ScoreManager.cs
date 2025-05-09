@@ -27,16 +27,25 @@ public class ScoreManager : NetworkBehaviour
     /// playerId를 넘겨 줍니다.
     /// </summary>
     [ServerRpc(RequireOwnership = false)]
-    public void RequestAddScoreServerRpc(int playerId, int appleCount, int appleScoreValue)
+    public void RequestAddScoreServerRpc(
+      int playerId,
+      int appleCount,
+      int appleScoreValue,
+      ServerRpcParams rpcParams = default    // ← 추가
+  )
     {
         if (!IsServer) return;
-        AddScore(playerId, appleCount, appleScoreValue);
+
+        // 호출한 클라이언트 ID
+        ulong callerClientId = rpcParams.Receive.SenderClientId;
+
+        AddScore(playerId, appleCount, appleScoreValue, callerClientId);
     }
 
     /// <summary>
     /// 서버에서 콤보/타이머 로직을 처리하고 점수를 갱신합니다.
     /// </summary>
-    public void AddScore(int playerId, int appleCount, int appleScoreValue)
+    public void AddScore(int playerId, int appleCount, int appleScoreValue, ulong callerClientId)
     {
         float now = Time.time;
 
@@ -65,12 +74,25 @@ public class ScoreManager : NetworkBehaviour
         float multiplier = 1f + (comboCounts[playerId] - 1) * comboScoreMultiplier;
         int finalScore = Mathf.FloorToInt(baseScore * multiplier);
 
+        int currentCombo = comboCounts[playerId];
+
         // 누적 점수 업데이트
         playerScores[playerId] += finalScore;
         Debug.Log($"[ScoreManager] 점수 추가: {playerId} = {finalScore} (콤보)");
 
         // 모든 클라이언트에 브로드캐스트
         UpdateScoreClientRpc(playerId, playerScores[playerId]);
+
+        ShowComboClientRpc(
+       currentCombo,
+       new ClientRpcParams
+       {
+           Send = new ClientRpcSendParams
+           {
+               TargetClientIds = new[] { callerClientId }
+           }
+       }
+   );
     }
 
     /// <summary>
@@ -122,4 +144,28 @@ public class ScoreManager : NetworkBehaviour
         // 클라이언트는 기존 UpdateScoreUIByPlayerId 로 화면만 덮어씁니다.
         PlayerUI.Instance.UpdateScoreUIByPlayerId(playerId, score);
     }
+
+    //-----------------------------------------------------------------------
+
+
+
+    [ClientRpc]
+    private void ShowComboClientRpc(int comboCount, ClientRpcParams rpcParams = default)
+    {
+        // 멀티플레이용 컨트롤러에서 처리
+        var localPlayer = NetworkManager.Singleton.LocalClient.PlayerObject;
+        var pc = localPlayer.GetComponent<PlayerController>();
+        pc.ShowLocalCombo(comboCount);
+    }
+
+    //-------------------------------------------------Reset 시 Combo 시간 연장
+
+    public void WhenResetExtendComboDuration(float seconds)
+    {
+        var playerIds = new List<int>(lastCollectTime.Keys);
+        foreach (var pid in playerIds)
+        {
+            lastCollectTime[pid] += seconds;
+        }
+    }    
 }

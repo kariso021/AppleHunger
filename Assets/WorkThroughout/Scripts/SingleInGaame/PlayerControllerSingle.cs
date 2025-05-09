@@ -138,8 +138,10 @@ public class PlayerControllerSingle : MonoBehaviour
             // (싱글 모드용 AddScore(int count, int score) 메서드 필요)
             scoreManager.AddScore(appleCount, appleScore);
 
-            // 20250507 성공시 사운드 추가
-            AudioManager.Instance.PlayVFX(1);
+            // 20250507 성공시 사운드 추가 Null 문구 추가함
+            if(AudioManager.Instance != null)
+                AudioManager.Instance.PlayVFX(1);
+   
 
             // 드래그 박스 내부에 콤보 카운트 띄우기
             comboUIgameObj.gameObject.transform.position = localDragBox.transform.position;

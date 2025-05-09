@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.UI;
 using System;
+using Unity.Burst.Intrinsics;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -19,6 +20,18 @@ public class PlayerController : NetworkBehaviour
     private bool isDragging = false;
     private bool isDragRestricted = false;
     private bool isCooldownActive = false;
+
+    //콤보 불러오려고 잠깐 쓰는것
+    public static Vector3 LastDragBoxWorldPos { get; private set; }
+
+
+    //제한시간 동안 타이머 슬라이더 적용
+    public Image restrictTimerSlider;
+    public Image ComboDurationTimerSlider;
+
+
+
+
 
     public static event System.Action<ulong> OnPlayerInitialized;
 
@@ -161,7 +174,7 @@ public class PlayerController : NetworkBehaviour
 
         if (currentSum == 10)
         {
-
+            LastDragBoxWorldPos = localDragBox.transform.position;
             List<ulong> appleIds = new List<ulong>();
             foreach (GameObject apple in selectedApples)
             {
@@ -171,7 +184,15 @@ public class PlayerController : NetworkBehaviour
                 }
             }
             RequestAppleRemovalServerRpc(appleIds.ToArray(), currentSum, myPlayerId);
-            ResetAppleColors();
+
+            // 사과 제거 및 사운드 처리
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayVFX(1);
+   
+
+
+
+        ResetAppleColors();
         }
         else
         {
@@ -260,7 +281,7 @@ public class PlayerController : NetworkBehaviour
 
 
     [ServerRpc(RequireOwnership = false)]
-    private void RequestAppleRemovalServerRpc(ulong[] appleIds, int sum, int playerId)
+    private void RequestAppleRemovalServerRpc(ulong[] appleIds, int sum, int playerId, ServerRpcParams rpcParams = default)
     {
         if (sum != 10) return;
 
@@ -282,7 +303,8 @@ public class PlayerController : NetworkBehaviour
         }
 
         // playerID 기준으로 점수 처리
-        ScoreManager.Instance.AddScore(playerId, appleCount, appleScoreValue);
+        ulong callerClientId = rpcParams.Receive.SenderClientId;
+        ScoreManager.Instance.AddScore(playerId, appleCount, appleScoreValue,callerClientId);
         Debug.Log($"Server: {playerId}의 점수 업데이트");
     }
 
@@ -295,6 +317,8 @@ public class PlayerController : NetworkBehaviour
         float flashDuration = 0.5f; // 총 지속 시간
         float halfDuration = flashDuration / 2f; // 절반 동안 밝아지고 절반 동안 어두워짐
         float elapsedTime = 0f;
+
+        StartCoroutine(nameof(RestrictTimerActive));
 
         if (flashCanvasGroup != null)
         {
@@ -342,5 +366,35 @@ public class PlayerController : NetworkBehaviour
         isDragRestricted = false;
     }
 
+    //--------------------------------------------------------------------------------------------
+
+    public void ShowLocalCombo(int comboCount)
+    {
+        ClientComboUI.Instance.ShowCombo(comboCount, LastDragBoxWorldPos);
+    }
+
+    //-------------------------------------------------------------------------------------------- RestrictTimerSlider
+
+    private IEnumerator RestrictTimerActive()
+    {
+        float elasped = 0f;
+        float duration = 2f;
+
+        restrictTimerSlider.gameObject.SetActive(true);
+
+        restrictTimerSlider.fillAmount = 1f;
+
+        while (elasped < duration)
+        {
+            elasped += Time.deltaTime;
+            float amount = Mathf.Lerp(1f, 0f, elasped / duration);
+            restrictTimerSlider.fillAmount = amount;
+            yield return null;
+        }
+
+        restrictTimerSlider.fillAmount = 0f;
+
+        restrictTimerSlider.gameObject.SetActive(false);
+    }
 
 }

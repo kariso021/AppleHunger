@@ -122,6 +122,9 @@ public class AppleManager : NetworkBehaviour
         if(!IsServer) return;
         GameTimer.Instance.PauseTimer(seconds);
         NotifyResetPanelClientRpc(seconds); // NotifyPanel 띄우기
+
+        // 콤보 시간들 일시정지
+        ScoreManager.Instance.WhenResetExtendComboDuration(seconds);
     }
 
     [ClientRpc]
