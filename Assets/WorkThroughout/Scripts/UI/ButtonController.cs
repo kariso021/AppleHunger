@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -45,6 +46,18 @@ public class ButtonController : MonoBehaviour
     public Button rankingGet;
     public Button localGet;
 
+    // Multiplay Mode 버튼
+    [Header("MuliplyMode button")]
+    public GameObject multiplaymodePanel;
+    public Button RelaymultiplayModeButton;
+    public Button MatchmakerplayModeButton;
+    public Button GameModePanelCloseButton;
+
+
+
+
+
+
     private ClientNetworkManager clientNetworkManager;
 
     public Managers testManager;
@@ -66,7 +79,18 @@ public class ButtonController : MonoBehaviour
         // single,multi 플레이 관련 함수 바인딩
 
 
-        multiPlayButton.onClick.AddListener(() => LoadInGameScene());
+        multiPlayButton.onClick.AddListener(() => LoadGameModePopup());
+        RelaymultiplayModeButton.onClick.AddListener(() => LoadRelayModeGameScene());
+        MatchmakerplayModeButton.onClick.AddListener(() => LoadMatchmakerGameScene());
+        GameModePanelCloseButton.onClick.AddListener(() =>
+        {
+            multiplaymodePanel.SetActive(false);
+        });
+
+
+
+
+
 
         singlePlayButton.onClick.AddListener(() => LoadSingleGameScene());
 
@@ -189,10 +213,19 @@ public class ButtonController : MonoBehaviour
         SceneManager.LoadScene("TestInGame");
     }
 
-    private void LoadInGameScene()
+    private void LoadGameModePopup()
+    {
+        multiplaymodePanel.SetActive(true);
+    }
+
+    private void LoadRelayModeGameScene()
+    {
+        SceneManager.LoadScene("RelayIngame");
+    }
+
+    private void LoadMatchmakerGameScene()
     {
         SceneManager.LoadScene("InGame");
     }
-
 
 }

@@ -11,6 +11,8 @@ using UnityEngine;
 public class PlayerDataManager : NetworkBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
+    
+    [SerializeField] private float panelDuration = 3f; // 패널 표시 시간
 
     [Serializable]
     private class PlayerState
@@ -156,12 +158,26 @@ public class PlayerDataManager : NetworkBehaviour
 
             if (_readyClients.Count == ExpectedPlayerCount)
             {
+                //준비된 기준 이때부터 타이머 적용시켜야함. 그리고 패널을 띄워줘야함.
                 Debug.Log("[PDM] All clients ready, syncing...");
                 SyncAllClients();
+
+                // 1) 상태 동기화
+                SyncAllClients();
+
+                // 2) 매칭 패널 띄우기
+                ShowMatchPanelClientRpc(panelDuration);
+
+                // 3) 타이머는 여기서 한 번만 호출
+                GameTimer.Instance.StartTimerWithDelayServerRpc(panelDuration);
+
                 _readyClients.Clear();
             }
         }
     }
+
+
+
 
     private void SyncAllClients()
     {
@@ -179,6 +195,12 @@ public class PlayerDataManager : NetworkBehaviour
                 st.Nickname
             );
         }
+    }
+
+    [ClientRpc]
+    private void ShowMatchPanelClientRpc(float panelDuration)
+    {
+        PlayerUI.Instance.OnMatchFoundShowPanel(panelDuration);
     }
 
     [ClientRpc]

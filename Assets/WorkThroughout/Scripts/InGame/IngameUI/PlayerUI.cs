@@ -38,6 +38,12 @@ public class PlayerUI : MonoBehaviour
     [Header("NoitfyResetPanel")]
     [SerializeField] private GameObject notifyResetPanel;
 
+
+    [Header("Opponent IntroduceUI")]
+    [SerializeField] private CanvasGroup opponentIntroduceUI;
+
+
+
     private Dictionary<int, int> playerScores = new Dictionary<int, int>();
     private int myPlayerId;
 
@@ -50,6 +56,7 @@ public class PlayerUI : MonoBehaviour
         else
             Destroy(gameObject);
 
+        opponentIntroduceUI.gameObject.SetActive(false);
    
     }
 
@@ -96,6 +103,7 @@ public class PlayerUI : MonoBehaviour
     // ---------------- Timer ----------------
     private void UpdateTimerUI(float remainingTime)
     {
+        Debug.Log("remainingTime: " + remainingTime);
         if (timerSlider != null)
             timerSlider.value = remainingTime / 60f;
         if (timerText != null)
@@ -173,7 +181,43 @@ public class PlayerUI : MonoBehaviour
         notifyResetPanel.SetActive(false);
     }
 
+    //----------------Opponent Introduce UI ---------------- 매칭 잡혔을때 기준
+
+    public void OnMatchFoundShowPanel(float duration)
+    {
+        // 1) 패널 보이기
+        ShowIntroducePanel();
+        
+        StartCoroutine(FadeOutAndHide(duration)); 
+        
+    }
+
+    public void ShowIntroducePanel()
+    {
+        opponentIntroduceUI.gameObject.SetActive(true);
+    }
 
 
-    //------------------------------------------------------------ 콤보관련
+    public void HideIntroducePanel()
+    {
+        opponentIntroduceUI.gameObject.SetActive(false);
+    }
+
+    private IEnumerator FadeOutAndHide(float fadeDuration)
+    {
+        float startAlpha = opponentIntroduceUI.alpha;  // 보통 1
+        float elapsed = 0f;
+
+        while (elapsed < fadeDuration)
+        {
+            opponentIntroduceUI.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / fadeDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // 완전 투명 & 패널 비활성화
+        opponentIntroduceUI.alpha = 0f;
+        opponentIntroduceUI.gameObject.SetActive(false);
+    }
+
 }

@@ -6,8 +6,6 @@ using UnityEditor.Rendering;
 
 public class PlayerRegister : NetworkBehaviour
 {
-    [Header("API 매니저 (Inspector에서 할당)")]
-    public Managers managers;
 
     public override void OnNetworkSpawn()
     {
