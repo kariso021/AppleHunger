@@ -27,7 +27,6 @@ public class PlayerController : NetworkBehaviour
 
     //제한시간 동안 타이머 슬라이더 적용
     public Image restrictTimerSlider;
-    public Image ComboDurationTimerSlider;
 
 
 
@@ -67,6 +66,7 @@ public class PlayerController : NetworkBehaviour
         }
         flashCanvasGroup.alpha = 0f;
         flashCanvasGroup.blocksRaycasts = false;
+        restrictTimerSlider.gameObject.SetActive(false);
     }
 
 

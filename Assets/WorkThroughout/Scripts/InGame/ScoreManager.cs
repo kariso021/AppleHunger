@@ -92,7 +92,19 @@ public class ScoreManager : NetworkBehaviour
                TargetClientIds = new[] { callerClientId }
            }
        }
-   );
+        );
+
+        // 콤보 맥스 이팩트
+        // maxCombo 도달 시 추가 이펙트 RPC Duration 고려해서 해야함 -> Duration 도 통일하면 좋겠는데?
+        if (currentCombo >= maxCombo)
+        {
+            ShowMaxComboEffectClientRpc(
+                new ClientRpcParams
+                {
+                    Send = new ClientRpcSendParams { TargetClientIds = new[] { callerClientId } }
+                }
+            );
+        }
     }
 
     /// <summary>
@@ -167,5 +179,15 @@ public class ScoreManager : NetworkBehaviour
         {
             lastCollectTime[pid] += seconds;
         }
-    }    
+    }
+
+    //-------------------------------------------------콤보 맥스 임팩트
+    [ClientRpc]
+    private void ShowMaxComboEffectClientRpc(ClientRpcParams rpcParams = default)
+    {
+        // 로컬 플레이어의 UI 매니저를 호출
+        PlayerUI.Instance.ShowMaxComboEffect();
+    }
+
+
 }

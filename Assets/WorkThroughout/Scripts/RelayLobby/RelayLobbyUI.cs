@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,12 +21,26 @@ public class RelayLobbyUI : MonoBehaviour
     public TMP_InputField joinInputField;
     public Button confirmJoinBtn;
     public Button closeJoinPanelBtn;
+    public Button GotoLobbyBtn;
+
+
+    [SerializeField]
+    private TMP_Text waitingText;
+
+    [SerializeField]
+    private GameObject selfCanvas;
+
 
     void Start()
     {
         // Main
         createRoomBtn.onClick.AddListener(OpenCreatePanel);
         joinRoomBtn.onClick.AddListener(OpenJoinPanel);
+
+        waitingText.text = "매칭 대기 중...";
+
+
+
 
         // Relay 이벤트 바인딩
         RelayManager.Instance.OnJoinCodeCreated += code => {
@@ -49,6 +65,21 @@ public class RelayLobbyUI : MonoBehaviour
         // 처음엔 둘 다 숨김
         createRoomPanel.SetActive(false);
         joinRoomPanel.SetActive(false);
+
+        RelayManager.Instance.OnClientJoined += HandleClientJoined;
+    }
+
+    private void HandleClientJoined(ulong clientId)
+    {
+        waitingText.text = "매칭이 성사되었습니다 !";
+        // 0.5초 대기 후 캔버스 비활성화
+        StartCoroutine(HideCanvasAfterDelay(0.5f));
+    }
+
+    private IEnumerator HideCanvasAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        selfCanvas.SetActive(false);
     }
 
     void OpenCreatePanel()
@@ -65,5 +96,8 @@ public class RelayLobbyUI : MonoBehaviour
         joinRoomPanel.SetActive(true);
         createRoomPanel.SetActive(false);
         joinInputField.text = "";
+
     }
+
+ 
 }

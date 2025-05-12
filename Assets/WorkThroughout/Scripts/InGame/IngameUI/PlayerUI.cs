@@ -56,20 +56,23 @@ public class PlayerUI : MonoBehaviour
         else
             Destroy(gameObject);
 
-        opponentIntroduceUI.gameObject.SetActive(false);
+        //opponentIntroduceUI.gameObject.SetActive(false);
    
     }
 
     private void OnEnable()
     {
-        PlayerController.OnPlayerInitialized += SetPlayerId;
+        Debug.Log("[PlayerUI] Subscribing to timer updates");
         GameTimer.OnTimerUpdated += UpdateTimerUI;
+        PlayerController.OnPlayerInitialized += SetPlayerId;
     }
 
     private void OnDisable()
     {
-        PlayerController.OnPlayerInitialized -= SetPlayerId;
+        Debug.Log("[PlayerUI] Unsubscribing from timer updates");
         GameTimer.OnTimerUpdated -= UpdateTimerUI;
+        PlayerController.OnPlayerInitialized -= SetPlayerId;
+    
     }
 
     private void SetPlayerId(ulong clientId)
@@ -103,7 +106,6 @@ public class PlayerUI : MonoBehaviour
     // ---------------- Timer ----------------
     private void UpdateTimerUI(float remainingTime)
     {
-        Debug.Log("remainingTime: " + remainingTime);
         if (timerSlider != null)
             timerSlider.value = remainingTime / 60f;
         if (timerText != null)
@@ -218,6 +220,13 @@ public class PlayerUI : MonoBehaviour
         // 완전 투명 & 패널 비활성화
         opponentIntroduceUI.alpha = 0f;
         opponentIntroduceUI.gameObject.SetActive(false);
+    }
+
+    //------------------ 콤보 max 이팩트 ----------------
+
+    public void ShowMaxComboEffect()
+    {
+        Debug.Log("콤보 max 이팩트 실행");
     }
 
 }

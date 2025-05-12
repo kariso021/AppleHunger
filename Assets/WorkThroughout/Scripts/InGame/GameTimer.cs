@@ -63,14 +63,14 @@ public class GameTimer : NetworkBehaviour
         {
             //자동시작 로직 다 제거해줘야함
             //-------------------------------------------------------------------------
-            startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-            endTime = startTime + totalGameTime;
-            remainingTime.Value = totalGameTime;
-            isGameEnded = false;
-            isInExtension = false;
-            // 자동 시작
-            isPaused = false;
-            isIndefinitePause = false;
+            //startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+            //endTime = startTime + totalGameTime;
+            //remainingTime.Value = totalGameTime;
+            //isGameEnded = false;
+            //isInExtension = false;
+            //// 자동 시작
+            //isPaused = false;
+            //isIndefinitePause = false;
 
             //-------------------------------------------------------------------------
         }
