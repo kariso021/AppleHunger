@@ -165,11 +165,11 @@ public class PlayerDataManager : NetworkBehaviour
                 // 1) 상태 동기화
                 SyncAllClients();
 
-                // 2) 매칭 패널 띄우기
-                ShowMatchPanelClientRpc(panelDuration);
+                //// 2) 매칭 패널 띄우기
+                //ShowMatchPanelClientRpc(panelDuration);
 
-                // 3) 타이머는 여기서 한 번만 호출
-                GameTimer.Instance.StartTimerWithDelayServerRpc(panelDuration);
+                //// 3) 타이머는 여기서 한 번만 호출
+                //GameTimer.Instance.StartTimerWithDelayServerRpc(panelDuration);
 
                 _readyClients.Clear();
             }

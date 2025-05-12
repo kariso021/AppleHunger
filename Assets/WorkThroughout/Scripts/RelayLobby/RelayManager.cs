@@ -36,7 +36,7 @@ public class RelayManager : MonoBehaviour
     {
         try
         {
-            var allocation = await RelayService.Instance.CreateAllocationAsync(2);
+            var allocation = await RelayService.Instance.CreateAllocationAsync(3);
             var joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
             // UI에 코드 전달
