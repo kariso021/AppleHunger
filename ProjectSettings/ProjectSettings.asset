@@ -173,7 +173,7 @@ PlayerSettings:
     iPhone: 0
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
-  AndroidBundleVersionCode: 45
+  AndroidBundleVersionCode: 47
   AndroidMinSdkVersion: 24
   AndroidTargetSdkVersion: 34
   AndroidPreferredInstallLocation: 1
@@ -803,19 +803,23 @@ PlayerSettings:
   webGLWebAssemblyBigInt: 0
   webGLCloseOnQuit: 0
   scriptingDefineSymbols:
-    Android: ENABLE_JSON_CATALOG;FISHNET;FISHNET_V4;EDGEGAP_PLUGIN_SERVERS
-    EmbeddedLinux: ENABLE_JSON_CATALOG
-    LinuxHeadlessSimulation: ENABLE_JSON_CATALOG
-    Nintendo Switch: ENABLE_JSON_CATALOG
-    PS4: ENABLE_JSON_CATALOG
-    QNX: ENABLE_JSON_CATALOG
+    Android: ENABLE_JSON_CATALOG;FISHNET;FISHNET_V4;EDGEGAP_PLUGIN_SERVERS;DOTWEEN
+    Bratwurst: DOTWEEN
+    EmbeddedLinux: ENABLE_JSON_CATALOG;DOTWEEN
+    GameCoreScarlett: DOTWEEN
+    GameCoreXboxOne: DOTWEEN
+    LinuxHeadlessSimulation: ENABLE_JSON_CATALOG;DOTWEEN
+    Nintendo Switch: ENABLE_JSON_CATALOG;DOTWEEN
+    PS4: ENABLE_JSON_CATALOG;DOTWEEN
+    PS5: DOTWEEN
+    QNX: ENABLE_JSON_CATALOG;DOTWEEN
     Server: ENABLE_JSON_CATALOG
-    Standalone: ENABLE_JSON_CATALOG;EDGEGAP_PLUGIN_SERVERS
-    WebGL: ENABLE_JSON_CATALOG
-    Windows Store Apps: ENABLE_JSON_CATALOG
-    XboxOne: ENABLE_JSON_CATALOG
-    iPhone: ENABLE_JSON_CATALOG
-    tvOS: ENABLE_JSON_CATALOG
+    Standalone: ENABLE_JSON_CATALOG;EDGEGAP_PLUGIN_SERVERS;DOTWEEN
+    WebGL: ENABLE_JSON_CATALOG;DOTWEEN
+    Windows Store Apps: ENABLE_JSON_CATALOG;DOTWEEN
+    XboxOne: ENABLE_JSON_CATALOG;DOTWEEN
+    iPhone: ENABLE_JSON_CATALOG;DOTWEEN
+    tvOS: ENABLE_JSON_CATALOG;DOTWEEN
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
