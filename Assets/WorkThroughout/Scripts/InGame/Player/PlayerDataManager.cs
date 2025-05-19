@@ -162,11 +162,8 @@ public class PlayerDataManager : NetworkBehaviour
                 Debug.Log("[PDM] All clients ready, syncing...");
                 SyncAllClients();
 
-                // 1) 상태 동기화
-                SyncAllClients();
-
                 //// 2) 매칭 패널 띄우기
-                //ShowMatchPanelClientRpc(panelDuration);
+                ShowMatchPanelClientRpc(panelDuration);
 
                 //// 3) 타이머는 여기서 한 번만 호출
                 //GameTimer.Instance.StartTimerWithDelayServerRpc(panelDuration);
