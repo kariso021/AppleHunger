@@ -186,6 +186,7 @@ GameObject:
   - component: {fileID: 6004765089188972196}
   - component: {fileID: 2350532427070537737}
   - component: {fileID: 284461540522477194}
+  - component: {fileID: 1965580669617426981}
   m_Layer: 3
   m_Name: AppleSingle
   m_TagString: Apple
@@ -276,3 +277,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberText: {fileID: 985721315488029380}
+  detectSize: 0
+--- !u!95 &1965580669617426981
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5749813513355723202}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

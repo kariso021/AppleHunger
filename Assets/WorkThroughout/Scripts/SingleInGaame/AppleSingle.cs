@@ -1,5 +1,7 @@
 using UnityEngine;
 using TMPro;
+using System;
+using System.Collections;
 
 public class AppleSingle : MonoBehaviour
 {
@@ -15,6 +17,9 @@ public class AppleSingle : MonoBehaviour
     public int Value => value;
     public int ScoreValue => scoreValue;
 
+    private Animator animator;
+
+
 
     public float detectSize;
 
@@ -29,11 +34,14 @@ public class AppleSingle : MonoBehaviour
     private void Awake()
     {
         // 1~9 랜덤 값 설정
-        value = Random.Range(1, 10);
+        value = UnityEngine.Random.Range(1, 10);
         scoreValue = 10;
 
         // UI 업데이트
-        UpdateText(); 
+        UpdateText();
+
+        animator = GetComponent<Animator>();
+
     }
     /// <summary>
     /// 값 수동 설정 (필요 시)
@@ -52,6 +60,34 @@ public class AppleSingle : MonoBehaviour
         GridX = x;
         GridY = y;
     }
+
+    //애니메이션 관련부 작업
+
+    public void PlaySpawnAnimation()
+    {
+        if (animator != null)
+        {
+            animator.Play("AppleSpawn", 0, 0f);
+        }
+    }
+
+    public void PlayDestroyAnimation(Action onComplete)
+    {
+        StartCoroutine(DestroyAfterAnimation(onComplete));
+    }
+
+    private IEnumerator DestroyAfterAnimation(Action onComplete)
+    {
+        if (animator != null)
+        {
+            animator.Play("AppleDestroy", 0, 0f);
+            yield return new WaitForSeconds(0.3f); // 애니메이션 길이와 동일
+        }
+
+        onComplete?.Invoke();
+    }
+
+
 
     private void UpdateText()
     {
