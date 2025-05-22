@@ -76,4 +76,10 @@ public class ScoreManagerSingle : MonoBehaviour
         // 예시: PlayerUI.Instance.UpdateScore(totalScore, comboCount);
         PlayerUISingle.Instance.UpdateScoreUI(totalScore, comboCount);
     }
+
+    public int GetScore()
+            {
+        // 최종 점수 반환
+        return totalScore;
+    }
 }

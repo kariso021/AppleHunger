@@ -49,10 +49,10 @@ public class PlayerUISingle : MonoBehaviour
         // 프로필 초기 표시
         if (SQLiteManager.Instance != null)
         {
-            var player = SQLiteManager.Instance.player;
-            AddressableManager.Instance.LoadImageFromGroup(player.profileIcon, profileImage);
-            nicknameText.text = player.playerName;
-            ratingText.text = $"R: {player.rating}";
+            string path = SQLiteManager.Instance.player.profileIcon;
+            AddressableManager.Instance.LoadImageFromGroup(path, profileImage);
+            nicknameText.text = SQLiteManager.Instance.player.playerName; ;
+            ratingText.text = $"R: {SQLiteManager.Instance.player.rating}";
         }
 
 
