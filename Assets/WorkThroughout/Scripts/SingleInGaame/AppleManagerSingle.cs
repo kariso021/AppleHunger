@@ -89,10 +89,20 @@ public class AppleManagerSingle : MonoBehaviour
             return;
         }
 
+        // 파티클 분리 및 재생
+        ParticleSystem ps = apple.GetComponentInChildren<ParticleSystem>();
+        if (ps != null)
+        {
+            ps.transform.SetParent(null); // 부모에서 분리
+            ps.Play();
+            Destroy(ps.gameObject, ps.main.duration);
+        }
+
+        // 사과 제거
         Destroy(apple.gameObject);
         appleGrid[y, x] = null;
-        appleValues[y, x] = 0;  
-        Debug.Log($"?? Apple removed at ({x}, {y})");
+        appleValues[y, x] = 0;
+        Debug.Log($"Apple removed at ({x}, {y})");
 
         if (!HasCombinationLeft())
         {
@@ -100,6 +110,7 @@ public class AppleManagerSingle : MonoBehaviour
             ResetGrid();
         }
     }
+
 
     private void ResetGrid()
     {
