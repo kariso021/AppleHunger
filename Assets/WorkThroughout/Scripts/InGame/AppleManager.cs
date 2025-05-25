@@ -34,6 +34,10 @@ public class AppleManager : NetworkBehaviour
 
     private int[,] appleValues; // Grid의 value 값만 저장
 
+    [Header("Effect Settings")]
+    [SerializeField] private GameObject effectPrefab;    // 파티클 프리팹
+    private ParticleSystem[,] effectGrid;
+
     public override void OnNetworkSpawn()
     {
         if (IsServer)
@@ -49,21 +53,29 @@ public class AppleManager : NetworkBehaviour
         float xOffset = (gridWidth - 1) * spacing / 2f;
         float yOffset = (gridHeight - 1) * spacing / 2f;
 
+        effectGrid = new ParticleSystem[gridHeight, gridWidth];
+
         for (int y = 0; y < gridHeight; y++)
         {
             for (int x = 0; x < gridWidth; x++)
             {
-                Vector3 spawnPos = new Vector3((x * spacing) - xOffset, -(y * spacing) + yOffset, 0f);
-                GameObject obj = Instantiate(applePrefab, spawnPos, Quaternion.identity);
+                Vector3 pos = new Vector3((x * spacing) - xOffset, -(y * spacing) + yOffset, 0f);
 
-                Apple apple = obj.GetComponent<Apple>();
+                // 1) Apple 스폰 (기존)
+                GameObject appleObj = Instantiate(applePrefab, pos, Quaternion.identity);
+                appleObj.GetComponent<NetworkObject>().Spawn(true);
+                var apple = appleObj.GetComponent<Apple>();
+                apple.SetGridPosition(y, x);
+                appleGrid[y, x] = apple;
+                appleValues[y, x] = apple.Value;
 
-                if (apple != null)
+                // 2) Effect 미리 생성
+                if (effectPrefab != null)
                 {
-                    obj.GetComponent<NetworkObject>().Spawn(true);
-                    appleValues[y, x] = apple.Value;
-                    appleGrid[y, x] = apple;
-                    apple.SetGridPosition(y, x);
+                    var effGO = Instantiate(effectPrefab, pos, Quaternion.identity, transform);
+                    var ps = effGO.GetComponent<ParticleSystem>();
+                    ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                    effectGrid[y, x] = ps;
                 }
             }
         }
@@ -81,6 +93,12 @@ public class AppleManager : NetworkBehaviour
             apple.GetComponent<NetworkObject>().Despawn();
             appleGrid[y, x] = null;
             appleValues[y, x] = 0;
+
+            var ps = effectGrid[y, x];
+            if (ps != null)
+            {
+                ps.Play();
+            }
 
             Debug.Log($"🍎 Apple despawned at ({x}, {y})");
 

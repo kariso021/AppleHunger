@@ -316,6 +316,8 @@ MonoBehaviour:
   PooledPrefabsList:
   - Prefab: {fileID: 5749813513355723202, guid: ba17bc469c1d84d4f8419864c978abea, type: 3}
     PrewarmCount: 50
+  - Prefab: {fileID: 460393968276500187, guid: 9e72b85f7bab9344cb929c78e745a22d, type: 3}
+    PrewarmCount: 50
 --- !u!114 &198061387
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,6 +334,7 @@ MonoBehaviour:
   gridWidth: 5
   gridHeight: 6
   spacing: 1.1
+  effectPrefab: {fileID: 460393968276500187, guid: 9e72b85f7bab9344cb929c78e745a22d, type: 3}
 --- !u!224 &399728635 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 301694750130030505, guid: 33b10fcee2492f54cb25fcc59e3bb860, type: 3}
