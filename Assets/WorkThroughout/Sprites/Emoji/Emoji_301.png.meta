@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 86b16ecd4210fe74d88b7716b30645a4
+guid: a074e2c22080fe042b815fbe038133bb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4880764369536867175
-    second: godot_emoji_01_0
+      213: -5563696205736131416
+    second: bunny_angry_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: godot_emoji_01_0
+      name: bunny_angry_0
       rect:
         serializedVersion: 2
-        x: 1
-        y: 2
-        width: 34
-        height: 32
+        x: 212
+        y: 209
+        width: 760
+        height: 907
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9942f515aaa044cb0800000000000000
-      internalID: -4880764369536867175
+      spriteID: 8a4c8e257c7c9c2b0800000000000000
+      internalID: -5563696205736131416
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      godot_emoji_01_0: -4880764369536867175
+      bunny_angry_0: -5563696205736131416
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

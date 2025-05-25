@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2c46c4cde79861844ac6e390a946f206
+guid: 2ccee721559efe04991b75f4d83134aa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6984010323676559695
-    second: godot_emoji_19_0
+      213: -121410444653878434
+    second: dragon_sad_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: godot_emoji_19_0
+      name: dragon_sad_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 36
-        height: 34
+        x: 218
+        y: 134
+        width: 705
+        height: 904
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1b6099d0d9fc31f90800000000000000
-      internalID: -6984010323676559695
+      spriteID: e53226608d9a05ef0800000000000000
+      internalID: -121410444653878434
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      godot_emoji_19_0: -6984010323676559695
+      dragon_sad_0: -121410444653878434
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

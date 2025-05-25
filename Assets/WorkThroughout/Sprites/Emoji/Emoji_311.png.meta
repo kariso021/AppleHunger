@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 53387ccf087c3964cadf4a4fd94ea8b9
+guid: 727005d1bce08da49b2ec01d067be6ee
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2290454054115737920
-    second: godot_emoji_15_0
+      213: -8250013210609546148
+    second: dragon_angry_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: godot_emoji_15_0
+      name: dragon_angry_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 1
-        width: 33
-        height: 34
+        x: 170
+        y: 123
+        width: 719
+        height: 916
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0410ceda3d359cf10800000000000000
-      internalID: 2290454054115737920
+      spriteID: c5c865502b0128d80800000000000000
+      internalID: -8250013210609546148
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      godot_emoji_15_0: 2290454054115737920
+      dragon_angry_0: -8250013210609546148
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

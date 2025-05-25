@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e15208b256b40e64e8feae8f5630a7d9
+guid: a91f366fbe88ef443b1dbe3d840fda15
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3914699314026110240
-    second: bunny_sad_0
+      213: 1818063268587978505
+    second: rat_sad_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bunny_sad_0
+      name: rat_sad_0
       rect:
         serializedVersion: 2
-        x: 248
-        y: 171
-        width: 619
-        height: 669
+        x: 103
+        y: 260
+        width: 868
+        height: 541
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 02dddfef84ec35630800000000000000
-      internalID: 3914699314026110240
+      spriteID: 90f3f5709ee0b3910800000000000000
+      internalID: 1818063268587978505
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      bunny_sad_0: 3914699314026110240
+      rat_sad_0: 1818063268587978505
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

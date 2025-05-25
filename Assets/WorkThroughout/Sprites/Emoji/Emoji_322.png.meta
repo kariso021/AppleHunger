@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e348e5ffbcb4c1148a02351fa618428c
+guid: 842337d1e5e7a5742b57d3a544bec570
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3907347062824559815
-    second: godot_emoji_21_0
+      213: -1974968241481912462
+    second: rat_happy_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: godot_emoji_21_0
+      name: rat_happy_0
       rect:
         serializedVersion: 2
-        x: 1
-        y: 1
-        width: 34
-        height: 33
+        x: 140
+        y: 233
+        width: 824
+        height: 718
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 93b1d226c8056c9c0800000000000000
-      internalID: -3907347062824559815
+      spriteID: 27feac329d08794e0800000000000000
+      internalID: -1974968241481912462
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      godot_emoji_21_0: -3907347062824559815
+      rat_happy_0: -1974968241481912462
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
