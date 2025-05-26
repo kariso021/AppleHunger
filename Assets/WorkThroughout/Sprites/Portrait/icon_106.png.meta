@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d22ff3d1eebfd2d49a56345ac760f60e
+guid: 99706145137d5464cb50a5a4d52c7fe5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8636221404721523813
-    second: sheep_0
+      213: 8700834849741896070
+    second: horay_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sheep_0
+      name: horay_0
       rect:
         serializedVersion: 2
         x: 0
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b93d2f9936af52880800000000000000
-      internalID: -8636221404721523813
+      spriteID: 689743462339fb870800000000000000
+      internalID: 8700834849741896070
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      sheep_0: -8636221404721523813
+      horay_0: 8700834849741896070
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

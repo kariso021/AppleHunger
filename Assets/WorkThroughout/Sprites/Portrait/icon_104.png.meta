@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 372b641528718ed489d46c21587985e5
+guid: d22ff3d1eebfd2d49a56345ac760f60e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4798825762170945512
-    second: monkey_0
+      213: -8636221404721523813
+    second: sheep_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: monkey_0
+      name: sheep_0
       rect:
         serializedVersion: 2
         x: 0
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 810cec20565276db0800000000000000
-      internalID: -4798825762170945512
+      spriteID: b93d2f9936af52880800000000000000
+      internalID: -8636221404721523813
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      monkey_0: -4798825762170945512
+      sheep_0: -8636221404721523813
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
