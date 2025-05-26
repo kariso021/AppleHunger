@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Unity.Netcode;
+using static TMPro.Examples.ObjectSpin;
 
 
 
@@ -8,15 +9,16 @@ public class EmotionUIHandler : MonoBehaviour
 {
     public EmotionUI emotionUI;
 
-    public void PlayEmotion(EmtionType emotion)
+    public void PlayEmotion(EmotionType emotion)
     {
+        string code = GetEmotionCode(emotion);
         PlayEmotionLocally(emotion);
 
         //네트워크
-        PlayerDataManager.Instance.SendEmotionServerRpc(emotion);
+        PlayerDataManager.Instance.SendEmotionServerRpc(code);
     }
 
-    private void PlayEmotionLocally(EmtionType emotion)
+    private void PlayEmotionLocally(EmotionType emotion)
     {
         string EmotionString = GetEmotionCode(emotion);
         AddressableManager.Instance.LoadImageFromGroup(EmotionString, emotionUI.player_ShowEmotionImage);
@@ -31,23 +33,33 @@ public class EmotionUIHandler : MonoBehaviour
         emotionUI.player_ShowEmotionPanel.SetActive(false);
     }
 
-    private string GetEmotionCode(EmtionType emotion)
+    private string GetEmotionCode(EmotionType emotion)
     {
+        // 프로필 아이콘 3번째 자리 추출
+        string icon = SQLiteManager.Instance.player.profileIcon;
+        string n = (icon != null && icon.Length >= 3)
+            ? icon[2].ToString()
+            : "0";  
+
+        int emotionNum;
         switch (emotion)
         {
-            case EmtionType.Taunt: return "306";
-            case EmtionType.Laugh: return "305";
-            case EmtionType.Clap: return "303";
-            default: return "301";
+            case EmotionType.Angry: emotionNum = 1; break;
+            case EmotionType.Laugh: emotionNum = 2; break;
+            case EmotionType.Sad: emotionNum = 3; break;
+            default: emotionNum = 0; break;
         }
+
+        // 최종조합
+        return $"3{n}{emotionNum}";
     }
+
+
 }
 
-public enum EmtionType
+public enum EmotionType
 {
-    Taunt,
-    Laugh,
-    Clap,
     Angry,
-    Sad,
+    Laugh,
+    Sad
 }

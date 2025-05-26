@@ -281,17 +281,17 @@ public class PlayerDataManager : NetworkBehaviour
     #region Emotion RPCs
 
     [ServerRpc(RequireOwnership = false)]
-    public void SendEmotionServerRpc(EmtionType emotion, ServerRpcParams rpc = default)
+    public void SendEmotionServerRpc(string EmotionCode, ServerRpcParams rpc = default)
     {
         var sender = rpc.Receive.SenderClientId;
-        SendEmotionClientRpc(emotion, sender);
+        SendEmotionClientRpc(EmotionCode, sender);
     }
 
     [ClientRpc]
-    private void SendEmotionClientRpc(EmtionType emotion, ulong senderClientId, ClientRpcParams rpcParams = default)
+    private void SendEmotionClientRpc(string EmotionCode, ulong senderClientId, ClientRpcParams rpcParams = default)
     {
         if (NetworkManager.Singleton.LocalClientId == senderClientId) return;
-        EmotionUI.Instance.ShowOpponentEmotion(emotion);
+        EmotionUI.Instance.ShowOpponentEmotion(EmotionCode);
     }
 
     #endregion

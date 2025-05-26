@@ -9,9 +9,9 @@ public class EmotionUI : MonoBehaviour
     public EmotionUIHandler emotionUIHandler;
 
     [Header("Button Of Emtion")]
-    public Button tauntButton;
-    public Button laughButton;
-    public Button clapButton;
+    public Button AngryButton;
+    public Button LaughButton;
+    public Button SadButton;
 
     [Header("Emotion Play Panel")]
     public GameObject player_ShowEmotionPanel;
@@ -41,9 +41,12 @@ public class EmotionUI : MonoBehaviour
         emotionPanel.SetActive(false);
         player_ShowEmotionPanel.SetActive(false);
         opponent_ShowEmotionPanel.SetActive(false);
-        tauntButton.onClick.AddListener(() => OnEmotionClicked(EmtionType.Taunt));
-        laughButton.onClick.AddListener(() => OnEmotionClicked(EmtionType.Laugh));
-        clapButton.onClick.AddListener(() => OnEmotionClicked(EmtionType.Clap));
+        AngryButton.onClick.AddListener(() => OnEmotionClicked(EmotionType.Angry));
+        LaughButton.onClick.AddListener(() => OnEmotionClicked(EmotionType.Laugh));
+        SadButton.onClick.AddListener(() => OnEmotionClicked(EmotionType.Sad));
+
+
+        ApplyButtonIcons(); // 버튼 아이콘 적용
     }
 
     public void ToggleEmotionPanel()
@@ -52,7 +55,7 @@ public class EmotionUI : MonoBehaviour
         emotionPanel.SetActive(isPanelOpen);
     }
 
-    private void OnEmotionClicked(EmtionType emotion)
+    private void OnEmotionClicked(EmotionType emotion)
     {
         emotionUIHandler.PlayEmotion(emotion);
         ClosePanel();
@@ -64,11 +67,9 @@ public class EmotionUI : MonoBehaviour
         emotionPanel.SetActive(false);
     }
 
-    public void ShowOpponentEmotion(EmtionType emotion)
+    public void ShowOpponentEmotion(string emotionCode)
     {
-        string EmotionCode = GetStringFromEmotion(emotion);
-
-        AddressableManager.Instance.LoadImageFromGroup(EmotionCode, opponent_ShowEmotionImage);
+        AddressableManager.Instance.LoadImageFromGroup(emotionCode, opponent_ShowEmotionImage);
         opponent_ShowEmotionPanel.SetActive(true);
         StartCoroutine(HideOpponentAfterSeconds(1f));
     }
@@ -79,14 +80,42 @@ public class EmotionUI : MonoBehaviour
         opponent_ShowEmotionPanel.SetActive(false);
     }
 
-    private string GetStringFromEmotion(EmtionType emotion) 
+
+    //Adressable로 이미지 적용시키는거
+    private void ApplyButtonIcons()
     {
-        switch (emotion)
-        {
-            case EmtionType.Taunt: return "306";
-            case EmtionType.Laugh: return "305";
-            case EmtionType.Clap: return "303";
-            default: return "301";
-        }
+        string angryCode = GetStringFromEmotion(EmotionType.Angry);
+        AddressableManager.Instance
+            .LoadImageFromGroup(angryCode, AngryButton.GetComponent<Image>());
+
+        string laughCode = GetStringFromEmotion(EmotionType.Laugh);
+        AddressableManager.Instance
+            .LoadImageFromGroup(laughCode, LaughButton.GetComponent<Image>());
+
+ 
+        string sadCode = GetStringFromEmotion(EmotionType.Sad);
+        AddressableManager.Instance
+            .LoadImageFromGroup(sadCode, SadButton.GetComponent<Image>());
+    }
+
+    private string GetStringFromEmotion(EmotionType emotion) 
+    {
+            // 1) 프로필 아이콘 3번째 자리 추출
+            string icon = SQLiteManager.Instance.player.profileIcon;
+            string n = (icon != null && icon.Length >= 3)
+                ? icon[2].ToString()
+                : "0";
+
+            int emotionNum;
+            switch (emotion)
+            {
+                case EmotionType.Angry: emotionNum = 1; break;
+                case EmotionType.Laugh: emotionNum = 2; break;
+                case EmotionType.Sad: emotionNum = 3; break;
+                default: emotionNum = 0; break;
+            }
+
+            // 최종조합
+            return $"3{n}{emotionNum}";
     }
 }
