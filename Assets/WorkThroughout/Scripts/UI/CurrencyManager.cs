@@ -7,16 +7,13 @@ using UnityEngine.UI;
 
 public class CurrencyManager : MonoBehaviour
 {
-    public GameObject currecnyLayout;
     public TMP_Text currencyText;
 
     private static bool isFirst = true;
     private void Start()
     {
-        if (currecnyLayout != null)
+        if (currencyText != null)
         {
-            currencyText = currecnyLayout.GetComponentInChildren<TMP_Text>();
-
             DataSyncManager.Instance.OnPlayerProfileChanged += DelayedCurrencyUpdate;
             Debug.Log("재화 변화 등록");
 

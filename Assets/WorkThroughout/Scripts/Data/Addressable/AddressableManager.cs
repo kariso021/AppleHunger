@@ -79,9 +79,9 @@ public class AddressableManager : MonoBehaviour
 
         foreach (var img in allImages)
         {
-            if (img.gameObject.name == "ProfileIconButtonGameObject")
+            if (img.gameObject.name == "IMG_Profile_Lobby")
                 profileIcon = img;
-            else if (img.gameObject.name == "ProfilePopupIconGameObject")
+            else if (img.gameObject.name == "IMG_Profile_Popup")
                 profilePopupIcon = img;
             else if (img.gameObject.name == "RankProfilePopupIconGameObject")
                 rankProfilePopupIcon = img;

@@ -6,10 +6,12 @@ public class Profile : MonoBehaviour
     public Image profileImage; // 프로필 이미지
     public TMP_Text nameText;  // 유저 이름
     public TMP_Text recordText; // 전적
+    public TMP_Text winText;
+    public TMP_Text loseText;
     public TMP_Text ratingText; // 점수 or 랭킹
 
     // 프로필 데이터 설정 함수
-    public void SetProfile(string name,int matches,int win, int rating)
+    public void SetProfile(string name,int matches,int win,int lose, int rating)
     {
         //if (profileImage != null)
         //    profileImage.sprite = image;
@@ -18,8 +20,11 @@ public class Profile : MonoBehaviour
             nameText.text = name;
 
         if (recordText != null)
-            recordText.text = $"{matches}전\n{win}승";
-
+            recordText.text = $"{matches}전";
+        if (winText != null)
+            winText.text = $"{win}승";
+        if (loseText != null)
+            loseText.text = $"{lose}패";
         if (ratingText != null)
             ratingText.text = rating.ToString();
     }
@@ -37,6 +42,7 @@ public class Profile : MonoBehaviour
             SQLiteManager.Instance.player.playerName,
             SQLiteManager.Instance.stats.totalGames,
             SQLiteManager.Instance.stats.wins,
+            SQLiteManager.Instance.stats.losses,
             SQLiteManager.Instance.player.rating
             );
 
