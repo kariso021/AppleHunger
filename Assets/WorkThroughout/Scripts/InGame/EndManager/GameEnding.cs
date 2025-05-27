@@ -66,6 +66,10 @@ public class GameEnding : NetworkBehaviour
     private void OnClientConnected(ulong clientId)
     {
         _hasClientEverConnected = true;
+
+        HideDisconnectedClientRpc();
+
+
         Debug.Log($"[ClientConnected] ClientId: {clientId}");
         foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
         {
@@ -83,6 +87,11 @@ public class GameEnding : NetworkBehaviour
         if (!IsServer || !_hasClientEverConnected)
             return;
 
+
+        // disconnected 문구 띄우게끔 함 어차피 2인이라서
+
+        ShowDisconnectedClientRpc();
+
         Debug.Log(NetworkManager.Singleton.ConnectedClientsList.Count);
 
         foreach(var client in NetworkManager.Singleton.ConnectedClientsList)
@@ -95,7 +104,7 @@ public class GameEnding : NetworkBehaviour
         }
 
         // 남은 클라이언트가 없으면 셧다운 나갈때 기점으로 몇명인지 보여주는거라서 1이하가 맞음
-        if (NetworkManager.Singleton.ConnectedClientsList.Count <= 1)
+        if (NetworkManager.Singleton.ConnectedClientsList.Count <= 0)
         {
             Debug.Log("Shutdown발동함");
             GameTimer.Instance.StopForEndTimer();
@@ -317,4 +326,12 @@ public class GameEnding : NetworkBehaviour
         Debug.Log("서버 종료");
         NetworkManager.Singleton.Shutdown();
     }
+
+    [ClientRpc]
+    private void ShowDisconnectedClientRpc(ClientRpcParams rpcParams = default)
+       => PlayerUI.Instance.ShowDisconnectedText();
+
+    [ClientRpc]
+    private void HideDisconnectedClientRpc(ClientRpcParams rpcParams = default)
+        => PlayerUI.Instance.HideDisconnectedText();
 }

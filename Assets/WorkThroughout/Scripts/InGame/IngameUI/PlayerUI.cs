@@ -40,8 +40,10 @@ public class PlayerUI : MonoBehaviour
 
 
     [Header("Opponent IntroduceUI")]
-    [SerializeField] private CanvasGroup opponentIntroduceUI;
+    [SerializeField] private CanvasGroup introduceCG;
 
+
+    [SerializeField] private TextMeshProUGUI DisconnectedText;
 
 
     private Dictionary<int, int> playerScores = new Dictionary<int, int>();
@@ -56,8 +58,10 @@ public class PlayerUI : MonoBehaviour
         else
             Destroy(gameObject);
 
+
+        DisconnectedText.gameObject.SetActive(false);
         //opponentIntroduceUI.gameObject.SetActive(false);
-   
+
     }
 
     private void OnEnable()
@@ -196,37 +200,45 @@ public class PlayerUI : MonoBehaviour
 
     public void ShowIntroducePanel()
     {
-        opponentIntroduceUI.gameObject.SetActive(true);
+        introduceCG.gameObject.SetActive(true);
+        introduceCG.alpha = 1f;
+        introduceCG.interactable = true;
+        introduceCG.blocksRaycasts = true;
     }
 
-
-    public void HideIntroducePanel()
+    public IEnumerator FadeOutAndHide(float duration)
     {
-        opponentIntroduceUI.gameObject.SetActive(false);
-    }
-
-    private IEnumerator FadeOutAndHide(float fadeDuration)
-    {
-        float startAlpha = opponentIntroduceUI.alpha;  // 보통 1
         float elapsed = 0f;
-
-        while (elapsed < fadeDuration)
+        while (elapsed < duration)
         {
-            opponentIntroduceUI.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / fadeDuration);
+            introduceCG.alpha = 1f - (elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
         }
-
-        // 완전 투명 & 패널 비활성화
-        opponentIntroduceUI.alpha = 0f;
-        opponentIntroduceUI.gameObject.SetActive(false);
+        introduceCG.alpha = 0f;
+        introduceCG.interactable = false;
+        introduceCG.blocksRaycasts = false;
+        introduceCG.gameObject.SetActive(false);
     }
+
 
     //------------------ 콤보 max 이팩트 ----------------
 
     public void ShowMaxComboEffect()
     {
         Debug.Log("콤보 max 이팩트 실행");
+    }
+
+    // ------------------ Disconnected Text ----------------
+
+    public void ShowDisconnectedText()
+    {
+        DisconnectedText.gameObject.SetActive(true);
+    }
+
+    public void HideDisconnectedText()
+    {
+        DisconnectedText.gameObject.SetActive(false);
     }
 
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,10 +26,12 @@ public class EmotionUI : MonoBehaviour
 
 
 
+
     private bool isPanelOpen = false;
 
     private void Awake()
     {
+
         if (Instance == null)
         {
             Instance = this;
@@ -124,4 +127,5 @@ public class EmotionUI : MonoBehaviour
             // 최종조합
             return $"3{n}{emotionNum}";
     }
+
 }
