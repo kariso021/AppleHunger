@@ -8,12 +8,16 @@ public class EmotionUI : MonoBehaviour
     public GameObject emotionPanel;
     public EmotionUIHandler emotionUIHandler;
 
+
+
     [Header("Button Of Emtion")]
     public Button AngryButton;
     public Button LaughButton;
     public Button SadButton;
 
     [Header("Emotion Play Panel")]
+    public Button ExpendButton; // 패널 열기 버튼
+
     public GameObject player_ShowEmotionPanel;
     public Image player_ShowEmotionImage;
     public GameObject opponent_ShowEmotionPanel;
@@ -45,6 +49,8 @@ public class EmotionUI : MonoBehaviour
         LaughButton.onClick.AddListener(() => OnEmotionClicked(EmotionType.Laugh));
         SadButton.onClick.AddListener(() => OnEmotionClicked(EmotionType.Sad));
 
+
+        ExpendButton.onClick.AddListener(ToggleEmotionPanel); // 패널 열기 버튼 이벤트 등록
 
         ApplyButtonIcons(); // 버튼 아이콘 적용
     }

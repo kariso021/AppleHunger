@@ -26,9 +26,22 @@ public class AppleManagerSingle : MonoBehaviour
     public Button sub;
     public TMP_Text curText;
 
+
+    //BackGroudnRender
+    [Header("Background Settings")]
+    public SpriteRenderer backgroundRenderer;
+
+    [Header("Base Settings for 4×4")]
+    [Tooltip("4×4 보드일 때 적용할 배경 스케일")]
+    public float baseScale = 0.6f;
+    [Tooltip("4×4 보드일 때 실제 그리드 폭 = (4-1)*spacing+1")]
+    public Vector2 baseGrid = new Vector2(4f, 4f);
+
+
     //
     private void Awake()
     {
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -46,6 +59,22 @@ public class AppleManagerSingle : MonoBehaviour
 
         // temp
         curText.text = appleDetectSize.ToString();
+    }
+
+    private void ResizeBackground()
+    {
+        float width = (gridWidth - 1) * spacing + 1f;
+        float height = (gridHeight - 1) * spacing + 1f;
+
+  
+        float sx = width / baseGrid.x;
+        float sy = height / baseGrid.y;
+
+        float finalScale = baseScale * Mathf.Max(sx, sy);
+
+
+        backgroundRenderer.transform.localScale = new Vector3(finalScale, finalScale, 1f);
+
     }
 
     private void SpawnApplesInGrid()
