@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: a074e2c22080fe042b815fbe038133bb
+guid: 39704425ca7fa8c41949b331c7c9cfee
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5563696205736131416
-    second: bunny_angry_0
+      213: 9067463356593672882
+    second: horay_angry_0
+  - first:
+      213: 2045108028184372943
+    second: horay_angry_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +116,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bunny_angry_0
+      name: horay_angry_0
       rect:
         serializedVersion: 2
-        x: 212
-        y: 209
-        width: 760
-        height: 907
+        x: 107
+        y: 182
+        width: 871
+        height: 783
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +130,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a4c8e257c7c9c2b0800000000000000
-      internalID: -5563696205736131416
+      spriteID: 2b213af91e916dd70800000000000000
+      internalID: 9067463356593672882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: horay_angry_1
+      rect:
+        serializedVersion: 2
+        x: 679
+        y: 879
+        width: 115
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc6aa3b8aeea16c10800000000000000
+      internalID: 2045108028184372943
       vertices: []
       indices: 
       edges: []
@@ -144,7 +168,8 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      bunny_angry_0: -5563696205736131416
+      horay_angry_0: 9067463356593672882
+      horay_angry_1: 2045108028184372943
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

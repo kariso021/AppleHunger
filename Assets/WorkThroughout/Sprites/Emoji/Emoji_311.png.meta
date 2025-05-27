@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 727005d1bce08da49b2ec01d067be6ee
+guid: a074e2c22080fe042b815fbe038133bb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8250013210609546148
-    second: dragon_angry_0
+      213: -5563696205736131416
+    second: bunny_angry_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: dragon_angry_0
+      name: bunny_angry_0
       rect:
         serializedVersion: 2
-        x: 170
-        y: 123
-        width: 719
-        height: 916
+        x: 212
+        y: 209
+        width: 760
+        height: 907
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c5c865502b0128d80800000000000000
-      internalID: -8250013210609546148
+      spriteID: 8a4c8e257c7c9c2b0800000000000000
+      internalID: -5563696205736131416
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      dragon_angry_0: -8250013210609546148
+      bunny_angry_0: -5563696205736131416
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

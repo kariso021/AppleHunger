@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: f8be6b0040957c1479e09738d00fc86d
+guid: 70bbbb593fcbf234f8b86171423b80cb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7721446242374176374
-    second: horay_sad_0
-  - first:
-      213: -4228347361737216884
-    second: horay_sad_1
-  - first:
-      213: -8344511731724314942
-    second: horay_sad_2
+      213: 7369982115339542265
+    second: monkey_sad_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -119,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: horay_sad_0
+      name: monkey_sad_0
       rect:
         serializedVersion: 2
-        x: 134
-        y: 182
-        width: 829
-        height: 694
+        x: 150
+        y: 211
+        width: 827
+        height: 728
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,50 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8133037d89e7d490800000000000000
-      internalID: -7721446242374176374
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: horay_sad_1
-      rect:
-        serializedVersion: 2
-        x: 951
-        y: 528
-        width: 16
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c8c61bc2a74e155c0800000000000000
-      internalID: -4228347361737216884
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: horay_sad_2
-      rect:
-        serializedVersion: 2
-        x: 123
-        y: 500
-        width: 17
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2c61e768ac6523c80800000000000000
-      internalID: -8344511731724314942
+      spriteID: 9fe9bc1afaf674660800000000000000
+      internalID: 7369982115339542265
       vertices: []
       indices: 
       edges: []
@@ -192,9 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      horay_sad_0: -7721446242374176374
-      horay_sad_1: -4228347361737216884
-      horay_sad_2: -8344511731724314942
+      monkey_sad_0: 7369982115339542265
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
