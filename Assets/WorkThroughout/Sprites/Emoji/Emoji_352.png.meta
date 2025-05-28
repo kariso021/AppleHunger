@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: dca42c740e32e3b40bd1c30e7460a64f
+guid: 38a590a61650ee74687c56a08af71eef
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -851077196957862706
-    second: horay_happy_0
+      213: -6041697481289810141
+    second: monkey_happy_0
   - first:
-      213: -5175909837435174603
-    second: horay_happy_1
+      213: -6551897072592949087
+    second: monkey_happy_1
   - first:
-      213: -5979469596234729919
-    second: horay_happy_2
+      213: 33684915557059654
+    second: monkey_happy_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -119,11 +119,11 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: horay_happy_0
+      name: monkey_happy_0
       rect:
         serializedVersion: 2
-        x: 52
-        y: 676
+        x: 97
+        y: 628
         width: 104
         height: 53
       alignment: 0
@@ -133,18 +133,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ec434ee6ccd5034f0800000000000000
-      internalID: -851077196957862706
+      spriteID: 32f395ba624972ca0800000000000000
+      internalID: -6041697481289810141
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: horay_happy_1
+      name: monkey_happy_1
       rect:
         serializedVersion: 2
-        x: 71
-        y: 722
+        x: 116
+        y: 674
         width: 104
         height: 86
       alignment: 0
@@ -154,20 +154,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5310a3e0d697b28b0800000000000000
-      internalID: -5175909837435174603
+      spriteID: 1a0fc2f635cf215a0800000000000000
+      internalID: -6551897072592949087
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: horay_happy_2
+      name: monkey_happy_2
       rect:
         serializedVersion: 2
-        x: 118
-        y: 182
-        width: 860
-        height: 802
+        x: 175
+        y: 189
+        width: 795
+        height: 747
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -175,8 +175,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1463e233518a40da0800000000000000
-      internalID: -5979469596234729919
+      spriteID: 64c4112904ca77000800000000000000
+      internalID: 33684915557059654
       vertices: []
       indices: 
       edges: []
@@ -192,9 +192,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      horay_happy_0: -851077196957862706
-      horay_happy_1: -5175909837435174603
-      horay_happy_2: -5979469596234729919
+      monkey_happy_0: -6041697481289810141
+      monkey_happy_1: -6551897072592949087
+      monkey_happy_2: 33684915557059654
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

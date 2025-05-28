@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: f21f4d4f7b1918d4fbcc3cd37274c47f
+guid: 2173de24ae6066348aea333ffcde1b2a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -9038449116284821363
-    second: dragon_happy_0
+      213: 1143027875277757083
+    second: bunny_happy_0
   - first:
-      213: 2190678110130539570
-    second: dragon_happy_1
+      213: 8891483429543718938
+    second: bunny_happy_1
   - first:
-      213: 9031393436763007438
-    second: dragon_happy_2
+      213: 2587127604582562620
+    second: bunny_happy_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -119,13 +119,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: dragon_happy_0
+      name: bunny_happy_0
       rect:
         serializedVersion: 2
-        x: 147
-        y: 691
-        width: 102
-        height: 58
+        x: 174
+        y: 530
+        width: 104
+        height: 53
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,20 +133,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d80666f9a6af09280800000000000000
-      internalID: -9038449116284821363
+      spriteID: b9adc4aebc9dcdf00800000000000000
+      internalID: 1143027875277757083
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: dragon_happy_1
+      name: bunny_happy_1
       rect:
         serializedVersion: 2
-        x: 173
-        y: 734
-        width: 99
-        height: 92
+        x: 193
+        y: 576
+        width: 104
+        height: 86
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,20 +154,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 23c0e8b622ad66e10800000000000000
-      internalID: 2190678110130539570
+      spriteID: a10b930f115e46b70800000000000000
+      internalID: 8891483429543718938
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: dragon_happy_2
+      name: bunny_happy_2
       rect:
         serializedVersion: 2
-        x: 214
-        y: 112
-        width: 709
-        height: 926
+        x: 249
+        y: 175
+        width: 625
+        height: 882
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -175,8 +175,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ec9ad09fa74f55d70800000000000000
-      internalID: 9031393436763007438
+      spriteID: c3b30c369d257e320800000000000000
+      internalID: 2587127604582562620
       vertices: []
       indices: 
       edges: []
@@ -192,9 +192,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      dragon_happy_0: -9038449116284821363
-      dragon_happy_1: 2190678110130539570
-      dragon_happy_2: 9031393436763007438
+      bunny_happy_0: 1143027875277757083
+      bunny_happy_1: 8891483429543718938
+      bunny_happy_2: 2587127604582562620
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

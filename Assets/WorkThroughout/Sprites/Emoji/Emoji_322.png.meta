@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 842337d1e5e7a5742b57d3a544bec570
+guid: f21f4d4f7b1918d4fbcc3cd37274c47f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1974968241481912462
-    second: rat_happy_0
+      213: -9038449116284821363
+    second: dragon_happy_0
+  - first:
+      213: 2190678110130539570
+    second: dragon_happy_1
+  - first:
+      213: 9031393436763007438
+    second: dragon_happy_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +119,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: rat_happy_0
+      name: dragon_happy_0
       rect:
         serializedVersion: 2
-        x: 140
-        y: 233
-        width: 824
-        height: 718
+        x: 147
+        y: 691
+        width: 102
+        height: 58
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +133,50 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 27feac329d08794e0800000000000000
-      internalID: -1974968241481912462
+      spriteID: d80666f9a6af09280800000000000000
+      internalID: -9038449116284821363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dragon_happy_1
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 734
+        width: 99
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23c0e8b622ad66e10800000000000000
+      internalID: 2190678110130539570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dragon_happy_2
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 112
+        width: 709
+        height: 926
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec9ad09fa74f55d70800000000000000
+      internalID: 9031393436763007438
       vertices: []
       indices: 
       edges: []
@@ -144,7 +192,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      rat_happy_0: -1974968241481912462
+      dragon_happy_0: -9038449116284821363
+      dragon_happy_1: 2190678110130539570
+      dragon_happy_2: 9031393436763007438
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
