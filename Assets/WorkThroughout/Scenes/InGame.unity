@@ -1234,6 +1234,9 @@ MonoBehaviour:
   AngryButton: {fileID: 1923317788}
   LaughButton: {fileID: 1923317786}
   SadButton: {fileID: 1923317785}
+  AngryButtonImage: {fileID: 1883325835}
+  LaughButtonImage: {fileID: 1883325834}
+  SadButtonImage: {fileID: 1883325833}
   ExpendButton: {fileID: 1923317784}
   player_ShowEmotionPanel: {fileID: 1923317783}
   player_ShowEmotionImage: {fileID: 1923317782}
@@ -1573,7 +1576,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1544002600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1668,6 +1671,39 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87ba98e8ab8673c428de27f669561203, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1883325833 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6118852505244723686, guid: 21c28d37041cf7949b3f66e00635a704, type: 3}
+  m_PrefabInstance: {fileID: 1923317779}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1883325834 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2442565125815986473, guid: 21c28d37041cf7949b3f66e00635a704, type: 3}
+  m_PrefabInstance: {fileID: 1923317779}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1883325835 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9027798317832548125, guid: 21c28d37041cf7949b3f66e00635a704, type: 3}
+  m_PrefabInstance: {fileID: 1923317779}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &1887216540 stripped

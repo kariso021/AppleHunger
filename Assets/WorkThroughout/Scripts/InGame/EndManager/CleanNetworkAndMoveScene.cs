@@ -10,6 +10,6 @@ public class CleanNetworkAndMoveScene : MonoBehaviour
     public void CleanNetwork()
     {
         Destroy(NObj);
-        SceneManager.LoadScene("Lobby");
+        SceneManager.LoadScene("TestLobby");
     }
 }

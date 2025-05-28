@@ -16,6 +16,12 @@ public class EmotionUI : MonoBehaviour
     public Button LaughButton;
     public Button SadButton;
 
+
+    [Header("Button Of Emotions Image")]// 버튼 아이콘 설정]
+    [SerializeField] Image AngryButtonImage;
+    [SerializeField] Image LaughButtonImage;
+    [SerializeField] Image SadButtonImage;
+
     [Header("Emotion Play Panel")]
     public Button ExpendButton; // 패널 열기 버튼
 
@@ -95,16 +101,16 @@ public class EmotionUI : MonoBehaviour
     {
         string angryCode = GetStringFromEmotion(EmotionType.Angry);
         AddressableManager.Instance
-            .LoadImageFromGroup(angryCode, AngryButton.GetComponent<Image>());
+            .LoadImageFromGroup(angryCode, AngryButtonImage.GetComponent<Image>());
 
         string laughCode = GetStringFromEmotion(EmotionType.Laugh);
         AddressableManager.Instance
-            .LoadImageFromGroup(laughCode, LaughButton.GetComponent<Image>());
+            .LoadImageFromGroup(laughCode, LaughButtonImage.GetComponent<Image>());
 
  
         string sadCode = GetStringFromEmotion(EmotionType.Sad);
         AddressableManager.Instance
-            .LoadImageFromGroup(sadCode, SadButton.GetComponent<Image>());
+            .LoadImageFromGroup(sadCode, SadButtonImage.GetComponent<Image>());
     }
 
     private string GetStringFromEmotion(EmotionType emotion) 
