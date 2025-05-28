@@ -44,11 +44,11 @@ public class AppleManager : NetworkBehaviour
         {
             appleValues = new int[gridHeight, gridWidth];
             appleGrid = new Apple[gridHeight, gridWidth];
-            SpawnApplesInGrid();
+         
         }
     }
 
-    private void SpawnApplesInGrid()
+    public void SpawnApplesInGrid()
     {
         float xOffset = (gridWidth - 1) * spacing / 2f;
         float yOffset = (gridHeight - 1) * spacing / 2f;

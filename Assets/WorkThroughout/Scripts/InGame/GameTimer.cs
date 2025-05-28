@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Unity.Netcode;
 using System;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 public class GameTimer : NetworkBehaviour
 {
@@ -11,6 +12,10 @@ public class GameTimer : NetworkBehaviour
     );
 
     [SerializeField] private float totalGameTime = 60f;
+    [SerializeField] private float readyGameTime = 5f; // 준비 시간
+
+    // 준비 시간 후 한 번만 사과 스폰 여부 플래그
+    private bool hasSpawnedApples = false;
 
     private float startTime;
     private float endTime;
@@ -26,6 +31,8 @@ public class GameTimer : NetworkBehaviour
 
     public static event Action OnGameEnded;
     public static event Action<float> OnTimerUpdated;
+
+    
 
     public static GameTimer Instance { get; private set; }
     public bool IsInExtension => isInExtension;
@@ -45,7 +52,7 @@ public class GameTimer : NetworkBehaviour
         // 1) 타이머 초기화
         startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
         endTime = startTime + totalGameTime;
-        remainingTime.Value = totalGameTime;
+        remainingTime.Value = totalGameTime + readyGameTime;
         isGameEnded = false;
         isInExtension = false;
 
@@ -64,10 +71,13 @@ public class GameTimer : NetworkBehaviour
             //자동시작 로직 다 제거해줘야함
             //-------------------------------------------------------------------------
             startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-            endTime = startTime + totalGameTime;
-            remainingTime.Value = totalGameTime;
+            endTime = startTime + totalGameTime+ readyGameTime;
+            remainingTime.Value = totalGameTime + readyGameTime;
             isGameEnded = false;
             isInExtension = false;
+
+            hasSpawnedApples = false;
+
             // 자동 시작
             isPaused = false;
             isIndefinitePause = false;
@@ -108,8 +118,20 @@ public class GameTimer : NetworkBehaviour
             ? Mathf.Max(0f, extensionDuration - (nowTime - extensionStartTime))
             : Mathf.Max(0f, endTime - nowTime);
 
+        // ── 준비 시간이 지난 뒤 단 한 번만 사과 스폰 ──
+        // now >= startTime + readyGameTime 이고, 아직 스폰 안 했다면
+        if (!hasSpawnedApples && nowTime >= startTime + readyGameTime)
+        {
+            AppleManager.Instance.SpawnApplesInGrid();
+            hasSpawnedApples = true;
+        }
+
+
+
         // 임계치 없이 매 틱 업데이트
         remainingTime.Value = newTime;
+
+
 
         if (newTime <= 0f && !isGameEnded)
             HandleGameEndLogic();

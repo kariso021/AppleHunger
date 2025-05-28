@@ -35,7 +35,7 @@ public class PlayerDataManager : NetworkBehaviour
     //임시버전임
     private readonly HashSet<ulong> _readyClients = new HashSet<ulong>();
 
-    private const int ExpectedPlayerCount = 2;
+    private const int ExpectedPlayerCount = 1;
 
     private void Awake()
     {

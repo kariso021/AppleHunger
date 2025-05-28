@@ -23,6 +23,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private Image myProfileImage;
     [SerializeField] private Image opponentProfileImage;
 
+
     [Header("Timer UI")]
     [SerializeField] private Slider timerSlider;
     [SerializeField] private TextMeshProUGUI timerText;
@@ -39,11 +40,31 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private GameObject notifyResetPanel;
 
 
+    //매칭 패널
     [Header("Opponent IntroduceUI")]
     [SerializeField] private CanvasGroup introduceCG;
+    [SerializeField] private Image MatchingPanel_MyProfileImage;
+    [SerializeField] private Image MatchingPanel_OpponentProfileImage;
+
+    [SerializeField] private TextMeshProUGUI MatchingPanel_MyNicknameText;
+    [SerializeField] private TextMeshProUGUI MatchingPanel_OpponentNicknameText;
+
+    [SerializeField] private TextMeshProUGUI MatchingPanel_MyRatingText;
+    [SerializeField] private TextMeshProUGUI MatchingPanel_OpponentRatingText;
+
+    // 매칭 패널 이후 카운트 패널
+    [Header("AfterMatching Panel CountPanel")]
+    [SerializeField] private GameObject countPanel;
+    [SerializeField] private TextMeshProUGUI countText;
 
 
+    //끊김 메세지
+    [Header("Disconnected Text")]
     [SerializeField] private TextMeshProUGUI DisconnectedText;
+
+
+    //매칭 잡히고 게임 시작되기까지의 준비시간
+    [SerializeField] private float ReadyTime = 3f;
 
 
     private Dictionary<int, int> playerScores = new Dictionary<int, int>();
@@ -60,6 +81,7 @@ public class PlayerUI : MonoBehaviour
 
 
         DisconnectedText.gameObject.SetActive(false);
+        countPanel.SetActive(false);
         //opponentIntroduceUI.gameObject.SetActive(false);
 
     }
@@ -111,9 +133,28 @@ public class PlayerUI : MonoBehaviour
     private void UpdateTimerUI(float remainingTime)
     {
         if (timerSlider != null)
-            timerSlider.value = remainingTime / 60f;
+        {
+            if (remainingTime >= 60f)
+            {
+                timerSlider.value = 1f; // 60초 이상일 때는 슬라이더를 최대값으로 설정
+            }
+            else
+            {
+                timerSlider.value = remainingTime / 60f;
+            }
+        }
+
         if (timerText != null)
-            timerText.text = $"{remainingTime:F0}";
+        {
+            if (remainingTime >= 60f)
+            {
+                timerText.text = "60";
+            }
+            else
+            {
+                timerText.text = $"{remainingTime:F0}";
+            }
+        }
     }
 
     // ---------------- Self Initial Upload ----------------
@@ -191,12 +232,30 @@ public class PlayerUI : MonoBehaviour
 
     public void OnMatchFoundShowPanel(float duration)
     {
-        // 1) 패널 보이기
-        ShowIntroducePanel();
-        
-        StartCoroutine(FadeOutAndHide(duration)); 
-        
+        StartCoroutine(MatchIntroAndCountdown(duration));
     }
+
+    private IEnumerator MatchIntroAndCountdown(float introDuration)
+    {
+        // 1) 소개 패널 보이기 & 페이드 아웃
+        ShowIntroducePanel();
+        yield return FadeOutAndHide(introDuration);
+
+        // 2) 카운트 패널 보이기
+        countPanel.SetActive(true);
+
+        int count = Mathf.FloorToInt(ReadyTime);
+        for (int i = count; i > 0; i--)
+        {
+            countText.text = i.ToString();
+            yield return new WaitForSeconds(1f);
+        }
+
+        // 3) 카운트 완료 후 숨기고 실제 게임 시작 콜백
+        countPanel.SetActive(false);
+    }
+
+
 
     public void ShowIntroducePanel()
     {
@@ -208,13 +267,23 @@ public class PlayerUI : MonoBehaviour
 
     public IEnumerator FadeOutAndHide(float duration)
     {
+        float fadeDuration = 1f;             
+        float holdTime = duration - fadeDuration;
+
+        
+        introduceCG.alpha = 1f;
+        yield return new WaitForSeconds(holdTime);
+
+        //fadeDuration 동안 alpha를 1 → 0으로 선형 보간
         float elapsed = 0f;
-        while (elapsed < duration)
+        while (elapsed < fadeDuration)
         {
-            introduceCG.alpha = 1f - (elapsed / duration);
+            introduceCG.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeDuration);
             elapsed += Time.deltaTime;
             yield return null;
         }
+
+        // 비활성화 처리
         introduceCG.alpha = 0f;
         introduceCG.interactable = false;
         introduceCG.blocksRaycasts = false;
