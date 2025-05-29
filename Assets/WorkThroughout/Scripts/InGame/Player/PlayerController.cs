@@ -21,6 +21,9 @@ public class PlayerController : NetworkBehaviour
     private bool isDragRestricted = false;
     private bool isCooldownActive = false;
 
+    [SerializeField] ClientComboUI clientComboUI; // 콤보 UI를 위한 참조
+
+
     //콤보 불러오려고 잠깐 쓰는것
     public static Vector3 LastDragBoxWorldPos { get; private set; }
 
@@ -304,7 +307,7 @@ public class PlayerController : NetworkBehaviour
 
         // playerID 기준으로 점수 처리
         ulong callerClientId = rpcParams.Receive.SenderClientId;
-        ScoreManager.Instance.AddScore(playerId, appleCount, appleScoreValue,callerClientId);
+        ScoreManager.Instance.AddScore(playerId, appleCount, appleScoreValue,callerClientId, false);
         Debug.Log($"Server: {playerId}의 점수 업데이트");
     }
 
@@ -370,7 +373,7 @@ public class PlayerController : NetworkBehaviour
 
     public void ShowLocalCombo(int comboCount)
     {
-        ClientComboUI.Instance.ShowCombo(comboCount, LastDragBoxWorldPos);
+        clientComboUI.ShowCombo(comboCount, LastDragBoxWorldPos);
     }
 
     //-------------------------------------------------------------------------------------------- RestrictTimerSlider

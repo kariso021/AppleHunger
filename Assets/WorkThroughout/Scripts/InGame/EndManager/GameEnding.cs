@@ -104,7 +104,7 @@ public class GameEnding : NetworkBehaviour
         }
 
         // 남은 클라이언트가 없으면 셧다운 나갈때 기점으로 몇명인지 보여주는거라서 1이하가 맞음
-        if (NetworkManager.Singleton.ConnectedClientsList.Count <= 0)
+        if (NetworkManager.Singleton.ConnectedClientsList.Count <= 1)
         {
             Debug.Log("Shutdown발동함");
             GameTimer.Instance.StopForEndTimer();

@@ -39,13 +39,14 @@ public class ScoreManager : NetworkBehaviour
         // 호출한 클라이언트 ID
         ulong callerClientId = rpcParams.Receive.SenderClientId;
 
-        AddScore(playerId, appleCount, appleScoreValue, callerClientId);
+        //처음 시작때 ADD Score 라서 Init True
+        AddScore(playerId, appleCount, appleScoreValue, callerClientId, true);
     }
 
     /// <summary>
     /// 서버에서 콤보/타이머 로직을 처리하고 점수를 갱신합니다.
     /// </summary>
-    public void AddScore(int playerId, int appleCount, int appleScoreValue, ulong callerClientId)
+    public void AddScore(int playerId, int appleCount, int appleScoreValue, ulong callerClientId, bool Init)
     {
         float now = Time.time;
 
@@ -83,27 +84,30 @@ public class ScoreManager : NetworkBehaviour
         // 모든 클라이언트에 브로드캐스트
         UpdateScoreClientRpc(playerId, playerScores[playerId]);
 
-        ShowComboClientRpc(
-       currentCombo,
-       new ClientRpcParams
-       {
-           Send = new ClientRpcSendParams
-           {
-               TargetClientIds = new[] { callerClientId }
-           }
-       }
-        );
-
-        // 콤보 맥스 이팩트
-        // maxCombo 도달 시 추가 이펙트 RPC Duration 고려해서 해야함 -> Duration 도 통일하면 좋겠는데?
-        if (currentCombo >= maxCombo)
+        if (Init == false)
         {
-            ShowMaxComboEffectClientRpc(
-                new ClientRpcParams
-                {
-                    Send = new ClientRpcSendParams { TargetClientIds = new[] { callerClientId } }
-                }
+            ShowComboClientRpc(
+           currentCombo,
+           new ClientRpcParams
+           {
+               Send = new ClientRpcSendParams
+               {
+                   TargetClientIds = new[] { callerClientId }
+               }
+           }
             );
+
+            // 콤보 맥스 이팩트
+            // maxCombo 도달 시 추가 이펙트 RPC Duration 고려해서 해야함 -> Duration 도 통일하면 좋겠는데?
+            if (currentCombo >= maxCombo)
+            {
+                ShowMaxComboEffectClientRpc(
+                    new ClientRpcParams
+                    {
+                        Send = new ClientRpcSendParams { TargetClientIds = new[] { callerClientId } }
+                    }
+                );
+            }
         }
     }
 

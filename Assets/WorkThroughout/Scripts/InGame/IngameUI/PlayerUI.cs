@@ -162,16 +162,19 @@ public class PlayerUI : MonoBehaviour
     {
         string path = SQLiteManager.Instance.player.profileIcon;
         AddressableManager.Instance.LoadImageFromGroup(path, myProfileImage);
+        AddressableManager.Instance.LoadImageFromGroup(path, MatchingPanel_MyProfileImage);
     }
 
     private void UploadNickNameSelf()
     {
         myNicknameText.text = SQLiteManager.Instance.player.playerName;
+        MatchingPanel_MyNicknameText.text = SQLiteManager.Instance.player.playerName;
     }
 
     private void UploadRatingSelf()
     {
         myRatingText.text = $"R: {SQLiteManager.Instance.player.rating}";
+        MatchingPanel_MyRatingText.text = $"Rating: {SQLiteManager.Instance.player.rating}";
     }
 
     // ---------------- Self Setters for Reconnect ----------------
@@ -179,37 +182,44 @@ public class PlayerUI : MonoBehaviour
     public void SetMyRating(int rating)
     {
         myRatingText.text = $"R: {rating}";
+        MatchingPanel_MyRatingText.text = $"Rating: {rating}";
     }
 
     public void SetMyProfileImage(string iconKey)
     {
         AddressableManager.Instance.LoadImageFromGroup(iconKey, myProfileImage);
+        AddressableManager.Instance.LoadImageFromGroup(iconKey, MatchingPanel_MyProfileImage);
     }
 
     public void SetMyNickname(string nickname)
     {
         myNicknameText.text = nickname;
+        MatchingPanel_MyNicknameText.text = nickname;
     }
 
     // ---------------- Opponent ----------------
     public void SetOpponentNumber(int number)
     {
         opponentNumberText.text = number.ToString();
+
     }
 
     public void SetOpponentIconImage(string iconKey)
     {
         AddressableManager.Instance.LoadImageFromGroup(iconKey, opponentProfileImage);
+        AddressableManager.Instance.LoadImageFromGroup(iconKey, MatchingPanel_OpponentProfileImage);
     }
 
     public void SetOpponentNickName(string nickname)
     {
         opponentNicknameText.text = nickname;
+        MatchingPanel_OpponentNicknameText.text = nickname;
     }
 
     public void SetOpponentRating(int rating)
     {
         opponentRatingText.text = $"R: {rating}";
+        MatchingPanel_OpponentRatingText.text = $"Rating: {rating}";
     }
 
     //-----------------Notify Reset Panel ----------------

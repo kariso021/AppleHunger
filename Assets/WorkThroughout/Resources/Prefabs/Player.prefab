@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2185043832979475786}
   - component: {fileID: 538772400157037283}
   - component: {fileID: 6027587535171583320}
-  - component: {fileID: 5139173436800810051}
+  - component: {fileID: 3208566328510943384}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 314647617582520290}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.35312, y: -0.36945873, z: 1666.3687}
+  m_LocalPosition: {x: 183, y: -0.36945873, z: 1666.3687}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -104,6 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4591a9c1a13b11c42906ce3a4f5211f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clientComboUI: {fileID: 3208566328510943384}
   restrictTimerSlider: {fileID: 4756211502484031656}
   localDragBox: {fileID: 6615129503576426566}
   flashImage: {fileID: 1534753133390118796}
@@ -132,7 +133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 762d4c02b006dc549ab8292446907881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5139173436800810051
+--- !u!114 &3208566328510943384
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -157,6 +158,7 @@ GameObject:
   - component: {fileID: 4919926190716861138}
   - component: {fileID: 7934673926174951228}
   - component: {fileID: 1638120357322287846}
+  - component: {fileID: 164049768025042821}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -180,7 +182,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 798, y: 695}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7934673926174951228
@@ -282,6 +284,18 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!225 &164049768025042821
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840615993212992224}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1213112706186900572
 GameObject:
   m_ObjectHideFlags: 0
