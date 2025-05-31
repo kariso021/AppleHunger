@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 2173de24ae6066348aea333ffcde1b2a
+guid: 35fe93fd562f4804c883325c13ad9c58
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -58,7 +58,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 168, y: 174, z: 248, w: 75}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -119,64 +119,22 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bunny_happy_0
+      name: Emoji_312_0
       rect:
         serializedVersion: 2
-        x: 174
-        y: 530
-        width: 104
-        height: 53
+        x: 175
+        y: 170
+        width: 700
+        height: 900
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: b9adc4aebc9dcdf00800000000000000
-      internalID: 1143027875277757083
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: bunny_happy_1
-      rect:
-        serializedVersion: 2
-        x: 193
-        y: 576
-        width: 104
-        height: 86
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a10b930f115e46b70800000000000000
-      internalID: 8891483429543718938
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: bunny_happy_2
-      rect:
-        serializedVersion: 2
-        x: 249
-        y: 175
-        width: 625
-        height: 882
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c3b30c369d257e320800000000000000
-      internalID: 2587127604582562620
+      spriteID: b14e65c308ef006418a6d451a1a9f475
+      internalID: 666341296
       vertices: []
       indices: 
       edges: []
@@ -184,17 +142,15 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      bunny_happy_0: 1143027875277757083
-      bunny_happy_1: 8891483429543718938
-      bunny_happy_2: 2587127604582562620
+      Emoji_312_0: 666341296
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

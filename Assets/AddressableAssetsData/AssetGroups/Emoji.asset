@@ -15,14 +15,14 @@ MonoBehaviour:
   m_GroupName: Emoji
   m_GUID: a718610dddc9a0d4ba3cd4b87647fb91
   m_SerializeEntries:
-  - m_GUID: 04dc3136dd161c44bb0bd6415d035668
-    m_Address: Emoji_341
+  - m_GUID: 017c9530ed90fbe4caec7ff6c8f65f3c
+    m_Address: Emoji_363
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2173de24ae6066348aea333ffcde1b2a
-    m_Address: Emoji_312
+  - m_GUID: 04dc3136dd161c44bb0bd6415d035668
+    m_Address: Emoji_341
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
@@ -39,20 +39,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 38a590a61650ee74687c56a08af71eef
-    m_Address: Emoji_352
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Emoji
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 39704425ca7fa8c41949b331c7c9cfee
-    m_Address: Emoji_361
+  - m_GUID: 35fe93fd562f4804c883325c13ad9c58
+    m_Address: Emoji_312
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5195f9ae724f5f947809f4e9619467b6
     m_Address: Emoji_331
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d72b5c201f23284c804d6a724382178
+    m_Address: Emoji_322
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
@@ -69,14 +69,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7fa8ad915821e3c4ba89e0eadc9b3e63
+    m_Address: Emoji_352
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Emoji
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 842337d1e5e7a5742b57d3a544bec570
     m_Address: Emoji_332
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 911b4cbf2d026da40a71fa0b06908f2c
-    m_Address: Emoji_342
+  - m_GUID: 8a93a749f142dea4bb8659e44bad1092
+    m_Address: Emoji_361
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
@@ -93,26 +99,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dca42c740e32e3b40bd1c30e7460a64f
-    m_Address: Emoji_362
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Emoji
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e15208b256b40e64e8feae8f5630a7d9
     m_Address: Emoji_313
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f21f4d4f7b1918d4fbcc3cd37274c47f
-    m_Address: Emoji_322
+  - m_GUID: ebbf86ec3f71826458ea0ddf4cf189b9
+    m_Address: Emoji_342
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f8be6b0040957c1479e09738d00fc86d
-    m_Address: Emoji_363
+  - m_GUID: f7a1b3cfbc67f7e458e5f62acfc35020
+    m_Address: Emoji_362
     m_ReadOnly: 0
     m_SerializedLabels:
     - Emoji

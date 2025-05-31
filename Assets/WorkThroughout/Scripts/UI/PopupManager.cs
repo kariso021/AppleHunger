@@ -109,16 +109,25 @@ public class PopupManager : MonoBehaviour
                 );
 
 
-                if (SQLiteManager.Instance.player.playerId == SQLiteManager.Instance.playerDetails.playerId)
+                if (SQLiteManager.Instance.player.playerId == SQLiteManager.Instance.playerDetails.playerId) // 본인 프로필일 경우
                 {
                     FindAnyObjectByType<MatchRecordsManager>().CreateMatchRecords();
-                    if(GameObject.Find("RankingPanel") == true) // 일단 임시 방편...
+                    if (GameObject.Find("UI_Canvas_Popup_RankProfile") == true) // 일단 임시 방편...
+                    {
                         AddressableManager.Instance.LoadRankProfilePopupIconFromGroup();
+                        Debug.Log("[PM] My Profile and Rank");
+                    }
                     else
+                    {
                         AddressableManager.Instance.LoadProfilePopupIconFromGroup();
+                        Debug.Log("[PM] My Profile only");
+                    }
                 }
-                else 
+                else
+                { // 본인 프로필이 아닐 경우
                     AddressableManager.Instance.LoadRankProfilePopupIconFromGroup();
+                    Debug.Log("[PM] Other Profile and Rank");
+                }
             }
         }
         else

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 39704425ca7fa8c41949b331c7c9cfee
+guid: 8a93a749f142dea4bb8659e44bad1092
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -55,7 +55,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 108, y: 181, z: 143, w: 150}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -116,43 +116,22 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: horay_angry_0
+      name: Emoji_361_0
       rect:
         serializedVersion: 2
-        x: 107
-        y: 182
-        width: 871
-        height: 783
+        x: 105
+        y: 180
+        width: 875
+        height: 805
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 2b213af91e916dd70800000000000000
-      internalID: 9067463356593672882
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: horay_angry_1
-      rect:
-        serializedVersion: 2
-        x: 679
-        y: 879
-        width: 115
-        height: 104
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fc6aa3b8aeea16c10800000000000000
-      internalID: 2045108028184372943
+      spriteID: 4e8afd31e3128c64d84d35d97863b4a5
+      internalID: 562213220
       vertices: []
       indices: 
       edges: []
@@ -160,16 +139,15 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      horay_angry_0: 9067463356593672882
-      horay_angry_1: 2045108028184372943
+      Emoji_361_0: 562213220
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

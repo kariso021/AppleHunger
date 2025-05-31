@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f8be6b0040957c1479e09738d00fc86d
+guid: 017c9530ed90fbe4caec7ff6c8f65f3c
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -58,7 +58,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 135, y: 184, z: 158, w: 255}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -119,64 +119,22 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: horay_sad_0
+      name: Emoji_363_0
       rect:
         serializedVersion: 2
-        x: 134
-        y: 182
-        width: 829
-        height: 694
+        x: 135
+        y: 180
+        width: 830
+        height: 700
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: a8133037d89e7d490800000000000000
-      internalID: -7721446242374176374
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: horay_sad_1
-      rect:
-        serializedVersion: 2
-        x: 951
-        y: 528
-        width: 16
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c8c61bc2a74e155c0800000000000000
-      internalID: -4228347361737216884
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: horay_sad_2
-      rect:
-        serializedVersion: 2
-        x: 123
-        y: 500
-        width: 17
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2c61e768ac6523c80800000000000000
-      internalID: -8344511731724314942
+      spriteID: 9085c595d62017f4f9213fa89398f055
+      internalID: -416478910
       vertices: []
       indices: 
       edges: []
@@ -184,17 +142,15 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      horay_sad_0: -7721446242374176374
-      horay_sad_1: -4228347361737216884
-      horay_sad_2: -8344511731724314942
+      Emoji_363_0: -416478910
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

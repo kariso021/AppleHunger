@@ -445,7 +445,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3121134430291927798}
-  - component: {fileID: 9190701552017519852}
+  - component: {fileID: 3997199515190266170}
   m_Layer: 5
   m_Name: UI_Unit_Profile_History
   m_TagString: Untagged
@@ -476,7 +476,7 @@ RectTransform:
   m_AnchoredPosition: {x: 540, y: -2}
   m_SizeDelta: {x: 960, y: 180}
   m_Pivot: {x: 0.5, y: 1}
---- !u!114 &9190701552017519852
+--- !u!114 &3997199515190266170
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -485,13 +485,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2947343087311589320}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fd6b02e38f375741b30ad9f883d6d32, type: 3}
+  m_Script: {fileID: 11500000, guid: 084575ca489217146b4779532281250a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iconImage: {fileID: 956762031482647495}
+  itemUnqiueId: 
   nameText: {fileID: 2967080541091827508}
   ratingText: {fileID: 5299507485517182318}
-  rankText: {fileID: 0}
+  resultText: {fileID: 7720537687131722251}
+  iconSprite: {fileID: 956762031482647495}
 --- !u!1 &3214822896123577623
 GameObject:
   m_ObjectHideFlags: 0
@@ -863,6 +864,7 @@ GameObject:
   - component: {fileID: 4035670762414598935}
   - component: {fileID: 7488562495093528268}
   - component: {fileID: 4380203722405016229}
+  - component: {fileID: 3429398094089050078}
   m_Layer: 5
   m_Name: BTN_Ranking
   m_TagString: Untagged
@@ -971,6 +973,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3429398094089050078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6948914279975673729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f08c5d7b5a649a94e80bc7e37ae9b779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickSoundIndex: 0
 --- !u!1 &7063771598585002676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1355,6 +1370,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2127657468603341834, guid: c8bec961823dc904c828156174c4f36d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4448230380041399687}
+    - targetCorrespondingSourceObject: {fileID: 2127657468603341834, guid: c8bec961823dc904c828156174c4f36d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6373595568565017096}
   m_SourcePrefab: {fileID: 100100000, guid: c8bec961823dc904c828156174c4f36d, type: 3}
 --- !u!224 &610355866201095014 stripped
 RectTransform:
@@ -1410,6 +1428,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6373595568565017096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401646833191207650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f08c5d7b5a649a94e80bc7e37ae9b779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickSoundIndex: 0
 --- !u!114 &7223932890922554144 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7689267301611589064, guid: c8bec961823dc904c828156174c4f36d, type: 3}

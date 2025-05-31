@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 911b4cbf2d026da40a71fa0b06908f2c
+guid: ebbf86ec3f71826458ea0ddf4cf189b9
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -61,7 +61,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 57, y: 223, z: 173, w: 38}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -122,85 +122,22 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: shepp_happy_0
+      name: Emoji_342_0
       rect:
         serializedVersion: 2
-        x: 84
-        y: 495
-        width: 102
-        height: 66
+        x: 55
+        y: 215
+        width: 895
+        height: 880
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: a891dfe9b23641450800000000000000
-      internalID: 6058576437722290570
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: shepp_happy_1
-      rect:
-        serializedVersion: 2
-        x: 88
-        y: 220
-        width: 860
-        height: 873
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d413627293516baf0800000000000000
-      internalID: -381093783252094643
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: shepp_happy_2
-      rect:
-        serializedVersion: 2
-        x: 54
-        y: 448
-        width: 121
-        height: 38
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e1e063d60b8a9da50800000000000000
-      internalID: 6546449009059696158
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: shepp_happy_3
-      rect:
-        serializedVersion: 2
-        x: 85
-        y: 374
-        width: 100
-        height: 62
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 24e3328b17e4e35c0800000000000000
-      internalID: -4233860349354099134
+      spriteID: b31bd04c0169e9f45ab05ac891df3b77
+      internalID: -775284265
       vertices: []
       indices: 
       edges: []
@@ -208,18 +145,15 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      shepp_happy_0: 6058576437722290570
-      shepp_happy_1: -381093783252094643
-      shepp_happy_2: 6546449009059696158
-      shepp_happy_3: -4233860349354099134
+      Emoji_342_0: -775284265
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

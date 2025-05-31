@@ -39,7 +39,9 @@ public class EmotionUIHandler : MonoBehaviour
         string icon = SQLiteManager.Instance.player.profileIcon;
         string n = (icon != null && icon.Length >= 3)
             ? icon[2].ToString()
-            : "0";  
+            : "0";
+
+        Debug.Log($"[Emotion] EM TEST ___ {icon} and {n}");
 
         int emotionNum;
         switch (emotion)

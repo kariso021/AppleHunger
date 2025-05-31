@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 38a590a61650ee74687c56a08af71eef
+guid: 7fa8ad915821e3c4ba89e0eadc9b3e63
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -58,7 +58,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 98, y: 190, z: 152, w: 195}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -119,64 +119,22 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: monkey_happy_0
+      name: Emoji_352_0
       rect:
         serializedVersion: 2
-        x: 97
-        y: 628
-        width: 104
-        height: 53
+        x: 95
+        y: 185
+        width: 875
+        height: 750
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 32f395ba624972ca0800000000000000
-      internalID: -6041697481289810141
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: monkey_happy_1
-      rect:
-        serializedVersion: 2
-        x: 116
-        y: 674
-        width: 104
-        height: 86
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1a0fc2f635cf215a0800000000000000
-      internalID: -6551897072592949087
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: monkey_happy_2
-      rect:
-        serializedVersion: 2
-        x: 175
-        y: 189
-        width: 795
-        height: 747
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 64c4112904ca77000800000000000000
-      internalID: 33684915557059654
+      spriteID: 9d2b0fe7a6bc9d342b38e443982f7d7d
+      internalID: 443253972
       vertices: []
       indices: 
       edges: []
@@ -184,17 +142,15 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      monkey_happy_0: -6041697481289810141
-      monkey_happy_1: -6551897072592949087
-      monkey_happy_2: 33684915557059654
+      Emoji_352_0: 443253972
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

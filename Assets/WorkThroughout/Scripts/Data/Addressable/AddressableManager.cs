@@ -81,9 +81,9 @@ public class AddressableManager : MonoBehaviour
         {
             if (img.gameObject.name == "IMG_Profile_Lobby")
                 profileIcon = img;
-            else if (img.gameObject.name == "IMG_Profile_Popup")
+            else if (img.gameObject.name == "IMG_Profile_Popup_Add")
                 profilePopupIcon = img;
-            else if (img.gameObject.name == "RankProfilePopupIconGameObject")
+            else if (img.gameObject.name == "IMG_Profile_Popup_Rank")
                 rankProfilePopupIcon = img;
             else if (img.gameObject.name == "MyRankProfileIconGameObject")
                 myRankProfileIcon = img;
@@ -237,12 +237,12 @@ public class AddressableManager : MonoBehaviour
     public void LoadMyRankingIconFromGroup()
     {
 
-        if (!isUIReady)
-        {
-            Debug.Log("[Addressable] UI isn't ready for LoadImage.");
-            pendingProfileUpdateActions.Add(() => LoadMyRankingIconFromGroup());
-            return;
-        }
+        //if (!isUIReady)
+        //{
+        //    Debug.Log("[Addressable] UI isn't ready for LoadImage.");
+        //    pendingProfileUpdateActions.Add(() => LoadMyRankingIconFromGroup());
+        //    return;
+        //}
 
         string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
         string key = "icon_" + itemUniqueId;

@@ -15,6 +15,7 @@ public class FuckingFinder : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("씨빠아아아아아");
         InitFinder();
     }
     // Update is called once per frame

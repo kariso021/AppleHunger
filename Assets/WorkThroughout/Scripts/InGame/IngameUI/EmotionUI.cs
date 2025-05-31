@@ -111,6 +111,8 @@ public class EmotionUI : MonoBehaviour
         string sadCode = GetStringFromEmotion(EmotionType.Sad);
         AddressableManager.Instance
             .LoadImageFromGroup(sadCode, SadButtonImage.GetComponent<Image>());
+
+        Debug.Log($"[Emotion] EM TEST _____ Character {SQLiteManager.Instance.player.profileIcon} , A = {angryCode} , L = {laughCode} , S = {sadCode}");
     }
 
     private string GetStringFromEmotion(EmotionType emotion) 

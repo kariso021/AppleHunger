@@ -24,7 +24,8 @@ public class MatchData : MonoBehaviour
         {
             isWin = winnerId == SQLiteManager.Instance.player.playerId ? true : false;
 
-            resultText.text = isWin ? "WIN" : "LOSE";
+            resultText.text = isWin ? "½Â¸®" : "ÆÐ¹è";
+            resultText.color = isWin ? new Color32(135, 236, 61, 255) : new Color32(207,73,42,255);
         }    
 
         

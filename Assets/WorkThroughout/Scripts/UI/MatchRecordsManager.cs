@@ -86,7 +86,9 @@ public class MatchRecordsManager : MonoBehaviour
                 );
             }
 
-            AddressableManager.Instance.matchIconObj.Add(matchData.gameObject);
+            if (AddressableManager.Instance != null)
+                AddressableManager.Instance.matchIconObj.Add(matchData.gameObject);
+            else Debug.Log("야발 왜안돼");
             activeMatchRecords.Add(matchInstance); // 🔹 활성화된 오브젝트 리스트에 추가
             recordCount++;
         }

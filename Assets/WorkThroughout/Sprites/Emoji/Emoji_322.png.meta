@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f21f4d4f7b1918d4fbcc3cd37274c47f
+guid: 6d72b5c201f23284c804d6a724382178
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -58,7 +58,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 149, y: 113, z: 200, w: 92}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -119,64 +119,22 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: dragon_happy_0
+      name: Emoji_322_0
       rect:
         serializedVersion: 2
-        x: 147
-        y: 691
-        width: 102
-        height: 58
+        x: 150
+        y: 110
+        width: 775
+        height: 930
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: d80666f9a6af09280800000000000000
-      internalID: -9038449116284821363
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: dragon_happy_1
-      rect:
-        serializedVersion: 2
-        x: 173
-        y: 734
-        width: 99
-        height: 92
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 23c0e8b622ad66e10800000000000000
-      internalID: 2190678110130539570
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: dragon_happy_2
-      rect:
-        serializedVersion: 2
-        x: 214
-        y: 112
-        width: 709
-        height: 926
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ec9ad09fa74f55d70800000000000000
-      internalID: 9031393436763007438
+      spriteID: 67840bf459c852747b71ace41656fdcf
+      internalID: -1729272551
       vertices: []
       indices: 
       edges: []
@@ -184,17 +142,15 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      dragon_happy_0: -9038449116284821363
-      dragon_happy_1: 2190678110130539570
-      dragon_happy_2: 9031393436763007438
+      Emoji_322_0: -1729272551
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
