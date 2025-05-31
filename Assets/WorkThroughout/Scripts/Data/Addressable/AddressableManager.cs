@@ -237,12 +237,12 @@ public class AddressableManager : MonoBehaviour
     public void LoadMyRankingIconFromGroup()
     {
 
-        //if (!isUIReady)
-        //{
-        //    Debug.Log("[Addressable] UI isn't ready for LoadImage.");
-        //    pendingProfileUpdateActions.Add(() => LoadMyRankingIconFromGroup());
-        //    return;
-        //}
+        if (!isUIReady)
+        {
+            Debug.Log("[Addressable] UI isn't ready for LoadImage.");
+            pendingProfileUpdateActions.Add(() => LoadMyRankingIconFromGroup());
+            return;
+        }
 
         string itemUniqueId = SQLiteManager.Instance.player.profileIcon;
         string key = "icon_" + itemUniqueId;

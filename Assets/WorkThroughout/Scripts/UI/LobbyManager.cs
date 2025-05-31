@@ -1,3 +1,4 @@
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -8,7 +9,6 @@ public class LobbyManager : MonoBehaviour
 {
 
     static bool isFirstEnter = true;
-
     private void Awake()
     {
     }
@@ -18,12 +18,19 @@ public class LobbyManager : MonoBehaviour
         if (isFirstEnter)
         {
             isFirstEnter = false;
-            Debug.Log("Á¦ÀÏ Ã³À½");
+            Debug.Log("ì œì¼ ì²˜ìŒ");
         }
         else
         {
-            Debug.Log("·Îºñ ¸Å´ÏÀú µ¥ÀÌÅÍ ÀÖÀ½");
-            SQLiteManager.Instance.LoadAllData();
+            Debug.Log("ë¡œë¹„ ë§¤ë‹ˆì € ë°ì´í„° ìˆìŒ");
+            StartCoroutine(loadDataForFrame());
         }
+    }
+
+    private IEnumerator loadDataForFrame()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        SQLiteManager.Instance.LoadAllData();
     }
 }

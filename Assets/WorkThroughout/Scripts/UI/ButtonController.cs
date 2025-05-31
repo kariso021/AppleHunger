@@ -25,26 +25,12 @@ public class ButtonController : MonoBehaviour
     [Header("Navbar Buttons")]
     public Button homeButton;
     public Button rankingButton;
-    public Button settingsButton;
     public Button collectionButton;
 
     [Header("Close Buttons")]
     public Button creditCloseButton;
     [Header("Popup Buttons")]
     public Button nameChangeButton;
-    [Header("Debug Buttons")]
-    public Button playerAdd;
-    public Button playerGet;
-    public Button playerPut;
-    public Button playerStatsGet;
-    public Button playerItemsGet;
-    public Button playerItemsPurchase;
-    public Button matchAdd;
-    public Button matchGet;
-    public Button loginGet;
-    public Button loginPut;
-    public Button rankingGet;
-    public Button localGet;
 
     // Multiplay Mode 버튼
     [Header("MuliplyMode button")]
@@ -52,11 +38,6 @@ public class ButtonController : MonoBehaviour
     public Button RelaymultiplayModeButton;
     public Button MatchmakerplayModeButton;
     public Button GameModePanelCloseButton;
-
-
-
-
-
 
     private ClientNetworkManager clientNetworkManager;
 
@@ -152,8 +133,6 @@ public class ButtonController : MonoBehaviour
         NavManager.Instance.NavigateTo("Home"));
         rankingButton.onClick.AddListener(() => 
         NavManager.Instance.NavigateTo("Ranking"));
-        settingsButton.onClick.AddListener(() => 
-        NavManager.Instance.NavigateTo("Settings"));
         collectionButton.onClick.AddListener(() => 
         NavManager.Instance.NavigateTo("Collection"));
 
@@ -167,45 +146,7 @@ public class ButtonController : MonoBehaviour
         nameChangeButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.nicknamePopup));
         settingButton.onClick.AddListener(() =>
-        PopupManager.Instance.ShowPopup(PopupManager.Instance.settingPopup));
-        // Debug Buttons
-        // 테스트 기능
-        playerAdd.onClick.AddListener(() =>
-        SceneManager.LoadScene("Down"));
-
-        playerGet.onClick.AddListener(() =>
-        StartCoroutine(clientNetworkManager.GetPlayerData("deviceId",SQLiteManager.Instance.player.deviceId, false)));
-
-        playerPut.onClick.AddListener(() =>
-        StartCoroutine(clientNetworkManager.UpdatePlayerData()));
-
-        playerStatsGet.onClick.AddListener(() =>
-        StartCoroutine(clientNetworkManager.GetPlayerStats(SQLiteManager.Instance.player.playerId)));
-
-        playerItemsGet.onClick.AddListener(() =>
-        clientNetworkManager.GetPlayerItems(SQLiteManager.Instance.player.playerId));
-
-        //playerItemsPurchase.onClick.AddListener(() =>
-        //clientNetworkManager.PurchasePlayerItem(SQLiteManager.Instance.player.playerId,102));
-
-        matchAdd.onClick.AddListener(() =>
-        StartCoroutine(testManager.AddMatchResult(SQLiteManager.Instance.player.playerId,
-        4)));
-
-        matchGet.onClick.AddListener(() =>
-        clientNetworkManager.GetMatchRecords(SQLiteManager.Instance.player.playerId));
-
-        loginGet.onClick.AddListener(() =>
-        clientNetworkManager.GetLogin(SQLiteManager.Instance.player.playerId));
-
-        loginPut.onClick.AddListener(() =>
-        clientNetworkManager.UpdateLogin(SQLiteManager.Instance.player.playerId));
-
-        rankingGet.onClick.AddListener(() =>
-        clientNetworkManager.GetRankingList());
-
-        localGet.onClick.AddListener(() =>
-        SQLiteManager.Instance.LoadAllData());
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.settingPopup));   
     }
 
     private void LoadSingleGameScene()

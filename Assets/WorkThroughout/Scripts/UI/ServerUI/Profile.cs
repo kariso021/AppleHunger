@@ -11,7 +11,7 @@ public class Profile : MonoBehaviour
     public TMP_Text ratingText; // 점수 or 랭킹
 
     // 프로필 데이터 설정 함수
-    public void SetProfile(string name,int matches,int win,int lose, int rating)
+    public void SetProfile(string name, int matches, int win, int lose, int rating)
     {
         //if (profileImage != null)
         //    profileImage.sprite = image;
@@ -38,13 +38,32 @@ public class Profile : MonoBehaviour
 
     private void profileUIupdate()
     {
+        if (this == null || gameObject == null)
+        {
+            Debug.LogWarning("[Profile] 오브젝트가 이미 파괴되었습니다.");
+            return;
+        }
+
+        if (SQLiteManager.Instance.player == null || SQLiteManager.Instance.stats == null)
+        {
+            Debug.LogWarning("[Profile] 불완전한 데이터 상태");
+            return;
+        }
+        Debug.Log($"[과연] 이름은 {gameObject.name}");
         SetProfile(
             SQLiteManager.Instance.player.playerName,
             SQLiteManager.Instance.stats.totalGames,
             SQLiteManager.Instance.stats.wins,
             SQLiteManager.Instance.stats.losses,
             SQLiteManager.Instance.player.rating
-            );
-
+        );
     }
+
+
+    private void OnDestroy()
+    {
+        if (DataSyncManager.Instance != null)
+            DataSyncManager.Instance.OnPlayerProfileChanged -= profileUIupdate;
+    }
+
 }

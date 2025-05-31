@@ -43,7 +43,7 @@ public class MatchRecordsManager : MonoBehaviour
     // ✅ 전적 기록 UI 업데이트
     private void UpdateMatchRecords()
     {
-        Debug.Log("🔄 [MatchRecordsManager] 전적 데이터 변경 감지 → UI 갱신");
+        Debug.Log("[MatchRecordsManager] 전적 데이터 변경 감지 → UI 갱신");
 
         // ✅ SQLite 데이터가 최신화된 후 UI 갱신 실행
         Invoke(nameof(CreateMatchRecords), 0.5f);
