@@ -28,6 +28,12 @@ public class PlayerUISingle : MonoBehaviour
 
     [SerializeField] private GameObject notifyPanel;
 
+
+    // 매칭 패널 이후 카운트 패널
+    [Header("AfterMatching Panel CountPanel")]
+    [SerializeField] private GameObject countPanel;
+    [SerializeField] private TextMeshProUGUI countText;
+
     public GameObject EmoticonPanel;
 
 
@@ -36,6 +42,7 @@ public class PlayerUISingle : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+        countPanel.SetActive(false);
     }
 
     private void Start()
@@ -54,6 +61,8 @@ public class PlayerUISingle : MonoBehaviour
             nicknameText.text = SQLiteManager.Instance.player.playerName; ;
             ratingText.text = $"R: {SQLiteManager.Instance.player.rating}";
         }
+
+        StartCoroutine(CountDown());
 
 
     }
@@ -84,10 +93,19 @@ public class PlayerUISingle : MonoBehaviour
     /// </summary>
     private void UpdateTimerUI(float remainingTime)
     {
-        if (timerSlider != null)
-            timerSlider.value = remainingTime / 60f;
-        if(timerText != null)
+        float totalTime = GameTimerSingle.Instance.totalGameTimeInSeconds;
+
+
+        if (remainingTime > totalTime)
+        {
+            timerSlider.value = 1;
+            timerText.text = $"{Mathf.FloorToInt(totalTime)}";
+        }
+        else if ((timerSlider != null) && (timerText != null))
+        {
+            timerSlider.value = remainingTime / totalTime;
             timerText.text = $"{Mathf.FloorToInt(remainingTime)}";
+        }
     }
 
     public void ShowNotifyPanelForSeconds(float seconds)
@@ -164,5 +182,45 @@ public class PlayerUISingle : MonoBehaviour
         maxComboEffectTimerSlider.gameObject.SetActive(false);
         comboEffectCoroutine = null;
     }
+
+
+    //------------------ 카운트 패널 ----------------
+    public float GetReadyTime()
+    {
+
+       return GameTimerSingle.Instance.ReadyTime;
+    }
+
+
+
+
+    private IEnumerator CountDown()
+    {
+        float readyTimeFloat = GetReadyTime();
+        int remainingSeconds = Mathf.CeilToInt(readyTimeFloat);
+        countPanel.SetActive(true);
+
+        while (remainingSeconds > 0)
+        {
+            if (remainingSeconds == Mathf.CeilToInt(readyTimeFloat))
+            {
+                countText.text = "START";
+                yield return new WaitForSeconds(1f);
+            }
+            else
+            {
+
+                countText.text = remainingSeconds.ToString();
+                yield return new WaitForSeconds(1f);
+            }
+
+                remainingSeconds--;
+            
+        }
+        countPanel.SetActive(false);
+        yield break;
+    }
+
+
 
 }

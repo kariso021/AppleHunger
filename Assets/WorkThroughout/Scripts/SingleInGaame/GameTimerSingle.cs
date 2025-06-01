@@ -10,6 +10,20 @@ public class GameTimerSingle : MonoBehaviour
     /// 게임 시작부터의 총 플레이 시간 (초)
     /// </summary>
     [SerializeField] private float totalGameTime = 60f;
+    [SerializeField] private float readyGameTime = 5f; // 준비 시간
+
+    public float ReadyTime
+    {
+        get => readyGameTime;
+        set => readyGameTime = Mathf.Max(0f, value);
+    }
+
+    public float totalGameTimeInSeconds
+    {
+        get => totalGameTime;
+        set => totalGameTime = Mathf.Max(0f, value);
+    }
+
 
     /// <summary>
     /// 남은 시간 (초)
@@ -44,7 +58,7 @@ public class GameTimerSingle : MonoBehaviour
     private void Start()
     {
         // 타이머 초기화 및 첫 UI 업데이트
-        remainingTime = totalGameTime;
+        remainingTime = totalGameTime + readyGameTime;
         OnTimerUpdated?.Invoke(remainingTime);
     }
 

@@ -12,6 +12,8 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using System.Collections;
 using UnityEngine.Networking;
+using UnityEngine.UI;
+
 
 
 #if UNITY_EDITOR
@@ -35,9 +37,6 @@ public class MatchMakerClient : MonoBehaviour
     }
 
     public Managers managers;
-
-
-
 
 
     private void OnEnable()
@@ -391,6 +390,27 @@ public class MatchMakerClient : MonoBehaviour
 
         // 3) 최종 결과 전달
         resultCallback(serverInGame);
+    }
+
+    public void CancelMatch()
+    {
+        // 1) 대기 UI 바로 꺼주기
+        if (waitingCanvas != null)
+            waitingCanvas.SetActive(false);
+
+        // 2) _ticketId가 남아있으면 취소 요청
+        if (!string.IsNullOrEmpty(_ticketId))
+        {
+            // 비동기 취소 작업 시작
+            CancelTicketIfExists();
+            // _ticketId 초기화 (추후 재매칭 시 다시 사용 가능)
+            _ticketId = null;
+            Debug.Log("[MatchMakerClient] 매칭 취소 요청 완료");
+        }
+        else
+        {
+            Debug.Log("[MatchMakerClient] 취소할 매칭 티켓이 없습니다.");
+        }
     }
 
 

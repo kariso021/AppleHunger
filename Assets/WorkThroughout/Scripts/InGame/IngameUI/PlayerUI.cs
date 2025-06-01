@@ -46,6 +46,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private Image MatchingPanel_MyProfileImage;
     [SerializeField] private Image MatchingPanel_OpponentProfileImage;
 
+
     [SerializeField] private TextMeshProUGUI MatchingPanel_MyNicknameText;
     [SerializeField] private TextMeshProUGUI MatchingPanel_OpponentNicknameText;
 
@@ -61,6 +62,11 @@ public class PlayerUI : MonoBehaviour
     //끊김 메세지
     [Header("Disconnected Text")]
     [SerializeField] private TextMeshProUGUI DisconnectedText;
+
+    [Header("Cancel the Matching")]
+    [SerializeField] private Button MatchingCancelButton;
+    [SerializeField] private MatchMakerClient matchMakerClient;
+
 
 
     //매칭 잡히고 게임 시작되기까지의 준비시간
@@ -319,5 +325,11 @@ public class PlayerUI : MonoBehaviour
     {
         DisconnectedText.gameObject.SetActive(false);
     }
+
+    public void matchcancel()
+    {
+        matchMakerClient.CancelMatch();
+    }
+
 
 }
