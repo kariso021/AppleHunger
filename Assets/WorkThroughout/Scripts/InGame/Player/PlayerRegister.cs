@@ -78,6 +78,8 @@ public class PlayerRegister : NetworkBehaviour
             PlayerDataManager.Instance.RegisterPlayerIconServerRpc(iconKey);
 
             // 4) 점수 초기화
+
+            yield return new WaitForSeconds(1f);
             ScoreManager.Instance.RequestAddScoreServerRpc(playerId, 0, 0);
 
             Debug.Log($"✅ 신규 Player 등록 완료 - ID:{playerId}, Rating:{rating}, Icon:{iconKey}");

@@ -253,6 +253,8 @@ public class PlayerDataManager : NetworkBehaviour
             Debug.Log($"[PDM] Player {playerId} reconnected (client {newCid})");
         }
 
+
+
         //여기에 점수 동기화 먼저
         ScoreManager.Instance.SyncAllScoresToClient(newCid);
 

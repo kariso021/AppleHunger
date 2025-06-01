@@ -27,6 +27,8 @@ public class GameTimer : NetworkBehaviour
 
     private bool isPaused = false;
     private bool isIndefinitePause = false;
+
+    private float pauseStartTime = 0f; // 일시 정지 시작 시간
     private float pauseEndTime = 0f;
 
     public static event Action OnGameEnded;
@@ -109,7 +111,14 @@ public class GameTimer : NetworkBehaviour
             if (isIndefinitePause) return;
             float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
             if (now < pauseEndTime) return;
+            float pausedDuration = pauseEndTime - pauseStartTime;
+            endTime += pausedDuration;
+            if (isInExtension)
+                extensionStartTime += pausedDuration; // 연장 시간도 일시 정지 동안 늘려줌
             ResumeTimer();
+
+
+
         }
 
         // 남은 시간 계산
@@ -192,7 +201,9 @@ public class GameTimer : NetworkBehaviour
     {
         isPaused = true;
         isIndefinitePause = false;
-        pauseEndTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + seconds;
+        //이부분이 잘못됐군
+        pauseStartTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+        pauseEndTime = pauseStartTime + seconds;
     }
 
     public void ResumeTimer()

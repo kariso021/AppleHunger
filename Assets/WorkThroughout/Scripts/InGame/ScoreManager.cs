@@ -12,7 +12,7 @@ public class ScoreManager : NetworkBehaviour
     private Dictionary<int, int> comboCounts = new Dictionary<int, int>();
 
     [Header("Combo Settings")]
-    [SerializeField] private float comboDuration = 2f;   // 콤보 유지 시간
+    [SerializeField] private float comboDuration = 3f;   // 콤보 유지 시간
     [SerializeField] private float comboScoreMultiplier = 0.2f; // 콤보당 추가 배수
     [SerializeField] private int maxCombo = 5;    // 최대 콤보 수
 
@@ -38,9 +38,11 @@ public class ScoreManager : NetworkBehaviour
 
         // 호출한 클라이언트 ID
         ulong callerClientId = rpcParams.Receive.SenderClientId;
+        Debug.Log($"[ScoreManager] RequestAddScoreServerRpc called by {callerClientId} for player {playerId} with {appleCount} apples.");
 
         //처음 시작때 ADD Score 라서 Init True
         AddScore(playerId, appleCount, appleScoreValue, callerClientId, true);
+
     }
 
     /// <summary>

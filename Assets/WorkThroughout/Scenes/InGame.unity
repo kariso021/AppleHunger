@@ -1277,6 +1277,8 @@ MonoBehaviour:
   countPanel: {fileID: 2123964474}
   countText: {fileID: 2123964473}
   DisconnectedText: {fileID: 481743591}
+  MatchingCancelButton: {fileID: 0}
+  matchMakerClient: {fileID: 0}
   ReadyTime: 3
 --- !u!4 &1090054328
 Transform:
@@ -1565,7 +1567,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1544002600
 MonoBehaviour:
   m_ObjectHideFlags: 0

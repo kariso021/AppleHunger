@@ -240,6 +240,10 @@ public class GameEnding : NetworkBehaviour
     }
 
     // DB 제출＋보상 계산 공통화
+
+
+
+
     private IEnumerator SubmitResultToDB(
         GameResultType type,
         int winId, int loseId,
@@ -251,7 +255,7 @@ public class GameEnding : NetworkBehaviour
             int gold = UnityEngine.Random.Range(50, 141);
             yield return StartCoroutine(Managers.UpdateCurrencyAndRating(winId, gold, 0));
             yield return StartCoroutine(Managers.UpdateCurrencyAndRating(loseId, gold, 0));
-            ShowGameOverScreenClientRpc(winId, loseId, 0, gold, gold);
+            ShowGameOverScreenClientRpc(winId, loseId,true, 0, gold, gold);
         }
         else // Win
         {
@@ -263,33 +267,37 @@ public class GameEnding : NetworkBehaviour
 
             yield return StartCoroutine(Managers.UpdateCurrencyAndRating(winId, winGold, delta));
             yield return StartCoroutine(Managers.UpdateCurrencyAndRating(loseId, loseGold, -delta));
-            ShowGameOverScreenClientRpc(winId, loseId, delta, winGold, loseGold);
+            ShowGameOverScreenClientRpc(winId, loseId,false, delta, winGold, loseGold);
         }
     }
 
     [ClientRpc]
     private void ShowGameOverScreenClientRpc(
-        int winnerPlayerId,
-        int loserPlayerId,
-        int ratingDelta,
-        int winnerGold,
-        int loserGold)
+    int winnerPlayerId,
+    int loserPlayerId,
+    bool isDraw,            // ← 무승부 여부를 추가로 받음
+    int ratingDelta,
+    int winnerGold,
+    int loserGold)
     {
         gameOverPanel.SetActive(true);
 
         var player = SQLiteManager.Instance.player;
-        bool isWinner = player.playerId == winnerPlayerId && winnerPlayerId != loserPlayerId;
-        bool isLoser = player.playerId == loserPlayerId && winnerPlayerId != loserPlayerId;
-        bool isDraw = winnerPlayerId == loserPlayerId && player.playerId == winnerPlayerId;
+        // 무승부인 경우 바로 무승부 패널 띄움
+        if (isDraw)
+        {
+            resultText.text = "🤝 Draw!\n" +
+                $"Rating: {player.rating} → {player.rating}\n" +
+                $"Gold:   {player.currency} → {player.currency + winnerGold}";
+            return;
+        }
 
-        string title;
-        if (isWinner) title = "🏆 Winner!";
-        else if (isLoser) title = "❌ Loser...";
-        else if (isDraw) title = "🤝 Draw!";
-        else title = "Unknown";
-
-        int finalRating = player.rating + (isWinner ? ratingDelta : isDraw ? 0 : -ratingDelta);
-        int finalGold = player.currency + (isWinner ? winnerGold : isLoser ? loserGold : winnerGold);
+        // 기존 Win/Lose 처리
+        bool isWinner = (player.playerId == winnerPlayerId);
+        bool isLoser = (player.playerId == loserPlayerId);
+        string title = isWinner ? "🏆 Winner!" : "❌ Loser...";
+        int finalRating = player.rating + (isWinner ? ratingDelta : -ratingDelta);
+        int finalGold = player.currency + (isWinner ? winnerGold : loserGold);
 
         string ratingLine = $"Rating: {player.rating} → {finalRating}  ({(ratingDelta >= 0 ? "+" : "")}{ratingDelta})";
         string goldLine = $"Gold:   {player.currency} → {finalGold}  (+{(isLoser ? loserGold : winnerGold)})";
