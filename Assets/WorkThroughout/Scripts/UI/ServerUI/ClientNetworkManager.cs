@@ -161,7 +161,7 @@ public class ClientNetworkManager : MonoBehaviour
     public void TargetReceivePlayerStatsClientRpc(string jsonData)
     {
         PlayerStatsResponse playerStatsResponse = JsonConvert.DeserializeObject<PlayerStatsResponse>(jsonData);
-        Debug.Log($"{playerStatsResponse.playerStats.playerId} , Total : {playerStatsResponse.playerStats.totalGames} , Winrate : {playerStatsResponse.playerStats.winRate}");
+        //Debug.Log($"{playerStatsResponse.playerStats.playerId} , Total : {playerStatsResponse.playerStats.totalGames} , Winrate : {playerStatsResponse.playerStats.winRate}");
         SQLiteManager.Instance.SavePlayerStats(playerStatsResponse.playerStats);
     }
     #endregion

@@ -41,8 +41,6 @@ public class EmotionUIHandler : MonoBehaviour
             ? icon[2].ToString()
             : "0";
 
-        Debug.Log($"[Emotion] EM TEST ___ {icon} and {n}");
-
         int emotionNum;
         switch (emotion)
         {
