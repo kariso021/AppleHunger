@@ -175,6 +175,7 @@ public class PlayerController : NetworkBehaviour
     {
         if (!isDragging) return;
 
+        int selectedCount = selectedApples.Count;
         if (currentSum == 10)
         {
             LastDragBoxWorldPos = localDragBox.transform.position;
@@ -200,7 +201,8 @@ public class PlayerController : NetworkBehaviour
         else
         {
             ResetAppleColors();
-            StartCoroutine(TriggerFlashEffect());
+            if(selectedCount> 1)
+                StartCoroutine(TriggerFlashEffect());
         }
 
         localDragBoxRenderer.enabled = false;

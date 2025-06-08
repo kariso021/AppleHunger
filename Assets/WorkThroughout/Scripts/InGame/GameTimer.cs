@@ -2,6 +2,9 @@
 using Unity.Netcode;
 using System;
 using static UnityEngine.Rendering.DebugUI.Table;
+using static GameEnding;
+using System.Linq;
+using System.Collections;
 
 public class GameTimer : NetworkBehaviour
 {
@@ -162,8 +165,9 @@ public class GameTimer : NetworkBehaviour
                 ExtendTime(totalGameTime * 0.25f);
                 break;
             case GameEnding.GameResultType.Draw:
+                // 이부분 extension 에서 꺼줬음 그래서 판넬 다시 나올거임
+                isInExtension = false;
                 isGameEnded = true;
-                OnGameEnded?.Invoke();
                 break;
             default:
                 isGameEnded = true;
@@ -195,6 +199,7 @@ public class GameTimer : NetworkBehaviour
     {
         isPaused = true;
         isIndefinitePause = true;
+        isInExtension = false;
     }
 
     public void PauseTimer(float seconds)
@@ -211,6 +216,10 @@ public class GameTimer : NetworkBehaviour
         isPaused = false;
         isIndefinitePause = false;
     }
+
+ 
+
+
 
 
 }

@@ -36,7 +36,6 @@ public class AppleManager : NetworkBehaviour
 
     [Header("Effect Settings")]
     [SerializeField] private GameObject effectPrefab;    // 파티클 프리팹
-    private ParticleSystem[,] effectGrid;
 
     public override void OnNetworkSpawn()
     {
@@ -53,7 +52,6 @@ public class AppleManager : NetworkBehaviour
         float xOffset = (gridWidth - 1) * spacing / 2f;
         float yOffset = (gridHeight - 1) * spacing / 2f;
 
-        effectGrid = new ParticleSystem[gridHeight, gridWidth];
 
         for (int y = 0; y < gridHeight; y++)
         {
@@ -68,15 +66,6 @@ public class AppleManager : NetworkBehaviour
                 apple.SetGridPosition(y, x);
                 appleGrid[y, x] = apple;
                 appleValues[y, x] = apple.Value;
-
-                // 2) Effect 미리 생성
-                if (effectPrefab != null)
-                {
-                    var effGO = Instantiate(effectPrefab, pos, Quaternion.identity, transform);
-                    var ps = effGO.GetComponent<ParticleSystem>();
-                    ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                    effectGrid[y, x] = ps;
-                }
             }
         }
     }
@@ -90,17 +79,16 @@ public class AppleManager : NetworkBehaviour
 
         if (appleGrid[y, x] == apple)
         {
+            Vector3 worldPos = apple.transform.position;
             apple.GetComponent<NetworkObject>().Despawn();
             appleGrid[y, x] = null;
             appleValues[y, x] = 0;
 
-            var ps = effectGrid[y, x];
-            if (ps != null)
-            {
-                ps.Play();
-            }
-
             Debug.Log($"🍎 Apple despawned at ({x}, {y})");
+
+            //사과프리펩 제거 후 이펙트 생성
+            PlayRemoveEffectClientRpc(worldPos);
+
 
             if (!CanAnyAppleBeRemoved())
             {
@@ -212,4 +200,18 @@ public class AppleManager : NetworkBehaviour
 
         return false;
     }
+
+    [ClientRpc]
+    private void PlayRemoveEffectClientRpc(Vector3 worldPos)
+    {
+        if (effectPrefab == null) return;
+        // 받은 worldPos 위치에 이펙트 생성
+        var go = Instantiate(effectPrefab, worldPos, Quaternion.identity);
+        var ps = go.GetComponent<ParticleSystem>();
+        ps.Play();
+        // duration + maxLifetime 만큼 뒤에 제거
+        float life = ps.main.duration + ps.main.startLifetime.constantMax;
+        Destroy(go, life);
+    }
+
 }

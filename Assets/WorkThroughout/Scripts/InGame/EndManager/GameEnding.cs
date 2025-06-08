@@ -342,4 +342,51 @@ public class GameEnding : NetworkBehaviour
     [ClientRpc]
     private void HideDisconnectedClientRpc(ClientRpcParams rpcParams = default)
         => PlayerUI.Instance.HideDisconnectedText();
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SurrenderRequestServerRpc(int surrenderPlayerId)
+    {
+        if (!IsServer || hasFinalGameBeenHandled) return;
+
+        Debug.Log($"[Surrender] Player {surrenderPlayerId} surrendered.");
+
+        // 타이머 즉시 멈춤
+        GameTimer.Instance.StopForEndTimer();
+
+        // 항복 전용 종료 처리 시작
+        StartCoroutine(HandleGameEndBySurrender(surrenderPlayerId));
+    }
+
+    // 항복 처리 로직
+    private IEnumerator HandleGameEndBySurrender(int surrenderPlayerId)
+    {
+        // 승자/패자 결정
+        int loserId = surrenderPlayerId;
+        int winnerId = ScoreManager.Instance.GetAllScores()
+                           .Keys.FirstOrDefault(id => id != loserId);
+
+        hasFinalGameBeenHandled = true;
+        LastWinnerId = winnerId;
+        LastLoserId = loserId;
+
+        var pdm = PlayerDataManager.Instance;
+        int winRating = pdm.GetPlayerRating(winnerId);
+        int loseRating = pdm.GetPlayerRating(loserId);
+
+        // 세션 종료 → DB 제출 → 보상 계산
+        yield return pdm.UpdateAllSessionsFalse();
+        yield return SubmitResultToDB(
+            GameResultType.Win,
+            winnerId, loserId,
+            winRating, loseRating
+        );
+
+        // 클라이언트 UI 갱신
+        NotifyClientsToFetchDataClientRpc();
+
+        // 서버 셧다운
+        ShutdownNetwork();
+    }
+
+
 }

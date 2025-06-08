@@ -4,16 +4,18 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Unity.Netcode;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PlayerUI : MonoBehaviour
 {
+    [Header("Network Object")]
+    [SerializeField] private GameObject NObj; // 네트워크 오브젝트 참조
+
+
+
     [Header("Score UI")]
     [SerializeField] private TextMeshProUGUI myScoreText;
     [SerializeField] private TextMeshProUGUI opponentScoreText;
-
-
-
-
 
     [Header("Player Number UI")]
     [SerializeField] private TextMeshProUGUI myNumberText;
@@ -72,11 +74,36 @@ public class PlayerUI : MonoBehaviour
     //매칭 잡히고 게임 시작되기까지의 준비시간
     [SerializeField] private float ReadyTime = 3f;
 
+    //Surrender 패널 On/Off 그리고 surrender 승낙버튼
+    [Header("SurrenerButton")]
+    [SerializeField] private Button surrenderPopUpButton;
+    [SerializeField] private Button surrenderAcceptButton; // 승낙 버튼
+    [SerializeField] private Button surrenderCancelButton; // 취소 버튼
+    [SerializeField] private GameObject surrenderPanel; // 패널을 활성화/비활성화할 GameObject
+
+    //게임 종료시 로비로 돌아가는 버튼
+    [Header("Button Exit")]
+    [SerializeField] private Button exitButton; // 게임 종료 버튼
+
+    
+
+
+
 
     private Dictionary<int, int> playerScores = new Dictionary<int, int>();
     private int myPlayerId;
 
     public static PlayerUI Instance { get; private set; }
+
+    private void Start()
+    {
+        MatchingCancelButton.onClick.AddListener(matchcancel);
+        surrenderAcceptButton.onClick.AddListener(AcceptSurrender);
+        surrenderCancelButton.onClick.AddListener(HideSurrenderPanel);
+        surrenderPopUpButton.onClick.AddListener(ShowSurrenderPanel);
+        exitButton.onClick.AddListener(CleanNetworkAndGoToLobby);
+    }
+
 
     private void Awake()
     {
@@ -328,8 +355,34 @@ public class PlayerUI : MonoBehaviour
 
     public void matchcancel()
     {
+        if(matchMakerClient != null)
+        {
+            matchMakerClient.CancelMatch();
+        }
         matchMakerClient.CancelMatch();
+        CleanNetworkAndGoToLobby();
     }
 
+    public void ShowSurrenderPanel()
+    {
+        Debug.Log("ShowSurrenderPanel called");
+        surrenderPanel.SetActive(true);
+    }
+
+    public void HideSurrenderPanel()
+    {
+        surrenderPanel.SetActive(false);
+    }
+
+    public void AcceptSurrender()
+    {
+        GameEnding.Instance.SurrenderRequestServerRpc(SQLiteManager.Instance.player.playerId);
+    }
+
+    public void CleanNetworkAndGoToLobby()
+    {
+        Destroy(NObj);
+        SceneManager.LoadScene("TestLobby");
+    }
 
 }
