@@ -151,6 +151,7 @@ public class PlayerControllerSingle : MonoBehaviour
         {
             // 실패 시 플래시 이펙트
             StartCoroutine(TriggerFlashEffect());
+            
         }
 
         ResetAppleColors();
@@ -185,11 +186,13 @@ public class PlayerControllerSingle : MonoBehaviour
         for (int i = selectedApples.Count - 1; i >= 0; i--)
         {
             var obj = selectedApples[i];
-            if (obj == null || !bounds.Intersects(obj.GetComponent<AppleSingle>().AppleBounds))
+            var apple = obj?.GetComponent<AppleSingle>();
+            if (obj == null || apple == null || !apple.OverlapsBox(bounds))
             {
                 var renderer = obj.GetComponent<SpriteRenderer>();
                 renderer.color = originalColors[obj];
-                currentSum -= obj.GetComponent<AppleSingle>().Value;
+                apple.OnDeselect();
+                currentSum -= apple?.Value ?? 0;
                 originalColors.Remove(obj);
                 selectedApples.RemoveAt(i);
             }
@@ -198,14 +201,14 @@ public class PlayerControllerSingle : MonoBehaviour
         // 영역 내 새로 진입한 사과 선택
         foreach (var obj in GameObject.FindGameObjectsWithTag("Apple"))
         {
-            if (bounds.Intersects(obj.GetComponent<AppleSingle>().AppleBounds) && !selectedApples.Contains(obj))
-            {
-                var apple = obj.GetComponent<AppleSingle>();
-                if (apple == null) continue;
+            var apple = obj.GetComponent<AppleSingle>();
+            if (apple == null || selectedApples.Contains(obj)) continue;
 
+            if (apple.OverlapsBox(bounds)) // 선택시(현재)
+            {
                 var renderer = obj.GetComponent<SpriteRenderer>();
                 originalColors[obj] = renderer.color;
-
+                apple.OnSelect();
                 selectedApples.Add(obj);
                 currentSum += apple.Value;
                 renderer.color = Color.yellow;
@@ -213,12 +216,16 @@ public class PlayerControllerSingle : MonoBehaviour
         }
     }
 
+
     private void ResetAppleColors()
     {
         foreach (var obj in selectedApples)
         {
             if (obj != null && originalColors.TryGetValue(obj, out var col))
+            {
                 obj.GetComponent<SpriteRenderer>().color = col;
+                obj.GetComponent<AppleSingle>().OnDeselect();
+            }
         }
         selectedApples.Clear();
         originalColors.Clear();
@@ -254,7 +261,7 @@ public class PlayerControllerSingle : MonoBehaviour
         flashCanvasGroup.alpha = 0f;
 
         // 잠시 대기
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.9f);
 
         // 플래시 이미지 비활성화
         flashImage.gameObject.SetActive(false);

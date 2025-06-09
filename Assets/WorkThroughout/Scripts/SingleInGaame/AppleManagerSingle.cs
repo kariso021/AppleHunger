@@ -19,7 +19,7 @@ public class AppleManagerSingle : MonoBehaviour
 
     // 20250505 추가
     [Header("Apple Detect Size")]
-    private float appleDetectSize = 0.1f;
+    private float appleDetectSize = 0.225f;
 
     [Header("Temp Buttons")]
     public Button add;

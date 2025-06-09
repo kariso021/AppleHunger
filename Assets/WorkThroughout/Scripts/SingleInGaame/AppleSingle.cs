@@ -7,6 +7,8 @@ public class AppleSingle : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private TextMeshPro numberText;
+    // 20250608 Select 아웃라인 설정
+    public SpriteRenderer selectOutline;
 
     private int value;
     private int scoreValue = 10;
@@ -24,10 +26,10 @@ public class AppleSingle : MonoBehaviour
     public float detectSize;
 
     // 20250505 탐지범위
-    public Bounds AppleBounds => new Bounds(
-    transform.position,
-    new Vector3(detectSize, detectSize, 1f)
-    );
+    //public Bounds AppleBounds => new Bounds(
+    //transform.position,
+    //new Vector3(detectSize, detectSize, 1f)
+    //);
 
 
     
@@ -96,5 +98,46 @@ public class AppleSingle : MonoBehaviour
         else
             Debug.LogError("numberText가 할당되지 않았습니다! Inspector에서 확인하세요.");
     }
+
+    public void OnSelect()
+    {
+        selectOutline.color = new Color(255f, 255f, 255f, 255f);
+    }
+    public void OnDeselect()
+    {
+        selectOutline.color = new Color(255f, 255f, 255f, 0f);
+    }
+
+    public bool OverlapsBox(Bounds box)
+    {
+        // 원형 중심과 가장 가까운 box 위의 점을 구함
+        Vector3 closest = box.ClosestPoint(transform.position);
+
+        float radius = detectSize;
+        float sqrDist = (transform.position - closest).sqrMagnitude;
+
+        return sqrDist <= radius * radius;
+    }
+    private void OnDrawGizmosSelected()
+    {
+        float radius = detectSize;
+        Vector3 center = transform.position;
+
+        Gizmos.color = Color.cyan;
+        for (int i = 0; i < 3; i++)
+        {
+            Gizmos.DrawWireSphere(center, radius); // 굵게 보이게
+        }
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(center, 0.05f); // 중심점 강조
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(center, center + Vector3.right * radius);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(center, center + Vector3.up * radius);
+    }
+
 
 }
