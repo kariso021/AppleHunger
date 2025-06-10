@@ -175,6 +175,7 @@ public class PlayerController : NetworkBehaviour
     {
         if (!isDragging) return;
 
+        //apple 2개 이상선택되어야 
         int selectedCount = selectedApples.Count;
         if (currentSum == 10)
         {
@@ -228,45 +229,50 @@ public class PlayerController : NetworkBehaviour
 
         List<GameObject> applesToDeselect = new List<GameObject>();
 
-        foreach (GameObject apple in selectedApples)
+        foreach (GameObject go in selectedApples)
         {
-            if (apple == null) continue;
-            if (!dragBounds.Contains(apple.transform.position))
-            {
-                applesToDeselect.Add(apple);
-            }
+            if (go == null)
+                continue;
+
+            var apple = go.GetComponent<Apple>();
+            // 컴포넌트가 없거나, bounds와 겹치지 않으면 해제 대상으로
+            if (apple == null || !apple.OverlapsBox(dragBounds))
+                applesToDeselect.Add(go);
         }
 
         foreach (GameObject apple in applesToDeselect)
         {
             if (apple != null && originalColors.ContainsKey(apple))
             {
-                apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
+                //apple.GetComponent<SpriteRenderer>().color = originalColors[apple]; 구버전
+
+                //신버전
+                apple.GetComponent<Apple>()?.OnDeselect();
                 selectedApples.Remove(apple);
                 currentSum -= apple.GetComponent<Apple>().Value;
             }
         }
 
-        foreach (GameObject apple in GameObject.FindGameObjectsWithTag("Apple"))
+        foreach (var go in GameObject.FindGameObjectsWithTag("Apple"))
         {
-            if (apple == null) continue;
+            if (go == null || selectedApples.Contains(go))
+                continue;
 
-            if (dragBounds.Contains(apple.transform.position))
+            var apple = go.GetComponent<Apple>();
+            if (apple == null)
+                continue;
+
+            if (apple.OverlapsBox(dragBounds))
             {
-                Apple appleComponent = apple.GetComponent<Apple>();
-                if (!selectedApples.Contains(apple) && appleComponent != null)
-                {
-                    SpriteRenderer appleRenderer = apple.GetComponent<SpriteRenderer>();
+                var rend = go.GetComponent<SpriteRenderer>();
+                // 최초 색 저장
+                if (!originalColors.ContainsKey(go))
+                    originalColors[go] = rend.color;
 
-                    if (!originalColors.ContainsKey(apple))
-                    {
-                        originalColors[apple] = appleRenderer.color;
-                    }
-
-                    selectedApples.Add(apple);
-                    currentSum += appleComponent.Value;
-                    appleRenderer.color = Color.yellow;
-                }
+                // 선택 콜백
+                apple.OnSelect();
+                selectedApples.Add(go);
+                currentSum += apple.Value;
             }
         }
     }
@@ -277,7 +283,8 @@ public class PlayerController : NetworkBehaviour
         {
             if (apple != null && originalColors.ContainsKey(apple))
             {
-                apple.GetComponent<SpriteRenderer>().color = originalColors[apple];
+                //apple.GetComponent<SpriteRenderer>().color = originalColors[apple]; 구버전
+                apple.GetComponent<Apple>()?.OnDeselect(); // 신버전
             }
         }
         selectedApples.Clear();

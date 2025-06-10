@@ -118,6 +118,8 @@ public class AppleSingle : MonoBehaviour
 
         return sqrDist <= radius * radius;
     }
+
+    //에디터 디버깅용 Gizmos
     private void OnDrawGizmosSelected()
     {
         float radius = detectSize;

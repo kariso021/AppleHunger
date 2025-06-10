@@ -12,6 +12,11 @@ public class Apple : NetworkBehaviour
 
     [SerializeField] private TextMeshPro numberText;
 
+
+    [SerializeField] private float detectSize = 0.2f; // 탐지 범위 크기
+
+    [SerializeField] private SpriteRenderer selectOutline;
+
     public int GridX { get; private set; }
     public int GridY { get; private set; }
 
@@ -61,4 +66,26 @@ public class Apple : NetworkBehaviour
             Debug.LogError("numberText가 할당되지 않았습니다! Inspector에서 확인하세요.");
         }
     }
+
+    public void OnSelect()
+    {
+        selectOutline.color = new Color(255f, 255f, 255f, 255f);
+    }
+    public void OnDeselect()
+    {
+        selectOutline.color = new Color(255f, 255f, 255f, 0f);
+    }
+
+    //판정범위용
+    public bool OverlapsBox(Bounds box)
+    {
+        // 원형 중심과 가장 가까운 box 위의 점을 구함
+        Vector3 closest = box.ClosestPoint(transform.position);
+
+        float radius = detectSize;
+        float sqrDist = (transform.position - closest).sqrMagnitude;
+
+        return sqrDist <= radius * radius;
+    }
+
 }

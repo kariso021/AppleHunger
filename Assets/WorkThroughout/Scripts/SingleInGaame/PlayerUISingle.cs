@@ -10,7 +10,6 @@ public class PlayerUISingle : MonoBehaviour
 
     [Header("Score UI")]
     [SerializeField] private TextMeshProUGUI scoreText;
-    [SerializeField] private TextMeshProUGUI comboText;
 
     [Header("Timer UI")]
     [SerializeField] private Slider timerSlider;
@@ -85,7 +84,6 @@ public class PlayerUISingle : MonoBehaviour
     public void UpdateScoreUI(int totalScore, int comboCount)
     {
         if (scoreText != null) scoreText.text = $"Score: {totalScore}";
-        if (comboText != null) comboText.text = $"Combo: {comboCount}";
     }
 
     /// <summary>

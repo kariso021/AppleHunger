@@ -119,7 +119,9 @@ public class PlayerControllerSingle : MonoBehaviour
     {
         if (!isDragging) return;
 
-        if (currentSum == 10)
+        int selectedCount = selectedApples.Count;
+
+        if (currentSum == 10 && selectedCount >=2)
         {
             // 올바르게 10점 모은 경우: 사과 제거 & 점수 처리
             int appleCount = selectedApples.Count;
@@ -147,7 +149,7 @@ public class PlayerControllerSingle : MonoBehaviour
             comboUIgameObj.gameObject.transform.position = localDragBox.transform.position;
             comboUIgameObj.ShowComboEffect();
         }
-        else
+        else if(selectedCount >=2)
         {
             // 실패 시 플래시 이펙트
             StartCoroutine(TriggerFlashEffect());
