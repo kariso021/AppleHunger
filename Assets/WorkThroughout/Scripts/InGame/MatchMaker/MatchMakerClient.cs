@@ -208,10 +208,12 @@ public class MatchMakerClient : MonoBehaviour
                     break;
                 case StatusOptions.Failed:
                     gotAssingment = true;
+                    HandleTicketCancellation("매칭에 실패했습니다.");
                     Debug.LogError(message : $"Failed to get Ticket Status. Error : {multiplayAssignment.Message}");
                     break;
                 case StatusOptions.Timeout:
                     gotAssingment = true;
+                    HandleTicketCancellation("매칭 시간이 초과되었습니다.");
                     Debug.LogError(message: $"Failed to get ticket because of Timeout");
                     break;
                 default:
@@ -394,11 +396,6 @@ public class MatchMakerClient : MonoBehaviour
 
     public void CancelMatch()
     {
-        // 1) 대기 UI 바로 꺼주기
-        if (waitingCanvas != null)
-            waitingCanvas.SetActive(false);
-
-        // 2) _ticketId가 남아있으면 취소 요청
         if (!string.IsNullOrEmpty(_ticketId))
         {
             // 비동기 취소 작업 시작
@@ -411,6 +408,18 @@ public class MatchMakerClient : MonoBehaviour
         {
             Debug.Log("[MatchMakerClient] 취소할 매칭 티켓이 없습니다.");
         }
+    }
+
+    private void HandleTicketCancellation(string userMessage)
+    {
+        // 1) 티켓 서버 쪽에서도 삭제
+        _ = CancelTicketIfExists();
+
+        _ticketId = null;
+
+        matchResultText.text = userMessage;
+
+        Debug.Log($"[MatchMakerClient] {userMessage}");
     }
 
 
