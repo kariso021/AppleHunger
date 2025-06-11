@@ -33,9 +33,6 @@ public class PlayerUISingle : MonoBehaviour
     [SerializeField] private GameObject countPanel;
     [SerializeField] private TextMeshProUGUI countText;
 
-    public GameObject EmoticonPanel;
-
-
 
     private void Awake()
     {
@@ -46,8 +43,6 @@ public class PlayerUISingle : MonoBehaviour
 
     private void Start()
     {
-        EmoticonPanel.SetActive(false);
-
         // 초기 점수·콤보 표시
         UpdateScoreUI(ScoreManagerSingle.Instance.TotalScore,
                       ScoreManagerSingle.Instance.ComboCount);

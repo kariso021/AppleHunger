@@ -49,7 +49,6 @@ public class Profile : MonoBehaviour
             Debug.LogWarning("[Profile] 불완전한 데이터 상태");
             return;
         }
-        Debug.Log($"[과연] 이름은 {gameObject.name}");
         SetProfile(
             SQLiteManager.Instance.player.playerName,
             SQLiteManager.Instance.stats.totalGames,

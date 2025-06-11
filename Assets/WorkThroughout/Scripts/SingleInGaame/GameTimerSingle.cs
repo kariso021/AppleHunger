@@ -82,7 +82,6 @@ public class GameTimerSingle : MonoBehaviour
         {
             remainingTime = 0f;
             OnTimerUpdated?.Invoke(remainingTime);
-
             isGameEnded = true;
             OnGameEnded?.Invoke();
         }
