@@ -18,7 +18,7 @@ public class PlayerController : NetworkBehaviour
     private Vector2 dragStartPos;
     private Vector2 dragEndPos;
     private bool isDragging = false;
-    private bool isDragRestricted = false;
+    private bool isDragRestricted = true; //초기값 true 로 잡고
     private bool isCooldownActive = false;
 
     [SerializeField] ClientComboUI clientComboUI; // 콤보 UI를 위한 참조
@@ -362,19 +362,30 @@ public class PlayerController : NetworkBehaviour
     }
 
 
-    //-------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------조작제한
 
-    [ClientRpc]
-    public void RestrictDragOnlyClientRpc()
+
+    public void RestrictDragForWhile(int seconds)
     {
-        if (!IsOwner) return;
-        StartCoroutine(RestrictDragOnlyCoroutine());
+        StartCoroutine(RestrictDragOnlyCoroutine(seconds));
     }
 
-    private IEnumerator RestrictDragOnlyCoroutine()
+    private IEnumerator RestrictDragOnlyCoroutine(int seconds)
     {
         isDragRestricted = true;
-        yield return new WaitForSeconds(2f); // 2초 동안 조작 제한
+        yield return new WaitForSeconds(seconds); // 2초 동안 조작 제한
+        isDragRestricted = false;
+    }
+
+    public void RestrictDrag()
+    {
+        if (!IsOwner) return;
+        isDragRestricted = true;
+    }
+
+    public void UnrestrictDrag()
+    {
+        if (!IsOwner) return;
         isDragRestricted = false;
     }
 

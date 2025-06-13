@@ -8,6 +8,8 @@ using TMPro;
 
 public class PlayerControllerSingle : MonoBehaviour
 {
+    public static PlayerControllerSingle Instance { get; private set; }
+
     private Camera mainCamera;
     private List<GameObject> selectedApples = new List<GameObject>();
     private Dictionary<GameObject, Color> originalColors = new Dictionary<GameObject, Color>();
@@ -15,7 +17,7 @@ public class PlayerControllerSingle : MonoBehaviour
     private Vector2 dragStartPos;
     private Vector2 dragEndPos;
     private bool isDragging = false;
-    private bool isDragRestricted = false;
+    private bool isDragRestricted = true;
 
     [Header("Drag Box")]
     public GameObject localDragBox;
@@ -39,6 +41,9 @@ public class PlayerControllerSingle : MonoBehaviour
     private void Awake()
     {
         EnhancedTouchSupport.Enable();
+
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
 
         // 플래시 이펙트 설정
         flashCanvasGroup = flashImage.GetComponent<CanvasGroup>();
@@ -292,4 +297,17 @@ public class PlayerControllerSingle : MonoBehaviour
 
         restrictTimerSlider.gameObject.SetActive(false);
     }
+
+    public void RestrictAndRelease_When_Start_And_End(bool Start)
+    {
+        if (Start == true)
+        {
+            isDragRestricted = false;
+        }
+        else
+        {
+            isDragRestricted = true;
+        }
+    }
+
 }

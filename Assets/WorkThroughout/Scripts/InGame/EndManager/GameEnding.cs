@@ -7,6 +7,8 @@ using Unity.Netcode;
 using UnityEngine.SceneManagement;
 using TMPro;
 
+
+//엔딩이라기보단... 분기로직에 가까움
 public class GameEnding : NetworkBehaviour
 {
     public static GameEnding Instance { get; private set; }
@@ -48,7 +50,6 @@ public class GameEnding : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         if (!IsServer) return;    // 서버가 아니면 아래 로직 진입하지 않음
-
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
     }
@@ -159,6 +160,8 @@ public class GameEnding : NetworkBehaviour
             yield break;
         }
 
+        //여기서 드래그 제한
+        RestictControllerWhenStartClientRpc(true);
         hasFinalGameBeenHandled = true;
 
         // clientId → playerId/rating
@@ -204,7 +207,7 @@ public class GameEnding : NetworkBehaviour
             if (!hasExtendedOnce)
             {
                 hasExtendedOnce = true;
-                StartCoroutine(ExtendGameTime());
+                StartCoroutine(ExtendGameTime(extendNoticeDuration));
                 return (GameResultType.Extend, topPid, secondPid);
             }
             // 연장 후에도 동점 → 무승부
@@ -215,17 +218,40 @@ public class GameEnding : NetworkBehaviour
         return (GameResultType.Win, topPid, secondPid);
     }
 
-    private IEnumerator ExtendGameTime()
+    private IEnumerator ExtendGameTime(int seconds)
     {
         // 서버→클라 연장 알림
         NotifyClientsToExtendGameTimeClientRpc();
 
-        // 클라이언트 조작 제한
-        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-            if (client.PlayerObject.TryGetComponent(out PlayerController pc))
-                pc.RestrictDragOnlyClientRpc();
+       RestrictAllClientsDragClientRpc(seconds);
 
         yield return new WaitForSeconds(extendNoticeDuration);
+    }
+
+
+    //제한 보내는것
+    [ClientRpc]
+    private void RestrictAllClientsDragClientRpc(int seconds)
+    {
+    
+        var pc = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>();
+
+        pc.RestrictDragForWhile(seconds);
+    }
+
+    [ClientRpc]
+    private void RestictControllerWhenStartClientRpc(bool start)
+    {
+        var pc = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>();
+        if (start)
+        {
+            pc.RestrictDrag();
+        }
+        else
+        {
+            pc.UnrestrictDrag();
+        }
+
     }
 
     [ClientRpc]
@@ -360,6 +386,9 @@ public class GameEnding : NetworkBehaviour
     // 항복 처리 로직
     private IEnumerator HandleGameEndBySurrender(int surrenderPlayerId)
     {
+        // true 일시 드래그 제한
+        RestictControllerWhenStartClientRpc(true);
+
         // 승자/패자 결정
         int loserId = surrenderPlayerId;
         int winnerId = ScoreManager.Instance.GetAllScores()

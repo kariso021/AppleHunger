@@ -3563,6 +3563,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2421704890276172023, guid: 153d597dc1b51c34d87ea168a323df96, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1000
+      objectReference: {fileID: 0}
     - target: {fileID: 4177360418330614034, guid: 153d597dc1b51c34d87ea168a323df96, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -4128,6 +4132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee113fb77381d684d9743dbc0236b6ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hasReleasedDrag: 0
   totalGameTime: 10
   readyGameTime: 5
 --- !u!1 &1660449343

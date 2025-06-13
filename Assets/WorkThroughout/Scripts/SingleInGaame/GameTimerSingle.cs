@@ -9,6 +9,8 @@ public class GameTimerSingle : MonoBehaviour
     /// <summary>
     /// 게임 시작부터의 총 플레이 시간 (초)
     /// </summary>
+    /// 
+    [SerializeField] private bool hasReleasedDrag = false; // 드래그 제한 해제 여부
     [SerializeField] private float totalGameTime = 60f;
     [SerializeField] private float readyGameTime = 5f; // 준비 시간
 
@@ -76,11 +78,19 @@ public class GameTimerSingle : MonoBehaviour
             return; // 멈춰있는 동안 시간 감소 안 시킴
         }
 
+        if(!hasReleasedDrag &&remainingTime <= totalGameTime)
+        {
+            hasReleasedDrag = true;
+            PlayerControllerSingle.Instance.RestrictAndRelease_When_Start_And_End(true);
+        }
+
+
         // 남은 시간 감소
         remainingTime -= Time.deltaTime;
         if (remainingTime <= 0f)
         {
-            remainingTime = 0f;
+            PlayerControllerSingle.Instance.RestrictAndRelease_When_Start_And_End(false);
+           remainingTime = 0f;
             OnTimerUpdated?.Invoke(remainingTime);
             isGameEnded = true;
             OnGameEnded?.Invoke();
@@ -91,9 +101,7 @@ public class GameTimerSingle : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 남은 시간에 추가 시간을 더합니다.
-    /// </summary>
+    /// 남은 시간에 추가 시간을 더함
     /// <param name="extraSeconds">추가할 초 단위 시간</param>
     public void ExtendTime(float extraSeconds)
     {

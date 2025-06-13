@@ -70,7 +70,6 @@ public class GameTimer : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        
         if (IsServer)
         {
             //자동시작 로직 다 제거해줘야함
@@ -80,7 +79,6 @@ public class GameTimer : NetworkBehaviour
             remainingTime.Value = totalGameTime + readyGameTime;
             isGameEnded = false;
             isInExtension = false;
-
             hasSpawnedApples = false;
 
             // 자동 시작
@@ -134,6 +132,7 @@ public class GameTimer : NetworkBehaviour
         // now >= startTime + readyGameTime 이고, 아직 스폰 안 했다면
         if (!hasSpawnedApples && nowTime >= startTime + readyGameTime)
         {
+            
             AppleManager.Instance.SpawnApplesInGrid();
             hasSpawnedApples = true;
         }
@@ -216,10 +215,5 @@ public class GameTimer : NetworkBehaviour
         isPaused = false;
         isIndefinitePause = false;
     }
-
- 
-
-
-
 
 }
