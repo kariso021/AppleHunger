@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 372b641528718ed489d46c21587985e5
+guid: d80c845186a6b4e4ab6baf3e41750aba
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4798825762170945512
-    second: monkey_0
+      213: -4760561001564533253
+    second: horay_modified_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: monkey_0
+      name: horay_modified_0
       rect:
         serializedVersion: 2
         x: 0
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 810cec20565276db0800000000000000
-      internalID: -4798825762170945512
+      spriteID: bfd0b2addf61fedb0800000000000000
+      internalID: -4760561001564533253
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      monkey_0: -4798825762170945512
+      horay_modified_0: -4760561001564533253
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

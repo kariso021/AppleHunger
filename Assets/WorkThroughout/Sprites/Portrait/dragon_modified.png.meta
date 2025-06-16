@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d22ff3d1eebfd2d49a56345ac760f60e
+guid: 146939d7567edb64b9e99577fcff0b5d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8636221404721523813
-    second: sheep_0
+      213: -1985683262686914863
+    second: dragon_modified_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sheep_0
+      name: dragon_modified_0
       rect:
         serializedVersion: 2
         x: 0
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b93d2f9936af52880800000000000000
-      internalID: -8636221404721523813
+      spriteID: 1d69b1bd79f6174e0800000000000000
+      internalID: -1985683262686914863
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      sheep_0: -8636221404721523813
+      dragon_modified_0: -1985683262686914863
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

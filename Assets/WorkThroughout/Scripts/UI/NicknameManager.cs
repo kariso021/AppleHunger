@@ -16,7 +16,7 @@ public class NicknameManager : MonoBehaviour
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private Button closeButton;
 
-    private int cost = 10000;
+    private int cost = 3000;
 
     private HashSet<string> forbiddenWords;
     private bool isChangingNickname = false;

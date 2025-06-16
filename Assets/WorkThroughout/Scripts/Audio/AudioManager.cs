@@ -145,23 +145,70 @@ public class AudioManager : MonoBehaviour
         if (bgmSlider != null) bgmSlider.value = bgmVolume;
         if (vfxSlider != null) vfxSlider.value = vfxVolume;
 
-        if (bgmToggle != null) bgmToggle.isOn = !isBGMMuted;
-        if (vfxToggle != null) vfxToggle.isOn = !isVFXMuted;
+        if (bgmToggle != null)
+        {
+            bgmToggle.isOn = !isBGMMuted;
+
+            var boardOff = bgmToggle.transform.Find("Board_Off");
+            var boardOn = bgmToggle.transform.Find("Board_On");
+
+            if (boardOff != null && boardOn != null)
+            {
+                boardOff.gameObject.SetActive(isBGMMuted);
+                boardOn.gameObject.SetActive(!isBGMMuted);
+            }
+        }
+
+        if (vfxToggle != null)
+        {
+            vfxToggle.isOn = !isVFXMuted;
+
+            var boardOff = vfxToggle.transform.Find("Board_Off");
+            var boardOn = vfxToggle.transform.Find("Board_On");
+
+            if (boardOff != null && boardOn != null)
+            {
+                boardOff.gameObject.SetActive(isVFXMuted);
+                boardOn.gameObject.SetActive(!isVFXMuted);
+            }
+        }
     }
+
 
     public void ToggleBGMMute(bool isOn)
     {
-        isBGMMuted = !isOn; // 토글이 켜져있으면 음소거 false
+        isBGMMuted = !isOn; // 토글이 켜져있으면 음소거는 false
         ApplyVolumes();
         PlayerPrefs.SetInt(BGM_MUTE_KEY, isBGMMuted ? 1 : 0);
+
+        // ✅ 이미지 제어
+        Transform boardOff = bgmToggle.transform.Find("Board_Off");
+        Transform boardOn = bgmToggle.transform.Find("Board_On");
+
+        if (boardOff != null && boardOn != null)
+        {
+            boardOff.gameObject.SetActive(!isOn); // 꺼짐일 때만 켜짐
+            boardOn.gameObject.SetActive(isOn);   // 켜짐일 때만 켜짐
+        }
     }
+
 
     public void ToggleVFXMute(bool isOn)
     {
         isVFXMuted = !isOn;
         ApplyVolumes();
         PlayerPrefs.SetInt(VFX_MUTE_KEY, isVFXMuted ? 1 : 0);
+
+        Transform boardOff = vfxToggle.transform.Find("Board_Off");
+        Transform boardOn = vfxToggle.transform.Find("Board_On");
+
+        if (boardOff != null && boardOn != null)
+        {
+            boardOff.gameObject.SetActive(!isOn);
+            boardOn.gameObject.SetActive(isOn);
+        }
     }
+
 
     public void OnBGMVolumeChanged(float value)
     {
@@ -247,4 +294,6 @@ public class AudioManager : MonoBehaviour
         Debug.Log($"[LoadSettings] bgmVolume: {bgmVolume}, mute? {isBGMMuted}, vfxVolume: {vfxVolume} , mute? {isVFXMuted}");
 
     }
+
+
 }

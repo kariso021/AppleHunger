@@ -61,6 +61,10 @@ public class PopupManager : MonoBehaviour
             pendingOnComplete = () => OnPlayerDetailsLoaded();
             StartCoroutine(ClientNetworkManager.Instance.GetPlayerDetalis(SQLiteManager.Instance.player.playerId));
         }
+        else if(popup.tag == "Setting")
+        {
+
+        }
 
     }
     public void ShowPopup(GameObject popup, int playerId)
