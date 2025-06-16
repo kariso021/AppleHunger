@@ -161,7 +161,7 @@ public class GameEnding : NetworkBehaviour
         }
 
         //여기서 드래그 제한
-        RestictControllerWhenStartClientRpc(true);
+        RestictControllerWhenStartClientRpc(false);
         hasFinalGameBeenHandled = true;
 
         // clientId → playerId/rating
@@ -240,7 +240,7 @@ public class GameEnding : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void RestictControllerWhenStartClientRpc(bool start)
+    public void RestictControllerWhenStartClientRpc(bool start)
     {
         var pc = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>();
         if (start)
@@ -386,8 +386,8 @@ public class GameEnding : NetworkBehaviour
     // 항복 처리 로직
     private IEnumerator HandleGameEndBySurrender(int surrenderPlayerId)
     {
-        // true 일시 드래그 제한
-        RestictControllerWhenStartClientRpc(true);
+        // true 일시 드래그 풀림
+        RestictControllerWhenStartClientRpc(false);
 
         // 승자/패자 결정
         int loserId = surrenderPlayerId;

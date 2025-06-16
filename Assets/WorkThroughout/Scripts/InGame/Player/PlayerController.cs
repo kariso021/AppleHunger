@@ -18,7 +18,7 @@ public class PlayerController : NetworkBehaviour
     private Vector2 dragStartPos;
     private Vector2 dragEndPos;
     private bool isDragging = false;
-    private bool isDragRestricted = true; //초기값 true 로 잡고
+    private bool isDragRestricted = false; //초기값 true 로 잡고
     private bool isCooldownActive = false;
 
     [SerializeField] ClientComboUI clientComboUI; // 콤보 UI를 위한 참조
@@ -130,6 +130,14 @@ public class PlayerController : NetworkBehaviour
             localDragBoxRenderer = localDragBox.GetComponent<SpriteRenderer>();
             localDragBoxRenderer.enabled = true;
         }
+
+        // 준비시간때 조작 불가능하게
+        // 처음엔 드래그 제한
+        RestrictDrag();
+
+        // GameTimer와 연동
+        if (GameTimer.Instance != null)
+            GameTimer.OnTimerUpdated += CheckControlTime;
     }
 
     private void OnFingerDown(Finger finger)
@@ -418,6 +426,18 @@ public class PlayerController : NetworkBehaviour
         restrictTimerSlider.fillAmount = 0f;
 
         restrictTimerSlider.gameObject.SetActive(false);
+    }
+
+    //-------------------------------------------------------------------------------------------- 컨트롤러 조작가능여부
+
+    private void CheckControlTime(float newTime)
+    {
+        // 준비 시간 경과 후 한번만 해제
+        if (GameTimer.Instance != null && GameTimer.Instance.CanControl)
+        {
+            UnrestrictDrag(); 
+            GameTimer.OnTimerUpdated -= CheckControlTime; // 다시 호출되지 않게 해제
+        }
     }
 
 }

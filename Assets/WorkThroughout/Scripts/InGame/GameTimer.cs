@@ -37,7 +37,18 @@ public class GameTimer : NetworkBehaviour
     public static event Action OnGameEnded;
     public static event Action<float> OnTimerUpdated;
 
-    
+
+    //시작전 일시정지 로직
+    public bool IsControlEnabled => NetworkManager.Singleton.ServerTime.TimeAsFloat >= (startTime + readyGameTime);
+
+    private NetworkVariable<bool> canControl = new NetworkVariable<bool>(
+    false,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);
+    public bool CanControl => canControl.Value;
+
+
 
     public static GameTimer Instance { get; private set; }
     public bool IsInExtension => isInExtension;
@@ -122,6 +133,8 @@ public class GameTimer : NetworkBehaviour
 
         }
 
+
+
         // 남은 시간 계산
         float nowTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
         float newTime = isInExtension
@@ -136,6 +149,13 @@ public class GameTimer : NetworkBehaviour
             AppleManager.Instance.SpawnApplesInGrid();
             hasSpawnedApples = true;
         }
+
+        if (!canControl.Value && nowTime >= startTime + readyGameTime)
+        {
+            canControl.Value = true;
+            GameEnding.Instance.RestictControllerWhenStartClientRpc(true); //start
+        }
+
 
 
 
