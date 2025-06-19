@@ -14,15 +14,17 @@ public class ItemData : MonoBehaviour
     public string acquiredAt; // 아이템 획득 날짜 (JSON 변환을 위해 문자열)
 
     public Image itemIcon;
-    public Image itemLockedImage;
+    public GameObject itemLockedImage;
     public TMP_Text itemPriceText;
-    private Button itemButton;
+    public TMP_Text itemNameText;
+    public Button itemButton;
 
     public bool isPurchasing = false;
 
     private void Awake()
     {
-        itemButton = GetComponent<Button>();
+        itemButton = GetComponentInChildren<Button>();
+        //Debug.Log($"[아이템체크] id : {itemUniqueId} , {itemButton.gameObject.name}");
     }
 
     public void SetItemData(int playerId, int itemUniqueId, string itemType, int price, bool isUnlocked, string acquiredAt)
@@ -37,23 +39,26 @@ public class ItemData : MonoBehaviour
         // UI 업데이트
         itemPriceText.text = price.ToString();
         itemLockedImage.gameObject.SetActive(!isUnlocked);
+        itemNameText.text = selectItemNameByItemId(itemUniqueId);
+
 
         itemButton.onClick.RemoveAllListeners();
-        if (!isUnlocked)
+        if (!isUnlocked) // 현재 아이템이 해금 상태일 경우
         {
             itemButton.onClick.AddListener(() =>
             {
                 if (isPurchasing) return;       // ✅ 이미 구매 중이면 무시
                 isPurchasing = true;            // ✅ 구매 시작
 
-                Debug.Log($"🔓 아이템 구매 시도: {itemUniqueId}");
+                Debug.Log($"[Item] Try purchase item : {itemUniqueId}");
                 PopupManager.Instance.ShowLoading("구매");
                 StartCoroutine(PurchaseItemCoroutine());
             });
         }
-        else
+        else // 현재 아이템이 잠금 상태일 경우
         {
             itemButton.onClick.AddListener(() => applySelectItemDataToCurrentItemData(itemType));
+            itemPriceText.text = "보유중";
         }
     }
     private IEnumerator PurchaseItemCoroutine()
@@ -70,7 +75,7 @@ public class ItemData : MonoBehaviour
         yield return ClientNetworkManager.Instance.PurchasePlayerItem(
            SQLiteManager.Instance.player.playerId, itemUniqueId
         );
-        Debug.Log("구매완료");
+        Debug.Log("[Item] Complete Purchasing");
         yield return new WaitForSeconds(1f);
         PopupManager.Instance.HideLoading();
         isPurchasing = false; // ✅ 완료 후 다시 클릭 가능
@@ -113,4 +118,24 @@ public class ItemData : MonoBehaviour
 
     }
 
+    private string selectItemNameByItemId(int itemUniqueId)
+    {
+        switch (itemUniqueId % 100)
+        {
+            case 1: // bunny;
+                return "토끼";
+            case 2: // dragon
+                return "용";
+            case 3: // rat
+                return "쥐";
+            case 4: // sheep
+                return "양";
+            case 5: // monkey
+                return "원숭이";
+            case 6: // tiger
+                return "호랑이";
+            default:
+                return "None";
+        }
+    }
 }

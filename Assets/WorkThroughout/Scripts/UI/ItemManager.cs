@@ -14,35 +14,6 @@ public class ItemManager : MonoBehaviour
     public GameObject currentItemIcon;
     public GameObject currentItemBoard;
 
-    //private void Awake()
-    //{
-    //    SceneManager.sceneLoaded += OnSceneLoaded;
-    //}
-    //void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    //{
-    //    StartCoroutine(DelayedAssignUIReferences());
-    //}
-
-    //private IEnumerator DelayedAssignUIReferences()
-    //{
-    //    yield return new WaitForSeconds(0.1f); // 1프레임 대기 (혹은 WaitForSeconds(0.1f))
-
-    //    itemDataIconListHolder =
-    //           GameObject.Find("ItemDataIconListHolderGameObject");
-    //    itemDataBoardListHolder =
-    //        GameObject.Find("ItemDataBoardListHolderGameObject");
-    //    currentItemIcon =
-    //        GameObject.Find("CurrentIconGameObject");
-    //    currentItemBoard =
-    //        GameObject.Find("CurrentBoardGameObject");
-
-    //    Debug.Log("ITEM MANAGER UI 요소 재할당 완료!");
-    //}
-
-    //private void OnDestroy()
-    //{
-    //    SceneManager.sceneLoaded -= OnSceneLoaded;
-    //}
     private void OnEnable()
     {
         StartCoroutine(SubscribeAfterFrame());
@@ -115,9 +86,9 @@ public class ItemManager : MonoBehaviour
                     AddressableManager.Instance.itemBoardObj.Add(itemInstance);
             }
         }
-        GridLayoutGroup grid = holder.GetComponent<GridLayoutGroup>();
-        RectTransform rect = holder.GetComponent<RectTransform>();
-        AutoAdjustGridByResolution(grid, rect, grid.constraintCount);
+        //GridLayoutGroup grid = holder.GetComponent<GridLayoutGroup>();
+        //RectTransform rect = holder.GetComponent<RectTransform>();
+        //AutoAdjustGridByResolution(grid, rect, grid.constraintCount);
 
 
         if (type == "icon")

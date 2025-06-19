@@ -59,13 +59,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2628972260204566225}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5148583374226634570}
-  m_Father: {fileID: 3666742596267491146}
+  m_Father: {fileID: 3798652346108427735}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -318,6 +318,7 @@ RectTransform:
   - {fileID: 8149340035626018817}
   - {fileID: 5144648632024206084}
   - {fileID: 2274396238529601768}
+  - {fileID: 5592609570902576072}
   m_Father: {fileID: 3666742596267491146}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -474,6 +475,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3666742596267491146}
   - component: {fileID: 2222396071941035423}
+  - component: {fileID: 2274001716894879608}
   m_Layer: 5
   m_Name: UI_Unit_Item_Slot_Shop
   m_TagString: Untagged
@@ -494,7 +496,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3798652346108427735}
-  - {fileID: 5592609570902576072}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -522,6 +523,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2274001716894879608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5154826560211828326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30061df540c83d44f87e9bdd59ce056c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 0
+  playerId: 0
+  itemUniqueId: 0
+  itemType: 
+  price: 0
+  isUnlocked: 0
+  acquiredAt: 
+  itemIcon: {fileID: 547766160625410294}
+  itemLockedImage: {fileID: 2628972260204566225}
+  itemPriceText: {fileID: 8910407793941234595}
+  itemNameText: {fileID: 1212887108006247964}
+  itemButton: {fileID: 0}
+  isPurchasing: 0
 --- !u!1 &5631522811081617906
 GameObject:
   m_ObjectHideFlags: 0
