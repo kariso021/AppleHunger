@@ -3014,7 +3014,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8392525164405205729, guid: 33b10fcee2492f54cb25fcc59e3bb860, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8731855195175702480, guid: 33b10fcee2492f54cb25fcc59e3bb860, type: 3}
       propertyPath: m_IsActive
@@ -3578,6 +3578,10 @@ PrefabInstance:
     - target: {fileID: 6838485433182934350, guid: 153d597dc1b51c34d87ea168a323df96, type: 3}
       propertyPath: m_Name
       value: UI_SingleGame
+      objectReference: {fileID: 0}
+    - target: {fileID: 6838485433182934350, guid: 153d597dc1b51c34d87ea168a323df96, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4457,7 +4461,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1871182814
 Transform:
   m_ObjectHideFlags: 0

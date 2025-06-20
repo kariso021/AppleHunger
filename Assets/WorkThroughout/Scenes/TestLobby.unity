@@ -7281,7 +7281,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 878625134042899623, guid: 38c9c798b42d3b64392eea6517f01127, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 899180042919794165, guid: 38c9c798b42d3b64392eea6517f01127, type: 3}
       propertyPath: m_AnchorMax.y
@@ -17795,6 +17795,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3679070487359837617, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 8941527943232587807, guid: b378337c4ae86894d9b17eaba20a7413, type: 3}
     - target: {fileID: 3722294752788342411, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -17815,6 +17819,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -25
       objectReference: {fileID: 0}
+    - target: {fileID: 3739702091972708971, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -4075403643260323513, guid: bb6b584b3c479e1438581c52878d4d8d, type: 3}
+    - target: {fileID: 5574086822627569313, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 1160167075835631722, guid: 7831bee57b65b7a44ac8fe1aa5bc8f85, type: 3}
     - target: {fileID: 5735663032131246222, guid: 2d80b6ad11a5f5b4d996621a48462605, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -18864,6 +18876,7 @@ MonoBehaviour:
   itemLockedImage: {fileID: 0}
   itemPriceText: {fileID: 0}
   itemNameText: {fileID: 0}
+  itemButton: {fileID: 0}
   isPurchasing: 0
 --- !u!1 &1266835260
 GameObject:
@@ -20475,6 +20488,7 @@ MonoBehaviour:
   itemLockedImage: {fileID: 0}
   itemPriceText: {fileID: 0}
   itemNameText: {fileID: 0}
+  itemButton: {fileID: 0}
   isPurchasing: 0
 --- !u!114 &1378472440 stripped
 MonoBehaviour:
