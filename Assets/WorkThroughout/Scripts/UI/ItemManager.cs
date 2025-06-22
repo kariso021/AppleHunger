@@ -86,6 +86,8 @@ public class ItemManager : MonoBehaviour
                     AddressableManager.Instance.itemBoardObj.Add(itemInstance);
             }
         }
+
+        // 20250619 기존에 GridLayout이던걸 ㅜ전ㅣ 무
         //GridLayoutGroup grid = holder.GetComponent<GridLayoutGroup>();
         //RectTransform rect = holder.GetComponent<RectTransform>();
         //AutoAdjustGridByResolution(grid, rect, grid.constraintCount);

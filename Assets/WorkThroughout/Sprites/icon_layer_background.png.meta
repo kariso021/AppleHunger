@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a2bb2f03d0d5de8488eb41a177eaa375
+guid: 15029b3d8aeeed641ac686ae7d6f24c5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8431261956473260057
-    second: ICN_Currency_Coin_0
+      213: -8891985786617475214
+    second: icon_layer_background_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ICN_Currency_Coin_0
+      name: icon_layer_background_0
       rect:
         serializedVersion: 2
-        x: 15
-        y: 15
-        width: 277
-        height: 277
+        x: 0
+        y: 0
+        width: 512
+        height: 512
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -127,8 +127,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7e7752cdbe32efa80800000000000000
-      internalID: -8431261956473260057
+      spriteID: 27fc7d0f902599480800000000000000
+      internalID: -8891985786617475214
       vertices: []
       indices: 
       edges: []
@@ -144,7 +144,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      ICN_Currency_Coin_0: -8431261956473260057
+      icon_layer_background_0: -8891985786617475214
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
