@@ -115,6 +115,7 @@ public class PlayerUI : MonoBehaviour
 
         DisconnectedText.gameObject.SetActive(false);
         countPanel.SetActive(false);
+        surrenderPanel.SetActive(false);
         //opponentIntroduceUI.gameObject.SetActive(false);
 
     }
@@ -151,12 +152,12 @@ public class PlayerUI : MonoBehaviour
         // playerId가 내 ID와 같으면 내 점수, 아니면 상대 점수 업데이트
         if (playerId == localId)
         {
-            myScoreText.text = $"My Score: {newScore}";
+            myScoreText.text = $"Score: {newScore}";
             Debug.Log($"[PlayerUI] 내 점수 업데이트: {newScore}");
         }
         else
         {
-            opponentScoreText.text = $"Opponent Score: {newScore}";
+            opponentScoreText.text = $"Score: {newScore}";
             Debug.Log($"[PlayerUI] 상대 점수 업데이트: {newScore}");
         }
     }

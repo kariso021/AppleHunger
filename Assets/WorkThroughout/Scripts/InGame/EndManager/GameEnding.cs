@@ -15,7 +15,21 @@ public class GameEnding : NetworkBehaviour
 
     [Header("UI")]
     [SerializeField] private GameObject gameOverPanel;
-    [SerializeField] private TextMeshProUGUI resultText;
+
+
+
+    //Result 세분화해야함
+    [SerializeField] private TextMeshProUGUI resultText_WinLose;
+    [SerializeField] private TextMeshProUGUI resultText_Rating;
+    [SerializeField] private TextMeshProUGUI resultText_RatingChanged;
+
+    [SerializeField] private TextMeshProUGUI resultText_Currency;
+    [SerializeField] private TextMeshProUGUI resultText_CurrencyChanged;
+
+
+
+
+
     [SerializeField] private GameObject extendPanel;
 
     [Header("Config")]
@@ -299,36 +313,63 @@ public class GameEnding : NetworkBehaviour
 
     [ClientRpc]
     private void ShowGameOverScreenClientRpc(
-    int winnerPlayerId,
-    int loserPlayerId,
-    bool isDraw,            // ← 무승부 여부를 추가로 받음
-    int ratingDelta,
-    int winnerGold,
-    int loserGold)
+     int winnerPlayerId,
+     int loserPlayerId,
+     bool isDraw,
+     int ratingDelta,
+     int winnerGold,
+     int loserGold)
     {
         gameOverPanel.SetActive(true);
 
+        // 현재 플레이어 정보
         var player = SQLiteManager.Instance.player;
-        // 무승부인 경우 바로 무승부 패널 띄움
+        int currentRating = player.rating;
+        int currentCurrency = player.currency;
+
         if (isDraw)
         {
-            resultText.text = "🤝 Draw!\n" +
-                $"Rating: {player.rating} → {player.rating}\n" +
-                $"Gold:   {player.currency} → {player.currency + winnerGold}";
+            // 무승부
+            resultText_WinLose.text = "🤝 Draw!";
+            resultText_Rating.text = $"Rating: {currentRating} → {currentRating}";
+            resultText_RatingChanged.text = "+0";
+            resultText_RatingChanged.color = Color.white;  // 기본 색
+            resultText_Currency.text = $"Gold:   {currentCurrency} → {currentCurrency + winnerGold}";
+            resultText_CurrencyChanged.text = $"+{winnerGold}";
+            resultText_CurrencyChanged.color = Color.white;
             return;
         }
 
-        // 기존 Win/Lose 처리
-        bool isWinner = (player.playerId == winnerPlayerId);
-        bool isLoser = (player.playerId == loserPlayerId);
-        string title = isWinner ? "🏆 Winner!" : "❌ Loser...";
-        int finalRating = player.rating + (isWinner ? ratingDelta : -ratingDelta);
-        int finalGold = player.currency + (isWinner ? winnerGold : loserGold);
+        // 승패 처리
+        bool amIWinner = (player.playerId == winnerPlayerId);
 
-        string ratingLine = $"Rating: {player.rating} → {finalRating}  ({(ratingDelta >= 0 ? "+" : "")}{ratingDelta})";
-        string goldLine = $"Gold:   {player.currency} → {finalGold}  (+{(isLoser ? loserGold : winnerGold)})";
+        // 1) Win/Lose 타이틀
+        resultText_WinLose.text = amIWinner
+            ? "🏆 Winner!"
+            : "❌ Loser...";
 
-        resultText.text = $"{title}\n{ratingLine}\n{goldLine}";
+        // 2) Rating 텍스트
+        int finalRating = currentRating + (amIWinner ? ratingDelta : -ratingDelta);
+        resultText_Rating.text = $"Rating: {currentRating} → {finalRating}";
+
+        // 3) Rating 변화량(sign + color)
+        if (amIWinner)
+        {
+            resultText_RatingChanged.text = $"+{ratingDelta}";
+            resultText_RatingChanged.color = Color.green;
+        }
+        else
+        {
+            resultText_RatingChanged.text = $"-{ratingDelta}";
+            resultText_RatingChanged.color = Color.red;
+        }
+
+        // 4) Currency 텍스트
+        int gainGold = amIWinner ? winnerGold : loserGold;
+        int finalCurrency = currentCurrency + gainGold;
+        resultText_Currency.text = $"Gold:   {currentCurrency} → {finalCurrency}";
+        resultText_CurrencyChanged.text = $"+{gainGold}";
+        resultText_CurrencyChanged.color = Color.white;
     }
 
     [ClientRpc]
