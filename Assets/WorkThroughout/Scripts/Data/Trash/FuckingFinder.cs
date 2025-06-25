@@ -59,12 +59,12 @@ public class FuckingFinder : MonoBehaviour
         {
             itemManager.itemDataIconListHolder =
                 GameObject.Find("ItemDataIconListHolderGameObject");
-            itemManager.itemDataBoardListHolder =
-                GameObject.Find("ItemDataBoardListHolderGameObject");
+            //itemManager.itemDataBoardListHolder =
+            //    GameObject.Find("ItemDataBoardListHolderGameObject");
             itemManager.currentItemIcon =
                 GameObject.Find("CurrentIconGameObject");
-            itemManager.currentItemBoard =
-                GameObject.Find("CurrentBoardGameObject");
+            //itemManager.currentItemBoard =
+            //    GameObject.Find("CurrentBoardGameObject");
         }
     }
     private void addressableManagerFinder()

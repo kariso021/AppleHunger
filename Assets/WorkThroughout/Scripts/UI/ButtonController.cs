@@ -88,10 +88,10 @@ public class ButtonController : MonoBehaviour
 
 
      // Collection Panel Buttons
-        customIconButton.onClick.AddListener(() =>
-        NavManager.Instance.NavigateTo("Collection/Icon"));
-        customBoadrButton.onClick.AddListener(() =>
-        NavManager.Instance.NavigateTo("Collection/Board"));
+        //customIconButton.onClick.AddListener(() =>
+        //NavManager.Instance.NavigateTo("Collection/Icon"));
+        //customBoadrButton.onClick.AddListener(() =>
+        //NavManager.Instance.NavigateTo("Collection/Board"));
 
         customIconConfrimButton.onClick.AddListener(() => {
             // Nav
@@ -110,21 +110,21 @@ public class ButtonController : MonoBehaviour
 
             });
 
-        customBoardConfrimButton.onClick.AddListener(() =>
-        {
-            // Nav
-            NavManager.Instance.NavigateTo("Collection");
-            // Popup
-            PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
-            //Invoke(nameof(PopupManager.Instance.HideLoading), 1.0f);
-            // Local Data Change
-            SQLiteManager.Instance.player.boardImage =
-            FindAnyObjectByType<ItemManager>().currentItemBoard.
-            GetComponent<ItemData>().itemUniqueId.ToString();
+        //customBoardConfrimButton.onClick.AddListener(() =>
+        //{
+        //    // Nav
+        //    NavManager.Instance.NavigateTo("Collection");
+        //    // Popup
+        //    PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
+        //    //Invoke(nameof(PopupManager.Instance.HideLoading), 1.0f);
+        //    // Local Data Change
+        //    SQLiteManager.Instance.player.boardImage =
+        //    FindAnyObjectByType<ItemManager>().currentItemBoard.
+        //    GetComponent<ItemData>().itemUniqueId.ToString();
 
-            // Server Data Change
-            StartCoroutine(clientNetworkManager.UpdatePlayerData());
-        });
+        //    // Server Data Change
+        //    StartCoroutine(clientNetworkManager.UpdatePlayerData());
+        //});
 
         // NavBar Buttons
         // Button ¹ÙÀÎµù

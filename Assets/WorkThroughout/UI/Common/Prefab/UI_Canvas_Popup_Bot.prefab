@@ -2585,6 +2585,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI_Unit_Setting_Slider_SFX
       objectReference: {fileID: 0}
+    - target: {fileID: 410939236479489357, guid: 3c086f67d06961f429f22772282b1973, type: 3}
+      propertyPath: m_TagString
+      value: vfxSlider
+      objectReference: {fileID: 0}
+    - target: {fileID: 1120707105101851353, guid: 3c086f67d06961f429f22772282b1973, type: 3}
+      propertyPath: m_TagString
+      value: vfxToggle
+      objectReference: {fileID: 0}
     - target: {fileID: 1373126177260088043, guid: 3c086f67d06961f429f22772282b1973, type: 3}
       propertyPath: m_text
       value: SFX
@@ -2715,6 +2723,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI_Unit_Setting_Slider_BGM
       objectReference: {fileID: 0}
+    - target: {fileID: 410939236479489357, guid: 3c086f67d06961f429f22772282b1973, type: 3}
+      propertyPath: m_TagString
+      value: bgmSlider
+      objectReference: {fileID: 0}
+    - target: {fileID: 1120707105101851353, guid: 3c086f67d06961f429f22772282b1973, type: 3}
+      propertyPath: m_TagString
+      value: bgmToggle
+      objectReference: {fileID: 0}
     - target: {fileID: 1373126177260088043, guid: 3c086f67d06961f429f22772282b1973, type: 3}
       propertyPath: m_text
       value: BGM
@@ -2814,6 +2830,10 @@ PrefabInstance:
     - target: {fileID: 7858051032984727014, guid: 3c086f67d06961f429f22772282b1973, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7922853976175595515, guid: 3c086f67d06961f429f22772282b1973, type: 3}
+      propertyPath: m_Value
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

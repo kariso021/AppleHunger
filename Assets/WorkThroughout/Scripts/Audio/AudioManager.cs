@@ -68,7 +68,7 @@ public class AudioManager : MonoBehaviour
     {
         Debug.Log($"씬 로드됨: {scene.name}");
 
-        if (scene.name == "Lobby")
+        if (scene.name == "TestLobby")
         {
             isInGameScene = false;
             PlayBGM(0, 0);     // BGM도 안전하게 재생 가능
@@ -86,9 +86,12 @@ public class AudioManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator LobbySetupCoroutine()
     {
+        Debug.Log("[TESTLOBBY] 로비");
         yield return StartCoroutine(delayFindReference());
 
+        LoadSettings();
         addListnerInit(); // 이제 null 걱정 없음
+        ApplyVolumes();
         ApplyUI();
         //PlayBGM(0, 0);     // BGM도 안전하게 재생 가능
     }
@@ -106,8 +109,8 @@ public class AudioManager : MonoBehaviour
         {
             bgmSlider = AppleHungerTools.FindByName(allSliders, "BgmSliderbar");
             vfxSlider = AppleHungerTools.FindByName(allSliders, "VfxSliderbar");
-            bgmToggle = AppleHungerTools.FindByName(allToggles, "BgmIcon");
-            vfxToggle = AppleHungerTools.FindByName(allToggles, "VfxIcon");
+            bgmToggle = AppleHungerTools.FindByName(allToggles, "BgmToggle");
+            vfxToggle = AppleHungerTools.FindByName(allToggles, "VfxToggle");
 
             if (bgmSlider != null) Debug.Log("브금 슬라이더 찾음");
             if (vfxSlider != null) Debug.Log("효과 슬라이더 찾음");

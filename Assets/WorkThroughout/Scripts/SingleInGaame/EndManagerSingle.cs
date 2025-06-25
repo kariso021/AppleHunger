@@ -9,7 +9,12 @@ public class EndManagerSingle : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private GameObject endPanel;    // 끝났을 때 띄울 판넬
     [SerializeField] private TextMeshProUGUI scoreText;         // 최종 스코어를 보여줄 Text
+    [SerializeField] private TMP_Text currentGoldText;         // 현재 가진 골드량 보여줄 text
+    [SerializeField] private TMP_Text deltaGoldText;           // 스코어 변화량
+    [SerializeField] private TMP_Text currentRatingText;              // 레이팅 변화 표시(싱글에선 변화x, 그냥 ux)
+    [SerializeField] protected TMP_Text deltaRatingText;              // 변화량(실제론 0)
     [SerializeField] private Button lobbyButton;     // 로비로 돌아가기 버튼
+    [SerializeField] private GameObject myProfilePanel;
 
     [Header("Submit DB References")]
     [SerializeField] private Managers manager;
@@ -37,8 +42,14 @@ public class EndManagerSingle : MonoBehaviour
 
         StartCoroutine(manager.UpdateCurrencyAndRating(player.playerId, gold, 0));
 
-        scoreText.text = $"Score: {finalScore} \n" + $"Gold: {player.currency} → {totalGold}  (+{gold})";
+        scoreText.text = $"Score: {finalScore}";
+        currentGoldText.text = player.currency.ToString();
+        deltaGoldText.text = $"+{gold.ToString()}";
+        currentRatingText.text = player.rating.ToString();
+        deltaRatingText.text = "+0";
         endPanel.SetActive(true);
+
+        myProfilePanel.SetActive(false);
 
         SQLiteManager.Instance.SavePlayerCurrency(totalGold);
 

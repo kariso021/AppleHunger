@@ -110,11 +110,11 @@ public class ItemData : MonoBehaviour
             FindAnyObjectByType<ItemManager>().currentItemIcon.GetComponent<Image>().sprite = itemIcon.sprite;
             FindAnyObjectByType<ItemManager>().currentItemIcon.GetComponent<ItemData>().itemUniqueId = this.itemUniqueId;
         }
-        else
-        {
-            FindAnyObjectByType<ItemManager>().currentItemBoard.GetComponent<Image>().sprite = itemIcon.sprite;
-            FindAnyObjectByType<ItemManager>().currentItemBoard.GetComponent<ItemData>().itemUniqueId = this.itemUniqueId;
-        }
+        //else
+        //{
+        //    FindAnyObjectByType<ItemManager>().currentItemBoard.GetComponent<Image>().sprite = itemIcon.sprite;
+        //    FindAnyObjectByType<ItemManager>().currentItemBoard.GetComponent<ItemData>().itemUniqueId = this.itemUniqueId;
+        //}
 
     }
 

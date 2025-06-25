@@ -12,7 +12,7 @@ public class ItemManager : MonoBehaviour
     private Dictionary<int, ItemData> activeItems = new Dictionary<int, ItemData>(); // 아이템 ID별 저장
 
     public GameObject currentItemIcon;
-    public GameObject currentItemBoard;
+    //public GameObject currentItemBoard;
 
     private void OnEnable()
     {
@@ -42,9 +42,9 @@ public class ItemManager : MonoBehaviour
 
         // 현재 사용중인 아이템 표시를 위함
         currentItemIcon.GetComponent<ItemData>().SetItemData(SQLiteManager.Instance.player.profileIcon);
-        currentItemBoard.GetComponent<ItemData>().SetItemData(SQLiteManager.Instance.player.boardImage);
+        //currentItemBoard.GetComponent<ItemData>().SetItemData(SQLiteManager.Instance.player.boardImage);
         currentItemIcon.GetComponent<ItemData>().itemIcon = currentItemIcon.GetComponent<Image>();
-        currentItemBoard.GetComponent<ItemData>().itemIcon = currentItemBoard.GetComponent<Image>();
+        //currentItemBoard.GetComponent<ItemData>().itemIcon = currentItemBoard.GetComponent<Image>();
 
         foreach (var itemData in playerItemsList)
         {
@@ -100,13 +100,13 @@ public class ItemManager : MonoBehaviour
             Debug.Log("=================아이콘 이미지 변경=======================");
             AddressableManager.Instance.LoadItemIconFromGroup();
         }
-        else
-        {
-            if (!AddressableManager.Instance.itemBoardObj.Contains(currentItemBoard))
-                AddressableManager.Instance.itemBoardObj.Add(currentItemBoard);
-            Debug.Log("==================보드 이미지 변경==========================");
-            AddressableManager.Instance.LoadItemBoardFromGroup();
-        }
+        //else
+        //{
+        //    if (!AddressableManager.Instance.itemBoardObj.Contains(currentItemBoard))
+        //        AddressableManager.Instance.itemBoardObj.Add(currentItemBoard);
+        //    Debug.Log("==================보드 이미지 변경==========================");
+        //    AddressableManager.Instance.LoadItemBoardFromGroup();
+        //}
     }
 
     // ✅ 데이터 변경 시 자동 갱신
@@ -114,7 +114,7 @@ public class ItemManager : MonoBehaviour
     {
         Debug.Log("🔄 [ItemManager] 아이템 데이터 변경 감지 → UI 갱신");
         CreateItemList("icon");
-        CreateItemList("board");
+        //CreateItemList("board");
     }
 
     void AutoAdjustGridByResolution(GridLayoutGroup grid, RectTransform content, int columns)
