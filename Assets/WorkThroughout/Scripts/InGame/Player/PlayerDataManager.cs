@@ -197,6 +197,7 @@ public class PlayerDataManager : NetworkBehaviour
     [ClientRpc]
     private void ShowMatchPanelClientRpc(float panelDuration)
     {
+        Debug.Log("ShowMatchPanelClientRpc called");
         PlayerUI.Instance.OnMatchFoundShowPanel(panelDuration);
     }
 
