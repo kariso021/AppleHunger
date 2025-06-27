@@ -181,6 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clientComboUI: {fileID: 3208566328510943384}
   restrictTimerSlider: {fileID: 2927209008301769042}
+  restrictTimerSliderRoot: {fileID: 2069303057380675606}
   localDragBox: {fileID: 6615129503576426566}
   flashImage: {fileID: 1534753133390118796}
 --- !u!114 &538772400157037283

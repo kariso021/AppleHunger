@@ -30,6 +30,7 @@ public class PlayerController : NetworkBehaviour
 
     //제한시간 동안 타이머 슬라이더 적용
     public Image restrictTimerSlider;
+    public GameObject restrictTimerSliderRoot;
 
 
 
@@ -69,6 +70,7 @@ public class PlayerController : NetworkBehaviour
         }
         flashCanvasGroup.alpha = 0f;
         flashCanvasGroup.blocksRaycasts = false;
+        restrictTimerSliderRoot.SetActive(false); // 초기에는 슬라이더 오브젝트 비활성화
         restrictTimerSlider.gameObject.SetActive(false);
     }
 
@@ -411,6 +413,7 @@ public class PlayerController : NetworkBehaviour
         float elasped = 0f;
         float duration = 2f;
 
+        restrictTimerSliderRoot.SetActive(true);
         restrictTimerSlider.gameObject.SetActive(true);
 
         restrictTimerSlider.fillAmount = 1f;
@@ -426,6 +429,7 @@ public class PlayerController : NetworkBehaviour
         restrictTimerSlider.fillAmount = 0f;
 
         restrictTimerSlider.gameObject.SetActive(false);
+        restrictTimerSliderRoot.SetActive(false);
     }
 
     //-------------------------------------------------------------------------------------------- 컨트롤러 조작가능여부
