@@ -117,10 +117,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5505835010882164590}
     m_Modifications:
-    - target: {fileID: 983886164077822898, guid: 73754e8bb0c2acf449edba9d2f64080b, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -8431261956473260057, guid: a2bb2f03d0d5de8488eb41a177eaa375, type: 3}
     - target: {fileID: 1237288918429132332, guid: 73754e8bb0c2acf449edba9d2f64080b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -277,10 +273,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4723566239316606307, guid: 73754e8bb0c2acf449edba9d2f64080b, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -8431261956473260057, guid: a2bb2f03d0d5de8488eb41a177eaa375, type: 3}
     - target: {fileID: 4759788099718571382, guid: 73754e8bb0c2acf449edba9d2f64080b, type: 3}
       propertyPath: m_Name
       value: UI_Canvas_Currency
