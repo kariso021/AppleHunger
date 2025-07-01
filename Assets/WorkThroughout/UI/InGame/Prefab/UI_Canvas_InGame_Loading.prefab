@@ -257,6 +257,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5155911819996832233}
     m_Modifications:
+    - target: {fileID: 390492863282281924, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3861076002302331194, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4525672368980540285, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
       propertyPath: m_text
       value: "\uB9E4\uCE6D \uCDE8\uC18C"
@@ -352,6 +360,18 @@ PrefabInstance:
     - target: {fileID: 5336068646479488334, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8029799350736956592, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
+      propertyPath: m_text
+      value: "\uCDE8\uC18C"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8029799350736956592, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
+      propertyPath: m_fontSize
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 8029799350736956592, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 8326599145343466657, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
       propertyPath: m_Name

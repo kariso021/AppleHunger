@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2553657404765088123}
   - component: {fileID: 2548462736065357008}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: IMG_Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 30340ff6dbb6334429605d97b79a128d, type: 3}
+  m_Sprite: {fileID: -3130563281727859300, guid: 118eeb70ab292d14f827108bc30e5c97, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 0.09375
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &1727711034059862885
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,7 +209,7 @@ GameObject:
   - component: {fileID: 7778882487945358806}
   - component: {fileID: 5195580229326368558}
   m_Layer: 5
-  m_Name: Image
+  m_Name: IMG_Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -262,7 +262,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 30340ff6dbb6334429605d97b79a128d, type: 3}
+  m_Sprite: {fileID: -3130563281727859300, guid: 118eeb70ab292d14f827108bc30e5c97, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -271,7 +271,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 0.09375
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4759788099718571382
 GameObject:
   m_ObjectHideFlags: 0
@@ -349,7 +349,7 @@ GameObject:
   - component: {fileID: 9002953675482929499}
   - component: {fileID: 2688211074225817329}
   m_Layer: 5
-  m_Name: Image (2)
+  m_Name: IMG_Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -402,7 +402,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 30340ff6dbb6334429605d97b79a128d, type: 3}
+  m_Sprite: {fileID: -3130563281727859300, guid: 118eeb70ab292d14f827108bc30e5c97, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -411,7 +411,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 0.09375
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7270340927743037953
 GameObject:
   m_ObjectHideFlags: 0
@@ -480,7 +480,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 30340ff6dbb6334429605d97b79a128d, type: 3}
+  m_Sprite: {fileID: -3130563281727859300, guid: 118eeb70ab292d14f827108bc30e5c97, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -666,7 +666,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 309.82
+      value: 319.82
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_SizeDelta.y
@@ -702,7 +702,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 745.08997
+      value: 740.08997
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -808,7 +808,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 309.82
+      value: 319.82
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_SizeDelta.y
@@ -844,7 +844,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 415.27
+      value: 400.27
       objectReference: {fileID: 0}
     - target: {fileID: 2840527784158046193, guid: bf3dd746bac45924d8982e390194c6df, type: 3}
       propertyPath: m_AnchoredPosition.y
