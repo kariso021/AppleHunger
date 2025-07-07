@@ -25,7 +25,7 @@ public class PlayerControllerSingle : MonoBehaviour
 
     [Header("Flash Effect")]
     public Image flashImage;
-    public Image restrictTimerSlider;
+    public Slider restrictTimerSlider;
     private CanvasGroup flashCanvasGroup;
 
     [Header("Combo UI")]
@@ -278,22 +278,24 @@ public class PlayerControllerSingle : MonoBehaviour
 
     private IEnumerator RestrictTimerActive()
     {
+
         float elasped = 0f;
         float duration = 2f;
 
         restrictTimerSlider.gameObject.SetActive(true);
 
-        restrictTimerSlider.fillAmount = 1f;
+
+        restrictTimerSlider.value = 1f;
 
         while(elasped < duration)
         {
             elasped += Time.deltaTime;
             float amount = Mathf.Lerp(1f,0f, elasped / duration);
-            restrictTimerSlider.fillAmount = amount;
+            restrictTimerSlider.value = amount;
             yield return null;
         }
 
-        restrictTimerSlider.fillAmount = 0f;
+        restrictTimerSlider.value = 0f;
 
         restrictTimerSlider.gameObject.SetActive(false);
     }
@@ -310,4 +312,15 @@ public class PlayerControllerSingle : MonoBehaviour
         }
     }
 
+    public void RestrictTouchWhenGameEnded()
+    {
+        if (PlayerControllerSingle.Instance != null)
+        {
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= PlayerControllerSingle.Instance.OnFingerDown;
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove -= PlayerControllerSingle.Instance.OnFingerMove;
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp -= PlayerControllerSingle.Instance.OnFingerUp;
+        }
+
+        EnhancedTouchSupport.Disable();
+    }
 }
