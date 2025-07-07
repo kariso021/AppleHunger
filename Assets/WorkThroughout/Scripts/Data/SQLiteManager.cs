@@ -36,7 +36,6 @@ public class SQLiteManager : MonoBehaviour
     public PlayerSessionData playerSession;
     // 데이터로드가 끝나면 실행될 이벤트
     public event Action OnSQLiteDataLoaded;
-    public event Action OnInitializeComplete;
     //
     public bool isSqlExist = false;
     private bool isGoogleLogin;

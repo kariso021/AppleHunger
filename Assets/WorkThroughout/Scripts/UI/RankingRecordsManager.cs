@@ -17,8 +17,6 @@ public class RankingRecordsManager : MonoBehaviour
     [SerializeField] private GameObject second;
     [SerializeField] private GameObject third;
 
-    // 동일 등수에 대한 표기
-    int recordCount = 0;
     private void Start()
     {
         // ✅ 랭킹 변경 이벤트 구독 (자동 갱신)

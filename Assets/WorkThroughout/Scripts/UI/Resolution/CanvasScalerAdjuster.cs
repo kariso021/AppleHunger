@@ -23,13 +23,17 @@ public class CanvasScalerAdjuster : MonoBehaviour
         // 디바이스가 더 길쭉한 경우 -> Height 기준
         if (deviceRatio < referenceRatio)
         {
+#if UNITY_EDITOR
             Debug.LogWarning("가로가 길다");
+#endif
             canvasScaler.matchWidthOrHeight = 0f; // Height
         }
         // 디바이스가 더 납작한 경우 -> Width 기준
         else
         {
+#if UNITY_EDITOR
             Debug.LogWarning("세로가 길다");
+#endif
             canvasScaler.matchWidthOrHeight = 1f; // Width
         }
     }

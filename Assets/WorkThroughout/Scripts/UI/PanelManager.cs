@@ -41,7 +41,8 @@ public class PanelManager : MonoBehaviour
             if (panelName == "Collection/Icon")
             {
                 panels["Collection"].SetActive(true);
-                FindAnyObjectByType<ItemManager>().CreateItemList("icon");
+                ItemManager im = FindAnyObjectByType<ItemManager>();
+                im.CreateItemList("icon");
             }
             else if (panelName == "Ranking")
                 FindAnyObjectByType<RankingRecordsManager>().CreateRankRecords();

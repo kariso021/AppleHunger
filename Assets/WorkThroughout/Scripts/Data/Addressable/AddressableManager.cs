@@ -251,7 +251,15 @@ public class AddressableManager : MonoBehaviour
         {
             if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
             {
-                myRankProfileIcon.sprite = handle.Result;
+                if (myRankProfileIcon != null)
+                {
+                    myRankProfileIcon.sprite = handle.Result;
+                    Debug.Log("MY RANK NOT NULL");
+                }
+                else
+                {
+                    Debug.Log("MY RANK NULL");
+                }
 
                 if (!loadedSprites.ContainsKey(itemUniqueId))
                 {

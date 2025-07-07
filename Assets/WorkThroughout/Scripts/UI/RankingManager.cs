@@ -21,7 +21,7 @@ public class RankingManager : MonoBehaviour
     }
     private IEnumerator WaitForInitThenStartRoutine()
     {
-        // ✅ ServerToAPIManager가 준비될 때까지 대기
+        //  ServerToAPIManager가 준비될 때까지 대기
         while (ServerToAPIManager.Instance == null || SQLiteManager.Instance == null || SQLiteManager.Instance.player == null)
         {
             yield return null;

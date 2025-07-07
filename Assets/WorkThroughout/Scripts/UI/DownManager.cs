@@ -24,7 +24,6 @@ public class DownManager : MonoBehaviour
 
     private long patchSize;
     private Dictionary<string, long> patchMap = new Dictionary<string, long>();
-    private bool isInitialized = false;
 
     private void Awake()
     {

@@ -20,11 +20,11 @@ public class Profile : MonoBehaviour
             nameText.text = name;
 
         if (recordText != null)
-            recordText.text = $"{matches}Àü";
+            recordText.text = $"{matches}";
         if (winText != null)
-            winText.text = $"{win}½Â";
+            winText.text = $"{win}";
         if (loseText != null)
-            loseText.text = $"{lose}ÆÐ";
+            loseText.text = $"{lose}";
         if (ratingText != null)
             ratingText.text = rating.ToString();
     }

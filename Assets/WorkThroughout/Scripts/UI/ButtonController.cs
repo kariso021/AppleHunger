@@ -43,8 +43,6 @@ public class ButtonController : MonoBehaviour
 
     public Managers testManager;
 
-    //юс╫ц
-    private int id = 1;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
