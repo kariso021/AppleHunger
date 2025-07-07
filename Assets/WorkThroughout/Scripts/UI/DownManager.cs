@@ -39,7 +39,6 @@ public class DownManager : MonoBehaviour
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
                 Debug.Log("Addressables 초기화 성공");
-                isInitialized = true;
             }
             else
             {

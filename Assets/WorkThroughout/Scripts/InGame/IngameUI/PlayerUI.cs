@@ -70,10 +70,6 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private MatchMakerClient matchMakerClient;
 
 
-
-    //매칭 잡히고 게임 시작되기까지의 준비시간
-    [SerializeField] private float ReadyTime = 3f;
-
     //Surrender 패널 On/Off 그리고 surrender 승낙버튼
     [Header("SurrenerButton")]
     [SerializeField] private Button surrenderPopUpButton;
@@ -274,32 +270,30 @@ public class PlayerUI : MonoBehaviour
 
     //----------------Opponent Introduce UI ---------------- 매칭 잡혔을때 기준
 
-    public void OnMatchFoundShowPanel(float duration)
+    public void OnMatchFoundShowPanel(float panelDuration, float countDuration)
     {
-        StartCoroutine(MatchIntroAndCountdown(duration));
+        StartCoroutine(MatchIntroAndCountdown(panelDuration, countDuration));
     }
 
-    private IEnumerator MatchIntroAndCountdown(float introDuration)
+    private IEnumerator MatchIntroAndCountdown(float panelDuration, float countDuration)
     {
-        // 1) 소개 패널 보이기 & 페이드 아웃
+        // 1) 소개 패널 보이기 & 페이드 아웃 (panelDuration 전체 사용)
         ShowIntroducePanel();
-        yield return FadeOutAndHide(introDuration);
+        yield return FadeOutAndHide(panelDuration);
 
-        // 2) 카운트 패널 보이기
+        // 2) 카운트다운 패널 보이기 (countDuration 만큼)
         countPanel.SetActive(true);
 
-        int count = Mathf.FloorToInt(ReadyTime);
+        int count = Mathf.CeilToInt(countDuration);
         for (int i = count; i > 0; i--)
         {
             countText.text = i.ToString();
             yield return new WaitForSeconds(1f);
         }
 
-        // 3) 카운트 완료 후 숨기고 실제 게임 시작 콜백
+        // 3) 카운트 완료 후 숨기기
         countPanel.SetActive(false);
     }
-
-
 
     public void ShowIntroducePanel()
     {
@@ -311,14 +305,15 @@ public class PlayerUI : MonoBehaviour
 
     public IEnumerator FadeOutAndHide(float duration)
     {
-        float fadeDuration = 1f;             
-        float holdTime = duration - fadeDuration;
+        // 패널 전체 표시 시간(duration) 중에서
+        // fadeDuration 만큼만 페이드 아웃에 쓰고, 나머지는 그냥 대기
+        const float fadeDuration = 1f;
+        float holdTime = Mathf.Max(0f, duration - fadeDuration);
 
-        
-        introduceCG.alpha = 1f;
+        // 1) 잠시 대기
         yield return new WaitForSeconds(holdTime);
 
-        //fadeDuration 동안 alpha를 1 → 0으로 선형 보간
+        // 2) fadeDuration 동안 alpha 1→0
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
@@ -327,7 +322,7 @@ public class PlayerUI : MonoBehaviour
             yield return null;
         }
 
-        // 비활성화 처리
+        // 3) 클린업
         introduceCG.alpha = 0f;
         introduceCG.interactable = false;
         introduceCG.blocksRaycasts = false;

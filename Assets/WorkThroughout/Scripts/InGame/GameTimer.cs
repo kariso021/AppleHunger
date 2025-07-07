@@ -15,7 +15,9 @@ public class GameTimer : NetworkBehaviour
     );
 
     [SerializeField] private float totalGameTime = 60f;
-    [SerializeField] private float readyGameTime = 5f; // 준비 시간
+    [SerializeField] private float initialDelay;
+
+    bool hasTimerStarted = false; // 타이머 시작 여부
 
     // 준비 시간 후 한 번만 사과 스폰 여부 플래그
     private bool hasSpawnedApples = false;
@@ -39,7 +41,7 @@ public class GameTimer : NetworkBehaviour
 
 
     //시작전 일시정지 로직
-    public bool IsControlEnabled => NetworkManager.Singleton.ServerTime.TimeAsFloat >= (startTime + readyGameTime);
+    public bool IsControlEnabled => NetworkManager.Singleton.ServerTime.TimeAsFloat >= (startTime + initialDelay);
 
     private NetworkVariable<bool> canControl = new NetworkVariable<bool>(
     false,
@@ -63,42 +65,27 @@ public class GameTimer : NetworkBehaviour
     //시작 로직 타이머
 
     [ServerRpc(RequireOwnership = false)]
-    public void StartTimerWithDelayServerRpc(float delaySeconds)
+    public void StartTimerWithDelayServerRpc(float introduration, float countduration)
     {
-        // 1) 타이머 초기화
-        startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-        endTime = startTime + totalGameTime;
-        remainingTime.Value = totalGameTime + readyGameTime;
-        isGameEnded = false;
-        isInExtension = false;
+        float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+        hasTimerStarted = true;                // (선택) Update() 활성화 플래그
+        initialDelay = introduration+countduration;        // 패널 표시 시간
 
-        // 2) delaySeconds 만큼 일시 정지 → 이후 ResumeTimer() 호출
+        startTime = now;
+        endTime = now + initialDelay + totalGameTime;
+        remainingTime.Value = initialDelay + totalGameTime;
+
+        // 딜레이 모드
         isPaused = true;
         isIndefinitePause = false;
-        pauseEndTime = startTime + delaySeconds;
+        pauseStartTime = now;                 // ← 꼭 설정
+        pauseEndTime = now + introduration + countduration;  // 패널 표시가 끝나는 시점
     }
 
 
     public override void OnNetworkSpawn()
     {
-        if (IsServer)
-        {
-            //자동시작 로직 다 제거해줘야함
-            //-------------------------------------------------------------------------
-            startTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-            endTime = startTime + totalGameTime+ readyGameTime;
-            remainingTime.Value = totalGameTime + readyGameTime;
-            isGameEnded = false;
-            isInExtension = false;
-            hasSpawnedApples = false;
-
-            // 자동 시작
-            isPaused = false;
-            isIndefinitePause = false;
-
-            //-------------------------------------------------------------------------
-        }
-
+    
         if (IsClient)
         {
             remainingTime.OnValueChanged += HandleTimerUpdated;
@@ -115,57 +102,40 @@ public class GameTimer : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsServer) return;
+        if (!IsServer || !hasTimerStarted) return;
+        if (isIndefinitePause) return;
 
-        // 일시/무한 정지 처리
+
+        float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+
+        // 1) 패널 딜레이 페이즈
         if (isPaused)
         {
-            if (isIndefinitePause) return;
-            float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
             if (now < pauseEndTime) return;
-            float pausedDuration = pauseEndTime - pauseStartTime;
-            endTime += pausedDuration;
-            if (isInExtension)
-                extensionStartTime += pausedDuration; // 연장 시간도 일시 정지 동안 늘려줌
-            ResumeTimer();
-
-
-
+            isPaused = false;
         }
 
+        Debug.Log("Pause 벗어남");
 
-
-        // 남은 시간 계산
-        float nowTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-        float newTime = isInExtension
-            ? Mathf.Max(0f, extensionDuration - (nowTime - extensionStartTime))
-            : Mathf.Max(0f, endTime - nowTime);
-
-        // ── 준비 시간이 지난 뒤 단 한 번만 사과 스폰 ──
-        // now >= startTime + readyGameTime 이고, 아직 스폰 안 했다면
-        if (!hasSpawnedApples && nowTime >= startTime + readyGameTime)
+        // 2) 사과 스폰 & 컨트롤 허용 (한 번만)
+        if (!hasSpawnedApples)
         {
-            
             AppleManager.Instance.SpawnApplesInGrid();
             hasSpawnedApples = true;
-        }
-
-        if (!canControl.Value && nowTime >= startTime + readyGameTime)
-        {
             canControl.Value = true;
-            GameEnding.Instance.RestictControllerWhenStartClientRpc(true); //start
+            GameEnding.Instance.RestictControllerWhenStartClientRpc(true);
         }
 
-
-
-
-        // 임계치 없이 매 틱 업데이트
+        // 3) 남은 시간 계산 & 동기화
+        float newTime = Mathf.Max(0f, endTime - now);
         remainingTime.Value = newTime;
 
-
-
-        if (newTime <= 0f && !isGameEnded)
-            HandleGameEndLogic();
+        // 4) 타임업 시 한 번만 종료
+        if (newTime <= 0f)
+        {
+            OnGameEnded?.Invoke();
+            enabled = false;
+        }
     }
 
     private void HandleTimerUpdated(float oldVal, float newVal)

@@ -11,8 +11,8 @@ using UnityEngine;
 public class PlayerDataManager : NetworkBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
-    
-    [SerializeField] private float panelDuration = 3f; // 패널 표시 시간
+    [SerializeField] private float Countduration = 3f; // 패널 카운트 시간
+    [SerializeField] private float Introduration = 3f; // 소개 패널 표시 시간
 
     [Serializable]
     private class PlayerState
@@ -163,10 +163,10 @@ public class PlayerDataManager : NetworkBehaviour
                 SyncAllClients();
 
                 //// 2) 매칭 패널 띄우기
-                ShowMatchPanelClientRpc(panelDuration);
+                ShowMatchPanelClientRpc(Introduration,Countduration);
 
-                //// 3) 타이머는 여기서 한 번만 호출
-                //GameTimer.Instance.StartTimerWithDelayServerRpc(panelDuration);
+                //세션 띄우기
+                GameTimer.Instance.StartTimerWithDelayServerRpc(Introduration, Countduration);
 
                 _readyClients.Clear();
             }
@@ -195,10 +195,10 @@ public class PlayerDataManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void ShowMatchPanelClientRpc(float panelDuration)
+    private void ShowMatchPanelClientRpc(float introduration, float countduration)
     {
         Debug.Log("ShowMatchPanelClientRpc called");
-        PlayerUI.Instance.OnMatchFoundShowPanel(panelDuration);
+        PlayerUI.Instance.OnMatchFoundShowPanel(Introduration,Countduration);
     }
 
     [ClientRpc]

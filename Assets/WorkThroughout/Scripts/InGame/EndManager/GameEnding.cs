@@ -98,6 +98,8 @@ public class GameEnding : NetworkBehaviour
 
     private void HandleClientDisconnect(ulong clientId)
     {
+        //
+        Debug.Log("HandleClientDissconeted 로 인한 현상");
         // 서버에서만 동작하도록 추가 체크
         if (!IsServer || !_hasClientEverConnected)
             return;
@@ -121,7 +123,6 @@ public class GameEnding : NetworkBehaviour
         // 남은 클라이언트가 없으면 셧다운 나갈때 기점으로 몇명인지 보여주는거라서 1이하가 맞음
         if (NetworkManager.Singleton.ConnectedClientsList.Count <= 1)
         {
-            Debug.Log("Shutdown발동함");
             GameTimer.Instance.StopForEndTimer();
             StartCoroutine(ShutdownAfterSessionUpdate());
         }
@@ -331,10 +332,10 @@ public class GameEnding : NetworkBehaviour
         {
             // 무승부
             resultText_WinLose.text = "🤝 Draw!";
-            resultText_Rating.text = $"Rating: {currentRating} → {currentRating}";
+            resultText_Rating.text = $"{currentRating}";
             resultText_RatingChanged.text = "+0";
             resultText_RatingChanged.color = Color.white;  // 기본 색
-            resultText_Currency.text = $"Gold:   {currentCurrency} → {currentCurrency + winnerGold}";
+            resultText_Currency.text = $"{currentCurrency + winnerGold}";
             resultText_CurrencyChanged.text = $"+{winnerGold}";
             resultText_CurrencyChanged.color = Color.white;
             return;
@@ -350,7 +351,7 @@ public class GameEnding : NetworkBehaviour
 
         // 2) Rating 텍스트
         int finalRating = currentRating + (amIWinner ? ratingDelta : -ratingDelta);
-        resultText_Rating.text = $"Rating: {currentRating} → {finalRating}";
+        resultText_Rating.text = $"{finalRating}";
 
         // 3) Rating 변화량(sign + color)
         if (amIWinner)
@@ -367,7 +368,7 @@ public class GameEnding : NetworkBehaviour
         // 4) Currency 텍스트
         int gainGold = amIWinner ? winnerGold : loserGold;
         int finalCurrency = currentCurrency + gainGold;
-        resultText_Currency.text = $"Gold:   {currentCurrency} → {finalCurrency}";
+        resultText_Currency.text = $"{finalCurrency}";
         resultText_CurrencyChanged.text = $"+{gainGold}";
         resultText_CurrencyChanged.color = Color.white;
     }

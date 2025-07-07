@@ -21,8 +21,12 @@ using ParrelSync;
 #endif
 
 
+
+
 public class MatchMakerClient : MonoBehaviour
 {
+
+
 
 
     private string _ticketId;
@@ -48,6 +52,16 @@ public class MatchMakerClient : MonoBehaviour
     {
         ServerStartUp.ClientInstance -= SignIn;
     }
+
+
+    private void Awake()
+    {
+        waitingCanvas.SetActive(true);
+    }
+
+
+
+
 
     private async void SignIn()
     {
