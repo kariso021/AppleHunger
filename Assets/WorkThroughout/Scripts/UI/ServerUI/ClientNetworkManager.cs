@@ -114,7 +114,7 @@ public class ClientNetworkManager : MonoBehaviour
         yield return ServerToAPIManager.Instance.UpdatePlayerData(SQLiteManager.Instance.player);
         AddressableManager.Instance.LoadProfileIconFromGroup();
         AddressableManager.Instance.LoadMyRankingIconFromGroup();
-        Invoke(nameof(PopupManager.Instance.HideLoading),0.5f);
+        PopupManager.Instance.HideLoading(0.5f);
     }
 
     public IEnumerator UpdatePlayerNickname(string nickname)

@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.UI;
 
 public class LoginManager : MonoBehaviour
@@ -16,6 +17,9 @@ public class LoginManager : MonoBehaviour
     public Button googleLoginButton;
     public GameObject loginPanel;
     public GameObject downCheck;
+
+    [Header("Touch Button")]
+    public GameObject touchToStartButton;
 
     private DownManager downManager;
     private void Awake()
@@ -54,7 +58,7 @@ public class LoginManager : MonoBehaviour
 
         guestLoginButton.onClick.AddListener(OnGuestLoginButtonClick);
         googleLoginButton.onClick.AddListener(OnGoogleLoginButtonClick);
-
+        touchToStartButton.GetComponent<Button>().onClick.AddListener(toDownCheck);
 
         int isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin",0);
         int isGuestLogin = PlayerPrefs.GetInt("IsGuestLogin", 0);
@@ -66,11 +70,7 @@ public class LoginManager : MonoBehaviour
         if (Application.internetReachability == NetworkReachability.NotReachable)
         {
             // 인터넷 연결이 안되어있다면?
-            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 로그인을 시도해주세요.";
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() =>Application.Quit());
+            PopupManager.Instance.DisconnectedNetworkShow();
             Debug.Log("[Network] Network is not available at login");
         }
         else
@@ -78,9 +78,14 @@ public class LoginManager : MonoBehaviour
             Debug.Log($"[Login] google? {isGoogleLogin} , guest? {isGuestLogin}");
             if (isGoogleLogin == 0 && isGuestLogin == 0)
                 loginPanel.SetActive(true);
-            else
-                toDownCheck();
+            //else
+            //    toDownCheck();
         }
+    }
+
+    private void Update()
+    {
+        
     }
 #if UNITY_ANDROID && !UNITY_EDITOR
     private void ProcessAutoAuthentication(SignInStatus status)
@@ -153,6 +158,7 @@ public class LoginManager : MonoBehaviour
 
     private void toDownCheck()
     {
+        touchToStartButton.SetActive(false);
         loginPanel.SetActive(false);
         downCheck.SetActive(true);
         StartCoroutine(downManager.CheckUpdateFiles());

@@ -95,7 +95,7 @@ public class ButtonController : MonoBehaviour
             // Nav
             NavManager.Instance.NavigateTo("Collection");
             // Popup
-            PopupManager.Instance.ShowPopup(PopupManager.Instance.loadingPopup);
+            PopupManager.Instance.ShowLoading("º¯°æ");
             //PopupManager.Instance.Invoke(nameof(PopupManager.Instance.HideLoading), 1f);
             // Local Data Change
             SQLiteManager.Instance.player.profileIcon =
