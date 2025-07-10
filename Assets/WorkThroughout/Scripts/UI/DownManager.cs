@@ -59,11 +59,7 @@ public class DownManager : MonoBehaviour
     {
         if (Application.internetReachability == NetworkReachability.NotReachable) // not connect internet
         {
-            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 게임을 재실행해주세요.";
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
-            PopupManager.Instance.warningPopup.GetComponent <ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => Application.Quit());
+           PopupManager.Instance.DisconnectedNetworkShow();
             Debug.Log("[Network] Network is not available");
 
             yield break;
@@ -115,19 +111,12 @@ public class DownManager : MonoBehaviour
     {
         if (Application.internetReachability == NetworkReachability.NotReachable) // not connect internet
         {
-            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 게임을 재실행해 로그인을 시도해주세요.";
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => Application.Quit());
+            PopupManager.Instance.DisconnectedNetworkShow();
             Debug.Log("[Network] Network is not available");
         }
         else if (Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork) // lte,3g
         {
-            PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "데이터로 연결되어 있습니다. 정말 다운받으시겠습니까?";
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
-            PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => StartCoroutine(DownloadAll()));
+            PopupManager.Instance.NonWifiNetworkShow(() => StartCoroutine(DownloadAll()));
             Debug.Log("[Network] Network is available");
             return;
         }

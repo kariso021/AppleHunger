@@ -151,15 +151,20 @@ public class PopupManager : MonoBehaviour
 
     public void ShowLoading(string text)
     {
-        string output = text + "중입니다......";
+        string output = text + "중입니다";
 
         if (loadingPopup != null && !loadingPopup.activeSelf)
         {
             loadingPopup.SetActive(true);
-            loadingPopup.GetComponentInChildren<TMP_Text>().text = output;
+            TMP_Text loadingText = loadingPopup.GetComponentInChildren<TMP_Text>();
+            TextAnimation anim = loadingText.GetComponent<TextAnimation>();
             RectTransform rect = loadingPopup.GetComponent<RectTransform>();
 
+            loadingText.text = text;
+            anim.baseText = output;
             rect.sizeDelta = new Vector2(rect.sizeDelta.x, Screen.height);
+
+
         }
     }
     public void ChangeLoadingText(string text)
@@ -173,9 +178,11 @@ public class PopupManager : MonoBehaviour
     }
     public void HideLoading()
     {
-        Debug.LogWarning("됨");
+        Debug.Log("작동하는거냐 하이드씨");
         if (loadingPopup != null && loadingPopup.activeSelf)
+        {
             loadingPopup.SetActive(false);
+        }
     }
 
     public void HideLoading(float time)
@@ -187,5 +194,21 @@ public class PopupManager : MonoBehaviour
     {
         pendingOnComplete?.Invoke(); // ✅ 저장된 콜백 실행
         pendingOnComplete = null;  // ✅ 콜백 초기화
+    }
+
+    public void DisconnectedNetworkShow()
+    {
+        ShowPopup(warningPopup);
+        warningPopup.GetComponent<ModalPopup>().config.text = "인터넷 연결이 되어있지 않습니다. \n" + "인터넷 연결 후 게임을 재실행해주세요.";
+        warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
+        warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+        warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => Application.Quit());
+    }
+    public void NonWifiNetworkShow(Action action)
+    {
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
+        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "데이터로 연결되어 있습니다. 정말 다운받으시겠습니까?";
+        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
+        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => { action?.Invoke();});
     }
 }
