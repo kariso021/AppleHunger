@@ -3820,8 +3820,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81a1dbb026d91434fb3577c6f1e32b23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridWidth: 1
-  gridHeight: 10
+  gridWidth: 5
+  gridHeight: 6
   spacing: 1
 --- !u!1001 &1387693711
 PrefabInstance:
@@ -4497,7 +4497,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasReleasedDrag: 0
-  totalGameTime: 10
+  totalGameTime: 60
   readyGameTime: 5
 --- !u!1 &1660449343
 GameObject:
