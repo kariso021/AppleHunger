@@ -127,6 +127,7 @@ public class DownManager : MonoBehaviour
     IEnumerator DownloadAll()
     {
         var labels = new List<string> { iconLabel.labelString, boardLabel.labelString, emojiLabel.labelString };
+        downSlider.gameObject.SetActive(true);
         StartCoroutine(UpdateProgress());
 
         foreach (var label in labels)
