@@ -22,6 +22,8 @@ public class LoginManager : MonoBehaviour
     public GameObject touchToStartButton;
 
     private DownManager downManager;
+
+    private bool isTouchStarted = false;
     private void Awake()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -58,34 +60,36 @@ public class LoginManager : MonoBehaviour
 
         guestLoginButton.onClick.AddListener(OnGuestLoginButtonClick);
         googleLoginButton.onClick.AddListener(OnGoogleLoginButtonClick);
-        touchToStartButton.GetComponent<Button>().onClick.AddListener(toDownCheck);
+        touchToStartButton.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            isTouchStarted = true;
+            touchToStartButton.SetActive(false);
+            TryLogin();
+        });
 
-        int isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin",0);
+        loginPanel.SetActive(false);
+    }
+
+    private void TryLogin()
+    {
+        int isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin", 0);
         int isGuestLogin = PlayerPrefs.GetInt("IsGuestLogin", 0);
 
-        Debug.Log("Game Start: Attempting silent login.");
-
-
-        // 인터넷 연결 여부 확인
         if (Application.internetReachability == NetworkReachability.NotReachable)
         {
-            // 인터넷 연결이 안되어있다면?
             PopupManager.Instance.DisconnectedNetworkShow();
-            Debug.Log("[Network] Network is not available at login");
+            return;
+        }
+
+        if (isGoogleLogin == 0 && isGuestLogin == 0)
+        {
+            loginPanel.SetActive(true);
         }
         else
         {
-            Debug.Log($"[Login] google? {isGoogleLogin} , guest? {isGuestLogin}");
-            if (isGoogleLogin == 0 && isGuestLogin == 0)
-                loginPanel.SetActive(true);
-            //else
-            //    toDownCheck();
+            // 이미 로그인 되어있음 → 자동 다운로드로 진행
+            toDownCheck();
         }
-    }
-
-    private void Update()
-    {
-        
     }
 #if UNITY_ANDROID && !UNITY_EDITOR
     private void ProcessAutoAuthentication(SignInStatus status)
