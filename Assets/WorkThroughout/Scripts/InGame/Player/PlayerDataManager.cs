@@ -166,7 +166,7 @@ public class PlayerDataManager : NetworkBehaviour
                 ShowMatchPanelClientRpc(Introduration,Countduration);
 
                 //세션 띄우기
-                GameTimer.Instance.StartTimerWithDelayServerRpc(Introduration, Countduration);
+                GameTimer.Instance.StartTimerWithDelay(Introduration, Countduration);
 
                 _readyClients.Clear();
             }

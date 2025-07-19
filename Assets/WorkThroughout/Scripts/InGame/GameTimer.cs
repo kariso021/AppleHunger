@@ -63,9 +63,7 @@ public class GameTimer : NetworkBehaviour
     }
 
     //시작 로직 타이머
-
-    [ServerRpc(RequireOwnership = false)]
-    public void StartTimerWithDelayServerRpc(float introduration, float countduration)
+    public void StartTimerWithDelay(float introduration, float countduration)
     {
         float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
         hasTimerStarted = true;                // (선택) Update() 활성화 플래그
@@ -102,8 +100,12 @@ public class GameTimer : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsServer || !hasTimerStarted) return;
-        if (isIndefinitePause) return;
+        if (!IsServer) return;
+        if (isIndefinitePause || !hasTimerStarted)
+        {
+            remainingTime.Value = 60.0f;
+            return;
+        }
 
 
         float now = NetworkManager.Singleton.ServerTime.TimeAsFloat;
