@@ -177,7 +177,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -769,7 +769,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 4
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -905,7 +905,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 4
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1116,7 +1116,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1348,7 +1348,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1766,7 +1766,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2760,7 +2760,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2896,7 +2896,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -3070,7 +3070,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 4
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -3206,7 +3206,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 4
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -3591,6 +3591,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BTN_Event (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3693,6 +3697,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BTN_Event
       objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3794,6 +3802,10 @@ PrefabInstance:
     - target: {fileID: 3648235320885728419, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
       propertyPath: m_Name
       value: BTN_Event (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3999,6 +4011,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BTN_Event (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4100,6 +4116,10 @@ PrefabInstance:
     - target: {fileID: 3648235320885728419, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
       propertyPath: m_Name
       value: BTN_Event (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4349,6 +4369,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BTN_Event (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4451,6 +4475,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BTN_Event (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4552,6 +4580,10 @@ PrefabInstance:
     - target: {fileID: 3648235320885728419, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
       propertyPath: m_Name
       value: BTN_Event (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8561761995489687920, guid: 83894a0425034154aa3e0f6b961b1b4e, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

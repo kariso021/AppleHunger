@@ -102,7 +102,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1144,7 +1144,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1538,7 +1538,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2249,7 +2249,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -2
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2844,6 +2844,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8029799350736956592, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
+      objectReference: {fileID: 0}
     - target: {fileID: 8326599145343466657, guid: c6cc4ec31b5af1449b3a7012f3412c65, type: 3}
       propertyPath: m_Name
       value: BTN_ChangeName
@@ -3236,6 +3240,10 @@ PrefabInstance:
     - target: {fileID: 4043758763397841295, guid: c274b0ff76eaf4648b6315ac0a869ad4, type: 3}
       propertyPath: m_text
       value: Collections
+      objectReference: {fileID: 0}
+    - target: {fileID: 4043758763397841295, guid: c274b0ff76eaf4648b6315ac0a869ad4, type: 3}
+      propertyPath: m_characterSpacing
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 5404583265166483279, guid: c274b0ff76eaf4648b6315ac0a869ad4, type: 3}
       propertyPath: m_Pivot.x
