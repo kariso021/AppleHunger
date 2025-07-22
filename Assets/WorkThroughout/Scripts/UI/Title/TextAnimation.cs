@@ -24,10 +24,9 @@ public class TextAnimation : MonoBehaviour
 
     private void Start()
     {
-        StartDotLoop();
     }
 
-    private void StartDotLoop()
+    public void StartDotLoop()
     {
         loopingTween = DOTween.Sequence()
             .AppendCallback(UpdateDotText)

@@ -33,15 +33,15 @@ public class SettingManager : MonoBehaviour
         // Button Bind
         copyButton.onClick.AddListener(() =>
         CopyTextToClipboard());
-        creditButton.onClick.AddListener(() =>
-        PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
+        //creditButton.onClick.AddListener(() =>
+        //PopupManager.Instance.ShowPopup(PopupManager.Instance.creditPopup));
         closeButton.onClick.AddListener(() =>
         PopupManager.Instance.ClosePopup());
 
-#if UNITY_ANDROID && !UNITY_EDITOR
-        loginButton.onClick.AddListener(() =>
-        networkCheck());
-#endif
+//#if UNITY_ANDROID && !UNITY_EDITOR
+//        loginButton.onClick.AddListener(() =>
+//        networkCheck());
+//#endif
     }
 
     void CopyTextToClipboard()
