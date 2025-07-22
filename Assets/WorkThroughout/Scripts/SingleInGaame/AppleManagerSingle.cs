@@ -133,11 +133,7 @@ public class AppleManagerSingle : MonoBehaviour
         appleValues[y, x] = 0;
         Debug.Log($"Apple removed at ({x}, {y})");
 
-        if (!HasCombinationLeft())
-        {
-            Debug.Log("조합 불가 → 그리드 리셋");
-            ResetGrid();
-        }
+
     }
 
 
@@ -166,12 +162,14 @@ public class AppleManagerSingle : MonoBehaviour
     /// <summary>
     /// 10 합계 조합이 남아있는지 검사
     /// </summary>
-    private bool HasCombinationLeft()
+    public void HasCombinationLeft()
     {
         //디버그 체크용도
         //DebugCheckGridValues();
-
-        return CheckSum10(appleValues);
+        if (!CheckSum10(appleValues))
+        {
+            ResetGrid();
+        }
     }
 
     private bool CheckSum10(int[,] grid)

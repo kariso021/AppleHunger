@@ -20,6 +20,7 @@ public class PlayerController : NetworkBehaviour
     private bool isDragging = false;
     private bool isDragRestricted = false; //초기값 true 로 잡고
     private bool isCooldownActive = false;
+    private bool isDragStared = false; // 드래그 시작 여부
 
     [SerializeField] ClientComboUI clientComboUI; // 콤보 UI를 위한 참조
 
@@ -147,6 +148,7 @@ public class PlayerController : NetworkBehaviour
         if (!IsOwner || isDragRestricted || isCooldownActive) return;
         dragStartPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
         isDragging = false;
+        isDragStared = true;
     }
 
     private void OnFingerMove(Finger finger)
@@ -157,34 +159,37 @@ public class PlayerController : NetworkBehaviour
         if (timeSinceLastUpdate < updateInterval) return;
         timeSinceLastUpdate = 0f;
 
-        if (!isDragging)
+        if (isDragStared)
         {
-            float dragThreshold = 0.1f;
-            if (Vector2.Distance(dragStartPos, Camera.main.ScreenToWorldPoint(finger.screenPosition)) > dragThreshold)
+            if (!isDragging)
             {
-                isDragging = true;
-                localDragBoxRenderer.enabled = true;
-                selectedApples.Clear();
-                currentSum = 0;
+                float dragThreshold = 0.1f;
+                if (Vector2.Distance(dragStartPos, Camera.main.ScreenToWorldPoint(finger.screenPosition)) > dragThreshold)
+                {
+                    isDragging = true;
+                    localDragBoxRenderer.enabled = true;
+                    selectedApples.Clear();
+                    currentSum = 0;
 
-                networkDragBoxManager.SendDragStartServerRpc(dragStartPos, OwnerClientId);
+                    networkDragBoxManager.SendDragStartServerRpc(dragStartPos, OwnerClientId);
+                }
             }
-        }
 
-        if (isDragging)
-        {
-            dragEndPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
-            UpdateLocalDragBox();
-            DetectAppleUnderCursor();
+            if (isDragging)
+            {
+                dragEndPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
+                UpdateLocalDragBox();
+                DetectAppleUnderCursor();
 
-            networkDragBoxManager.SendDragUpdateServerRpc(dragStartPos,dragEndPos,OwnerClientId);
+                networkDragBoxManager.SendDragUpdateServerRpc(dragStartPos, dragEndPos, OwnerClientId);
+            }
         }
     }
 
     private void OnFingerUp(Finger finger)
     {
         if (!isDragging) return;
-
+        isDragStared = false;
         //apple 2개 이상선택되어야 
         int selectedCount = selectedApples.Count;
         if (currentSum == 10)
@@ -321,6 +326,7 @@ public class PlayerController : NetworkBehaviour
             {
                 appleScoreValue = appleComponent.ScoreValue;
                 AppleManager.Instance?.DespawnApple(appleComponent);
+                AppleManager.Instance.CanAnyAppleBeRemoved();
             }
         }
 
@@ -375,12 +381,12 @@ public class PlayerController : NetworkBehaviour
     //---------------------------------------------------------------------------------------조작제한
 
 
-    public void RestrictDragForWhile(int seconds)
+    public void RestrictDragForWhile(float seconds)
     {
         StartCoroutine(RestrictDragOnlyCoroutine(seconds));
     }
 
-    private IEnumerator RestrictDragOnlyCoroutine(int seconds)
+    private IEnumerator RestrictDragOnlyCoroutine(float seconds)
     {
         isDragRestricted = true;
         yield return new WaitForSeconds(seconds); // 2초 동안 조작 제한
@@ -443,5 +449,7 @@ public class PlayerController : NetworkBehaviour
             GameTimer.OnTimerUpdated -= CheckControlTime; // 다시 호출되지 않게 해제
         }
     }
+
+
 
 }

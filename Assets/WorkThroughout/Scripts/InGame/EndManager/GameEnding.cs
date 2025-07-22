@@ -238,6 +238,7 @@ public class GameEnding : NetworkBehaviour
         // 서버→클라 연장 알림
         NotifyClientsToExtendGameTimeClientRpc();
 
+
        RestrictAllClientsDragClientRpc(seconds);
 
         yield return new WaitForSeconds(extendNoticeDuration);
@@ -246,7 +247,7 @@ public class GameEnding : NetworkBehaviour
 
     //제한 보내는것
     [ClientRpc]
-    private void RestrictAllClientsDragClientRpc(int seconds)
+    private void RestrictAllClientsDragClientRpc(float seconds)
     {
     
         var pc = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>();

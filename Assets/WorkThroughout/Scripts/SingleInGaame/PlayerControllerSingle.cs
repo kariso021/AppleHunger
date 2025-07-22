@@ -18,6 +18,7 @@ public class PlayerControllerSingle : MonoBehaviour
     private Vector2 dragEndPos;
     private bool isDragging = false;
     private bool isDragRestricted = true;
+    private bool isDragStarted = false;
 
     [Header("Drag Box")]
     public GameObject localDragBox;
@@ -89,11 +90,18 @@ public class PlayerControllerSingle : MonoBehaviour
         if (isDragRestricted) return;
         dragStartPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
         isDragging = false;
+
+        // Test 용 드래그 시점 초기화
+        isDragStarted = true;
     }
 
     private void OnFingerMove(Finger finger)
     {
-        if (isDragRestricted) return;
+        if (isDragRestricted)
+        {
+            isDragStarted = false;
+            return;
+        }
 
         timeSinceLastUpdate += Time.deltaTime;
         if (timeSinceLastUpdate < updateInterval) return;
@@ -101,28 +109,32 @@ public class PlayerControllerSingle : MonoBehaviour
 
         Vector2 worldPos = mainCamera.ScreenToWorldPoint(finger.screenPosition);
 
-        if (!isDragging)
+        if (isDragStarted == true)
         {
-            if (Vector2.Distance(dragStartPos, worldPos) > 0.1f)
+            if (!isDragging)
             {
-                isDragging = true;
-                localDragBoxRenderer.enabled = true;
-                selectedApples.Clear();
-                currentSum = 0;
+                if (Vector2.Distance(dragStartPos, worldPos) > 0.1f)
+                {
+                    isDragging = true;
+                    localDragBoxRenderer.enabled = true;
+                    selectedApples.Clear();
+                    currentSum = 0;
+                }
             }
-        }
 
-        if (isDragging)
-        {
-            dragEndPos = worldPos;
-            UpdateLocalDragBox();
-            DetectAppleUnderCursor();
+            if (isDragging)
+            {
+                dragEndPos = worldPos;
+                UpdateLocalDragBox();
+                DetectAppleUnderCursor();
+            }
         }
     }
 
     private void OnFingerUp(Finger finger)
     {
         if (!isDragging) return;
+        isDragStarted = false;
 
         int selectedCount = selectedApples.Count;
 
@@ -138,6 +150,7 @@ public class PlayerControllerSingle : MonoBehaviour
                 {
                     appleScore = apple.ScoreValue;
                     AppleManagerSingle.Instance.RemoveApple(apple);
+                    AppleManagerSingle.Instance.HasCombinationLeft();
                 }
             }
 

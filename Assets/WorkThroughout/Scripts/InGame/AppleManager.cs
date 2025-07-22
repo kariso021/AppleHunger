@@ -88,14 +88,6 @@ public class AppleManager : NetworkBehaviour
 
             //사과프리펩 제거 후 이펙트 생성
             PlayRemoveEffectClientRpc(worldPos);
-
-
-            if (!CanAnyAppleBeRemoved())
-            {
-                Debug.Log("No combinations left. Resetting apples.");
-                WhenResetAndDoNotify(2f);
-                ResetAppleGrid();
-            }
         }
         else
         {
@@ -131,6 +123,12 @@ public class AppleManager : NetworkBehaviour
 
         // 콤보 시간들 일시정지
         ScoreManager.Instance.WhenResetExtendComboDuration(seconds);
+
+        var pc = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>();
+
+        pc.RestrictDragForWhile(seconds);
+
+
     }
 
     [ClientRpc]
@@ -140,21 +138,14 @@ public class AppleManager : NetworkBehaviour
     }
 
 
-    private bool CanAnyAppleBeRemoved()
+    public void CanAnyAppleBeRemoved()
     {
-        Debug.Log(" Apple Grid 상태 (Top → Bottom):");
-        for (int y = gridHeight - 1; y >= 0; y--) // 👈 y를 역순으로 출력
+        //10의 결과가 반환되지 않을시
+        if (!CheckSubRectWithSum10(appleValues))
         {
-            string line = "";
-            for (int x = 0; x < gridWidth; x++)
-            {
-                line += appleValues[y, x].ToString() + " ";
-            }
-            Debug.Log(line);
+            WhenResetAndDoNotify(2f);
+            ResetAppleGrid();
         }
-
-
-            return CheckSubRectWithSum10(appleValues);
     }
 
     private bool CheckSubRectWithSum10(int[,] grid)
