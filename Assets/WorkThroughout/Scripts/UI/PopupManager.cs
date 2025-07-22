@@ -164,23 +164,27 @@ public class PopupManager : MonoBehaviour
             anim.baseText = output;
             rect.sizeDelta = new Vector2(rect.sizeDelta.x, Screen.height);
 
-
+            anim.StartDotLoop();
         }
     }
     public void ChangeLoadingText(string text)
     {
-        string output = text + "실패!" +
-            "";
         if (loadingPopup != null && loadingPopup.activeSelf)
         {
-            loadingPopup.GetComponentInChildren<TMP_Text>().text = output;
+            TMP_Text loadingText = loadingPopup.GetComponentInChildren<TMP_Text>();
+            TextAnimation textAnim = loadingText.GetComponent<TextAnimation>();
+
+            loadingText.text = text;
+            textAnim.baseText = text;
         }
     }
     public void HideLoading()
     {
-        Debug.Log("작동하는거냐 하이드씨");
         if (loadingPopup != null && loadingPopup.activeSelf)
         {
+            TextAnimation textAnim = loadingPopup.GetComponentInChildren<TextAnimation>();
+            if (textAnim != null)
+                textAnim.StopDotLoop();
             loadingPopup.SetActive(false);
         }
     }

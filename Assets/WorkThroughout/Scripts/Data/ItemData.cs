@@ -63,10 +63,12 @@ public class ItemData : MonoBehaviour
     }
     private IEnumerator PurchaseItemCoroutine()
     {
+        yield return new WaitForSeconds(1f);
+
         if(SQLiteManager.Instance.player.currency < price)
         {
-            PopupManager.Instance.ChangeLoadingText("구매");
-            yield return new WaitForSeconds(0.5f);
+            PopupManager.Instance.ChangeLoadingText("구매 실패");
+            yield return new WaitForSeconds(1f);
             PopupManager.Instance.HideLoading();
             isPurchasing = false; // ✅ 완료 후 다시 클릭 가능
             yield break;
