@@ -12,6 +12,7 @@ public class ModalPopup : MonoBehaviour
     public TMP_Text config;
     public Button btn_confirm;
     public Button btn_cancel;
+    public Button btn_touchEvent;
 
     // Start is called before the first frame update
     void Start()

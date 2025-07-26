@@ -398,6 +398,7 @@ GameObject:
   - component: {fileID: 466983181}
   - component: {fileID: 466983180}
   - component: {fileID: 466983182}
+  - component: {fileID: 466983183}
   m_Layer: 0
   m_Name: DownSceneManager
   m_TagString: Untagged
@@ -460,6 +461,19 @@ MonoBehaviour:
   loginPanel: {fileID: 1549447006}
   downCheck: {fileID: 1542443531}
   touchToStartButton: {fileID: 371109086}
+  updateManager: {fileID: 466983183}
+--- !u!114 &466983183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 466983179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eac58768f0ff664a898b1c4d6a02f8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &628093096
 GameObject:
   m_ObjectHideFlags: 0
@@ -901,6 +915,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateText: {fileID: 747246713}
   baseText: "\uC5C5\uB370\uC774\uD2B8 \uCCB4\uD06C\uC911"
+--- !u!114 &749474310 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8157097895453853591, guid: d5d682e9a3669e3458db873ae562e56b, type: 3}
+  m_PrefabInstance: {fileID: 1670000143}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1013669822
 GameObject:
   m_ObjectHideFlags: 0
@@ -1787,6 +1812,7 @@ MonoBehaviour:
   config: {fileID: 1670000147}
   btn_confirm: {fileID: 1670000145}
   btn_cancel: {fileID: 1670000146}
+  btn_touchEvent: {fileID: 749474310}
 --- !u!1001 &1687416468
 PrefabInstance:
   m_ObjectHideFlags: 0

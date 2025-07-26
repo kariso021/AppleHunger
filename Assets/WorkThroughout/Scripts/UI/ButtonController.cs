@@ -1,6 +1,3 @@
-using JetBrains.Annotations;
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -43,14 +40,17 @@ public class ButtonController : MonoBehaviour
 
     public Managers testManager;
 
+    private List<Image> navList;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
         clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
+        navList = new List<Image>();
     }
     void Start()
     {
-        
+
 
         // Home Panel Buttons Binding , 임시로 방지
         profileButton.onClick.AddListener(() =>
@@ -85,13 +85,14 @@ public class ButtonController : MonoBehaviour
 
 
 
-     // Collection Panel Buttons
+        // Collection Panel Buttons
         //customIconButton.onClick.AddListener(() =>
         //NavManager.Instance.NavigateTo("Collection/Icon"));
         //customBoadrButton.onClick.AddListener(() =>
         //NavManager.Instance.NavigateTo("Collection/Board"));
 
-        customIconConfrimButton.onClick.AddListener(() => {
+        customIconConfrimButton.onClick.AddListener(() =>
+        {
             // Nav
             NavManager.Instance.NavigateTo("Collection");
             // Popup
@@ -106,7 +107,7 @@ public class ButtonController : MonoBehaviour
             // Server Data Change
             StartCoroutine(clientNetworkManager.UpdatePlayerData());
 
-            });
+        });
 
         //customBoardConfrimButton.onClick.AddListener(() =>
         //{
@@ -127,11 +128,14 @@ public class ButtonController : MonoBehaviour
         // NavBar Buttons
         // Button 바인딩
         // Navbar Buttons (이제 PanelManager를 통해 패널 변경)
-        homeButton.onClick.AddListener(() => 
-        NavManager.Instance.NavigateTo("Home"));
-        rankingButton.onClick.AddListener(() => 
+        homeButton.onClick.AddListener(() =>
+        {
+            NavManager.Instance.NavigateTo("Home");
+            ;
+        });
+        rankingButton.onClick.AddListener(() =>
         NavManager.Instance.NavigateTo("Ranking"));
-        collectionButton.onClick.AddListener(() => 
+        collectionButton.onClick.AddListener(() =>
         NavManager.Instance.NavigateTo("Collection"));
 
         // Close Buttons
@@ -144,7 +148,11 @@ public class ButtonController : MonoBehaviour
         nameChangeButton.onClick.AddListener(() =>
         PopupManager.Instance.ShowPopup(PopupManager.Instance.nicknamePopup));
         settingButton.onClick.AddListener(() =>
-        PopupManager.Instance.ShowPopup(PopupManager.Instance.settingPopup));   
+        PopupManager.Instance.ShowPopup(PopupManager.Instance.settingPopup));
+
+
+
+        Debug.Log($"[TEST NAME] name : {homeButton.GetComponentsInChildren<Image>()[1].gameObject.name}");
     }
 
     private void LoadSingleGameScene()
@@ -167,4 +175,8 @@ public class ButtonController : MonoBehaviour
         SceneManager.LoadScene("InGame");
     }
 
+    private void showNavButtonActive()
+    {
+
+    }
 }

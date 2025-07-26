@@ -28,18 +28,6 @@ public class PopupManager : MonoBehaviour
         }
         else Destroy(gameObject);
     }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void ShowPopup(GameObject popup)
     {
         // 만약 현재 활성화 된 팝업이 있다면?
@@ -57,7 +45,6 @@ public class PopupManager : MonoBehaviour
 
         if (popup.tag == "Profile")
         {
-            Debug.Log("쇼 팝업 클라이언트 아이디");
             pendingOnComplete = () => OnPlayerDetailsLoaded();
             StartCoroutine(ClientNetworkManager.Instance.GetPlayerDetalis(SQLiteManager.Instance.player.playerId));
         }
@@ -69,7 +56,6 @@ public class PopupManager : MonoBehaviour
     }
     public void ShowPopup(GameObject popup, int playerId)
     {
-        Debug.Log("팝업실행");
         // 만약 현재 활성화 된 팝업이 있다면?
         if (activePopup != null)
         {
@@ -94,7 +80,7 @@ public class PopupManager : MonoBehaviour
     // 🔹 데이터가 다 로드된 후 실행될 메서드
     private void OnPlayerDetailsLoaded()
     {
-        Debug.Log($"✅ PROFILE LOADED: {SQLiteManager.Instance.playerDetails.playerName} , {SQLiteManager.Instance.playerDetails.playerId}");
+        Debug.Log($"PROFILE LOADED: {SQLiteManager.Instance.playerDetails.playerName} , {SQLiteManager.Instance.playerDetails.playerId}");
 
         // 자기 자신의 프로필을 열람할 때만 매치 기록을 불러오기
         if (activePopup != null)
@@ -193,11 +179,11 @@ public class PopupManager : MonoBehaviour
     {
         Invoke(nameof(HideLoading), time);
     }
-    // 🔹 클라이언트에서 데이터를 받은 후 실행
+    //  클라이언트에서 데이터를 받은 후 실행
     public void OnDataReceived()
     {
-        pendingOnComplete?.Invoke(); // ✅ 저장된 콜백 실행
-        pendingOnComplete = null;  // ✅ 콜백 초기화
+        pendingOnComplete?.Invoke(); // 저장된 콜백 실행
+        pendingOnComplete = null;  //  콜백 초기화
     }
 
     public void DisconnectedNetworkShow()
@@ -213,6 +199,10 @@ public class PopupManager : MonoBehaviour
         PopupManager.Instance.ShowPopup(PopupManager.Instance.warningPopup);
         PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "데이터로 연결되어 있습니다. 정말 다운받으시겠습니까?";
         PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.RemoveAllListeners();
-        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => { action?.Invoke();});
+        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.onClick.AddListener(() => { 
+            action?.Invoke(); 
+            PopupManager.Instance.ClosePopup();
+        });
+
     }
 }
