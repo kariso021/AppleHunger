@@ -18,8 +18,6 @@ public class SQLiteManager : MonoBehaviour
     public static SQLiteManager Instance => instance;
 
     [Header("Debug")]
-    // =========================== 나중에 꼭 지워야 한다 ===============================/
-    public bool isDummy = false;
     // =================================================================================
     private string dbName = "game_data.db";
     private string dbPath;
@@ -72,9 +70,9 @@ public class SQLiteManager : MonoBehaviour
     }
     private IEnumerator InitializeDatabase()
     {
-        // =========================== 나중에 꼭 지워야 한다 ===============================/
-        string rawDbPath = !isDummy ? Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/") : Path.Combine(Application.persistentDataPath, "game_data_dummy.db").Replace("\\", "/");
-        // =================================================================================      
+        string rawDbPath = Path.Combine(Application.persistentDataPath, dbName).Replace("\\", "/");
+
+        // 구글 로그인 체크용 bool
         isGoogleLogin = PlayerPrefs.GetInt("IsGoogleLogin", 0) == 1;
         lookupKey = isGoogleLogin ? "googleId" : "deviceId";
         lookupValue = AESUtil.Encrypt(isGoogleLogin
@@ -113,12 +111,15 @@ public class SQLiteManager : MonoBehaviour
                yield return (ClientNetworkManager.Instance.UpdatePlayerGoogleId(player.playerId, TransDataClass.googleIdToApply));
         }
         yield return ClientNetworkManager.Instance.UpdateLogin(SQLiteManager.Instance.player.playerId);
-        PopupManager.Instance.HideLoading(1f);
+        // 땜빵임.. 아직 제대로 로직 아님
+        PopupManager.Instance.HideLoading(1.25f);
+        // 20250726 닉네임 강제 변경
+        // 
         //dbPath = "URI=file:" + Path.Combine(Application.persistentDataPath, dbName);
     }
     private IEnumerator CreateDatabaseAndFetchPlayerData()
     {
-        yield return StartCoroutine(CreateDatabase()); // ✅ SQLite DB 생성
+        yield return StartCoroutine(CreateDatabase()); 
     }
     private void createTables(SQLiteConnection connection)
     {
@@ -248,7 +249,7 @@ public class SQLiteManager : MonoBehaviour
         string streamingDbPath = Path.Combine(Application.streamingAssetsPath, dbName);
         string persistentDbPath = Path.Combine(Application.persistentDataPath, dbName);
 
-        // 📌 Step 2: `streamingAssetsPath`에서 복사 (PC, iOS)
+        //  Step 2: `streamingAssetsPath`에서 복사 (PC, iOS)
         if (Application.platform != RuntimePlatform.Android)
         {
             if (File.Exists(streamingDbPath))
@@ -262,7 +263,7 @@ public class SQLiteManager : MonoBehaviour
                 Debug.LogError("[SQL] StreamingAssets 폴더에 DB 파일이 존재하지 않음!");
             }
         }
-        else // 📌 Step 3: `streamingAssetsPath`에서 다운로드 (Android)
+        else // Step 3: `streamingAssetsPath`에서 다운로드 (Android)
         {
             string sourcePath = Path.Combine(Application.streamingAssetsPath, dbName);
             Debug.Log("[SQL] StreamingAssets SQLite 경로: " + sourcePath);

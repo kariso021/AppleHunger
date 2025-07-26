@@ -2146,6 +2146,7 @@ MonoBehaviour:
   config: {fileID: 288598173}
   btn_confirm: {fileID: 288598171}
   btn_cancel: {fileID: 288598172}
+  btn_touchEvent: {fileID: 0}
 --- !u!1 &323275564
 GameObject:
   m_ObjectHideFlags: 0
@@ -4497,7 +4498,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasReleasedDrag: 0
-  totalGameTime: 10000
+  totalGameTime: 60
   readyGameTime: 5
 --- !u!1 &1660449343
 GameObject:

@@ -40,13 +40,10 @@ public class ButtonController : MonoBehaviour
 
     public Managers testManager;
 
-    private List<Image> navList;
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
         clientNetworkManager = FindAnyObjectByType<ClientNetworkManager>();
-        navList = new List<Image>();
     }
     void Start()
     {
@@ -131,12 +128,18 @@ public class ButtonController : MonoBehaviour
         homeButton.onClick.AddListener(() =>
         {
             NavManager.Instance.NavigateTo("Home");
-            ;
+            NavManager.Instance.ChangeNavBarActiveEffect("Home");
         });
         rankingButton.onClick.AddListener(() =>
-        NavManager.Instance.NavigateTo("Ranking"));
+        {
+            NavManager.Instance.NavigateTo("Ranking");
+            NavManager.Instance.ChangeNavBarActiveEffect("Ranking");
+        });
         collectionButton.onClick.AddListener(() =>
-        NavManager.Instance.NavigateTo("Collection"));
+        {
+            NavManager.Instance.NavigateTo("Collection");
+            NavManager.Instance.ChangeNavBarActiveEffect("Collection");
+        });
 
         // Close Buttons
 

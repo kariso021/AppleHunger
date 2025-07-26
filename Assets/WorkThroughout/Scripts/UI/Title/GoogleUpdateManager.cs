@@ -84,6 +84,11 @@ public class GoogleUpdateManager : MonoBehaviour
         PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().config.text = "새로운 업데이트가 있습니다! 스토어로 이동합니다!";
         PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_confirm.gameObject.SetActive(false);
         PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_cancel.gameObject.SetActive(false);
-        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_touchEvent.onClick.AddListener(() => { StartCoroutine(StartImmediateUpdate(appUpdateInfoResult, appUpdateOptions)); });
+        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_touchEvent.enabled = true;
+        PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_touchEvent.onClick.AddListener(() => 
+        {
+            StartCoroutine(StartImmediateUpdate(appUpdateInfoResult, appUpdateOptions));
+            //PopupManager.Instance.warningPopup.GetComponent<ModalPopup>().btn_touchEvent.enabled = false;
+        });
     }
 }

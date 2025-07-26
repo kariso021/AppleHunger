@@ -43,9 +43,7 @@ public class EndManagerSingle : MonoBehaviour
 
         if (EnhancedTouchSupport.enabled) // 게임 끝나면 아예 게임 보드판에 관여하지 못하도록 터치를 막는거
         {
-            Debug.Log("터치막아버리잖아");
             PlayerControllerSingle.Instance.RestrictTouchWhenGameEnded();
-
         }
 
         StartCoroutine(manager.UpdateCurrencyAndRating(player.playerId, gold, 0));

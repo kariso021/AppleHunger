@@ -10,7 +10,7 @@ public class NicknameManager : MonoBehaviour
     [Header("Config")]
     [SerializeField] private TMP_InputField nicknameInputField;
     [SerializeField] private Button confirmButton;
-    [SerializeField] private TMP_Text resultText;
+    [SerializeField] private TMP_Text inputText;
     [SerializeField] private TMP_Text placeHolderText;
     [SerializeField] private TMP_Text warningText;
     [SerializeField] private TMP_Text titleText;
@@ -23,7 +23,10 @@ public class NicknameManager : MonoBehaviour
     private void Awake()
     {
         closeButton.onClick.AddListener(() =>
-        PopupManager.Instance.ClosePopup());
+        {
+            PopupManager.Instance.ClosePopup();
+            resetInputFieldText();
+        });
     }
     private void Start()
     {
@@ -39,12 +42,12 @@ public class NicknameManager : MonoBehaviour
     public void OnClick_ChangeNickname()
     {
         if (isChangingNickname) return;
-        var isCanAttempt = canNAttemptChange();
+        var isCanAttempt = canAttemptChange();
         if (!isCanAttempt) return;
         StartCoroutine(ChangeNicknameCoroutine());
     }
 
-    private bool canNAttemptChange()
+    private bool canAttemptChange()
     {
         if (SQLiteManager.Instance.player.currency < cost)
         {
@@ -57,7 +60,7 @@ public class NicknameManager : MonoBehaviour
                 pm.warningPopup.GetComponent<ModalPopup>().btn_cancel.GetComponentInChildren<TMP_Text>().text = "확인";
                 pm.warningPopup.GetComponent<ModalPopup>().config.text = "닉네임 변경에 필요한 재화가 충분치 않습니다.";
             }
-
+            resetInputFieldText();
             return false;
         }
 
@@ -71,6 +74,7 @@ public class NicknameManager : MonoBehaviour
         if (!IsValidNickname(newNickname, out string message))
         {
             warningText.text = message;
+            resetInputFieldText();
             yield break;
         }
 
@@ -89,6 +93,7 @@ public class NicknameManager : MonoBehaviour
             warningText.text = "이미 사용 중인 닉네임입니다.";
             isChangingNickname = false;
             confirmButton.interactable = true;
+            resetInputFieldText();
             yield break;
         }
 
@@ -142,6 +147,10 @@ public class NicknameManager : MonoBehaviour
         return true;
     }
 
+    private void resetInputFieldText()
+    {
+        nicknameInputField.text = "";
+    }
 
 
 }
